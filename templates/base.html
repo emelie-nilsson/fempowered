@@ -1,0 +1,96 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    {% block meta %}
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% endblock %}
+
+    {% block extra_meta %}
+    {% endblock %}
+
+    <title>Fempowered {% block extra_title %}{% endblock %}</title>
+
+    {% block corecss %}
+      <!-- Bootstrap 4.6 CSS -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+        crossorigin="anonymous">
+      <!-- Custom styles -->
+      <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% endblock %}
+
+    {% block extra_css %}
+    {% endblock %}
+  </head>
+
+  <body>
+    <header class="container-fluid fixed-top">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+          <a class="navbar-brand font-weight-bold" href="{% url 'home' %}">Fempowered</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-nav"
+            aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="main-nav">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Shop</a>
+              </li>
+              {% if user.is_authenticated %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'account_signup' %}">Sign up</a>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container" style="padding-top: 100px;">
+      {% block content %}
+      {% endblock %}
+    </main>
+
+    <footer class="bg-dark text-light py-3 mt-5">
+      <div class="container text-center">
+        <small>&copy; {{ now.year }} Fempowered. All rights reserved.</small>
+      </div>
+    </footer>
+
+    {% block corejs %}
+      <!-- jQuery (minified) -->
+      <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <!-- Popper.js -->
+      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2SDFt5nC7xusO6cN9gFELT1G6jLMwNLD69Npy4HI+N"
+        crossorigin="anonymous"></script>
+      <!-- Bootstrap 4.6 JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"
+        integrity="sha384-+YQ4/73txnbhcV7dGp1F1jNwQh4l3S1r8eWH4KuwZyYkLJ4kN5i5h8Y5CkVo/DOa"
+        crossorigin="anonymous"></script>
+    {% endblock %}
+
+    {% block extra_js %}
+    {% endblock %}
+  </body>
+</html>
+
