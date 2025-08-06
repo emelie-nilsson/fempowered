@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@400;700&display=swap');
+
+:root {
+  --primary-font: "Montserrat", sans-serif; /* Rubriker */
+  --secondary-font: "Lato", sans-serif;     /* Brödtext */
+
+  --primary-color: #2d2d2d;         /* Charcoal */
+  --secondary-color: #5d6f63;       /* Moss */
+  --middle-color: #7c665e;          /* Earth */
+  --highlight-color: #b1978c;       /* Mauve Taupe */
+  --light-highlight-color: #e5ded6; /* Light Beige */
+}
+
+/* General */
+body {
+  font-family: var(--secondary-font);
+  color: var(--primary-color);
+  background-color: var(--light-highlight-color);
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--primary-font);
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--primary-color) !important;
+}
+.navbar-brand,
+.nav-link {
+  color: var(--light-highlight-color) !important;
+}
+.nav-link:hover {
+  color: var(--highlight-color) !important;
+}
+
+/* Footer */
+footer {
+  background-color: var(--primary-color);
+  color: var(--light-highlight-color);
+}
+
+/* Buttons */
+button,
+.btn {
+  background-color: var(--secondary-color);
+  color: var(--light-highlight-color);
+  border: none;
+}
+button:hover,
+.btn:hover {
+  background-color: var(--middle-color);
+  color: var(--light-highlight-color);
+}
+
+/* Forms */
+form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+form h1 {
+  margin-bottom: 1.5rem;
+}
+form input,
+form select,
+form textarea {
+  font-family: var(--secondary-font);
+  border-radius: 4px;
+}
+form button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Links */
+a {
+  color: var(--secondary-color);
+}
+a:hover {
+  color: var(--middle-color);
+}
+
+/* Logo  */
+.home-logo {
+    max-width: 200px;
+}
+
+/* Hero image */
+.home-hero {
+    max-width: 640px;  
+    height: auto;
+}
+
+.tagline {
+    color: var(--secondary-color);
+}

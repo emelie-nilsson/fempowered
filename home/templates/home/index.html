@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row align-items-center">
+
+        <!-- Text Section -->
+        <div class="col-md-6">
+            <!-- Logo -->
+            <div class="mb-4">
+                <img src="{% static 'img/branding/logo.webp' %}" alt="Fempowered Logo" class="img-fluid home-logo">
+            </div>
+            
+            <!-- Heading -->
+            <h1 class="mb-3">
+                Fempowered
+            </h1>
+
+            <!-- Tagline -->
+            <h4 class="mb-4 tagline">
+                Built for curves. Made for strength.<br>
+                Worn by the empowered.
+            </h4>
+
+            <!-- Introduction -->
+            <p>This is activewear made to move with you — not against you.  
+            At Fempowered, we design for women with strong bodies and strong minds. Our collections are built for curves, made to handle serious training, and styled with confidence.</p>
+
+            <p>We believe in celebrating:</p>
+            <ul>
+                <li>Muscular legs, defined backs, and powerful glutes.</li>
+                <li>High-performance pieces that don’t compromise on femininity.</li>
+                <li>Strength — in all its forms.</li>
+            </ul>
+
+            <p>This isn’t about fitting into something.  
+            It’s about wearing what fits you, your shape, and your goals.  
+            Because empowerment isn’t a look — it’s a mindset.</p>
+        </div>
+
+        <!-- Image Section -->
+        <div class="col-md-6 text-center">
+            <img src="{% static 'img/branding/hero-image.webp' %}" alt="Fempowered Activewear" 
+                 class="img-fluid rounded shadow home-hero">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
