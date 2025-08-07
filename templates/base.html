@@ -9,8 +9,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% endblock %}
 
-    {% block extra_meta %}
-    {% endblock %}
+    {% block extra_meta %}{% endblock %}
 
     <title>Fempowered {% block extra_title %}{% endblock %}</title>
 
@@ -19,20 +18,29 @@
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
         integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
         crossorigin="anonymous">
+
+      <!-- Font Awesome  -->
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+
       <!-- Custom styles -->
       <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% endblock %}
 
-    {% block extra_css %}
-    {% endblock %}
+    {% block extra_css %}{% endblock %}
   </head>
 
   <body>
     <header class="container-fluid fixed-top">
       <!-- Navbar -->
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-          <a class="navbar-brand font-weight-bold" href="{% url 'home' %}">Fempowered</a>
+      <nav class="navbar navbar-expand-lg fempowered-navbar">
+        <div class="container d-flex align-items-center justify-content-between">
+          <!-- Logo -->
+          <a class="navbar-brand d-flex align-items-center text-uppercase" href="{% url 'home' %}">
+            <img src="{% static 'img/branding/logo.webp' %}" alt="Fempowered Logo" width="40" height="40" class="mr-2">
+            <span class="font-weight-bold">Fempowered</span>
+          </a>
+
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-nav"
             aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -45,6 +53,9 @@
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="#">Shop</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">About Us</a>
               </li>
               {% if user.is_authenticated %}
                 <li class="nav-item">
@@ -64,33 +75,35 @@
       </nav>
     </header>
 
-    <main class="container" style="padding-top: 100px;">
-      {% block content %}
-      {% endblock %}
+    <main class="container page-content">
+      {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-dark text-light py-3 mt-5">
-      <div class="container text-center">
-        <small>&copy; {{ now.year }} Fempowered. All rights reserved.</small>
+  <footer class="fempowered-footer py-4 mt-5">
+    <div class="container text-center">
+      <small>&copy; {{ now.year }} Fempowered. All rights reserved.</small>
+      <div class="social-icons mt-2">
+        <a href="https://www.instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://www.tiktok.com" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="mailto:info@fempowered.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
       </div>
-    </footer>
+    </div>
+  </footer>
+
 
     {% block corejs %}
-      <!-- jQuery (minified) -->
+      <!-- jQuery -->
       <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
         integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
       <!-- Popper.js -->
-      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
-        integrity="sha384-9/reFTGAW83EW2RDu2SDFt5nC7xusO6cN9gFELT1G6jLMwNLD69Npy4HI+N"
-        crossorigin="anonymous"></script>
-      <!-- Bootstrap 4.6 JS -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"
-        integrity="sha384-+YQ4/73txnbhcV7dGp1F1jNwQh4l3S1r8eWH4KuwZyYkLJ4kN5i5h8Y5CkVo/DOa"
-        crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+      <!-- Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+
     {% endblock %}
 
-    {% block extra_js %}
-    {% endblock %}
+    {% block extra_js %}{% endblock %}
   </body>
 </html>
 
