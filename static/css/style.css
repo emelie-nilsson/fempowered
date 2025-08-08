@@ -9,6 +9,8 @@
   --middle-color: #7c665e;          /* Earth */
   --highlight-color: #b1978c;       /* Mauve Taupe */
   --light-highlight-color: #e5ded6; /* Light Beige */
+
+  --navbar-h: 56px;
 }
 
 /* General */
@@ -16,7 +18,9 @@ body {
   font-family: var(--secondary-font);
   color: var(--primary-color);
   background-color: var(--light-highlight-color);
+  padding-top: var(--navbar-h);
 }
+
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--primary-font);
@@ -150,4 +154,13 @@ a:hover {
   color: var(--secondary-color);
   font-weight: 600;
   font-size: 1.25rem;
+}
+
+/* Media queries */
+
+/* height navbar */
+@media (min-width: 992px) {
+  :root {
+    --navbar-h: 72px;
+  }
 }
