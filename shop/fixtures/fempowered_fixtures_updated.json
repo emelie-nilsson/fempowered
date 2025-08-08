@@ -1,0 +1,681 @@
+[
+  {
+    "model": "shop.product",
+    "pk": 1,
+    "fields": {
+      "name": "Backpack",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Backpack in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/backpack_catalog.webp",
+      "image_details": "details/backpack_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 2,
+    "fields": {
+      "name": "Duffel bag",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Duffel bag in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/bag_catalog.webp",
+      "image_details": "details/bag_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 3,
+    "fields": {
+      "name": "Barbell with weights",
+      "color": null,
+      "description": "Barbell with weights – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 4,
+    "fields": {
+      "name": "Cap",
+      "color": "light beige",
+      "hex": "#e5ded6",
+      "description": "Cap in light beige – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/beigecap_catalog.webp",
+      "image_details": "details/beigecap_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 5,
+    "fields": {
+      "name": "Cap",
+      "color": "earth",
+      "hex": "#7c665e",
+      "description": "Cap in earth – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/greycap_catalog.webp",
+      "image_details": "details/greycap_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 6,
+    "fields": {
+      "name": "Cap",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Cap in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/pinkcap_catalog.webp",
+      "image_details": "details/pinkcap_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 7,
+    "fields": {
+      "name": "Windbreaker",
+      "color": "light beige",
+      "hex": "#e5ded6",
+      "description": "Windbreaker in light beige – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/beigejacket_catalog.webp",
+      "image_details": "details/beigejacket_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 8,
+    "fields": {
+      "name": "Windbreaker",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Windbreaker in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/pinkjacket_catalog.webp",
+      "image_details": "details/pinkjacket_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 9,
+    "fields": {
+      "name": "Windbreaker pants",
+      "color": "light beige",
+      "hex": "#e5ded6",
+      "description": "Windbreaker pants in light beige – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/beigepants_catalog.webp",
+      "image_details": "details/beigepants_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 10,
+    "fields": {
+      "name": "Windbreaker pants",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Windbreaker pants in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/pinkpants_catalog.webp",
+      "image_details": "details/pinkpants_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 11,
+    "fields": {
+      "name": "Lifting belt",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Lifting belt in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/belt_catalog.webp",
+      "image_details": "details/belt_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 12,
+    "fields": {
+      "name": "Big water bottle",
+      "color": "light beige",
+      "hex": "#e5ded6",
+      "description": "Big water bottle in light beige – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 13,
+    "fields": {
+      "name": "Cropped t-shirt",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Cropped t-shirt in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/croppedshirt_catalog.webp",
+      "image_details": "details/croppedshirt_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 14,
+    "fields": {
+      "name": "Dumbbells",
+      "color": null,
+      "description": "Dumbbells – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 15,
+    "fields": {
+      "name": "Foam roller",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Foam roller in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/foamroller_catalog.webp",
+      "image_details": "details/foamroller_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 16,
+    "fields": {
+      "name": "Long band",
+      "color": "charcoal",
+      "hex": "#2d2d2d",
+      "description": "Long band in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/heavyband_catalog.webp",
+      "image_details": "details/heavyband_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 17,
+    "fields": {
+      "name": "Long band",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Long band in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/mediumband_catalog.webp",
+      "image_details": "details/mediumband_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 18,
+    "fields": {
+      "name": "Hoodie with drawstring",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Hoodie with drawstring in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/hoodie_catalog.webp",
+      "image_details": "details/hoodie_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 19,
+    "fields": {
+      "name": "Jumping rope",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Jumping rope in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/jumprope_catalog.webp",
+      "image_details": "details/jumprope_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 20,
+    "fields": {
+      "name": "Knee pads",
+      "color": "light beige",
+      "hex": "#e5ded6",
+      "description": "Knee pads in light beige – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/kneepad_catalog.webp",
+      "image_details": "details/kneepad_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 21,
+    "fields": {
+      "name": "Weight plates small",
+      "color": null,
+      "description": "Weight plates small – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 22,
+    "fields": {
+      "name": "Oversized t-shirt",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Oversized t-shirt in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/oversizedshirt_catalog.webp",
+      "image_details": "details/oversizedshirt_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 23,
+    "fields": {
+      "name": "Oversized t-shirt with logo",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Oversized t-shirt with logo in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tshirtoversize_catalog.webp",
+      "image_details": "details/tshirtoversize_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 24,
+    "fields": {
+      "name": "Sweatpants",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Sweatpants in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/pants_catalog.webp",
+      "image_details": "details/pants_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 25,
+    "fields": {
+      "name": "Power grips",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Power grips in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/powergrips_catalog.webp",
+      "image_details": "details/powergrips_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 26,
+    "fields": {
+      "name": "Shaker",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Shaker in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/shake_catalog.webp",
+      "image_details": "details/shake_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 27,
+    "fields": {
+      "name": "Shorts with inner shorts",
+      "color": "charcoal",
+      "hex": "#2d2d2d",
+      "description": "Shorts with inner shorts in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/shorts_catalog.webp",
+      "image_details": "details/shorts_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 28,
+    "fields": {
+      "name": "Tight shorts",
+      "color": "charcoal",
+      "hex": "#2d2d2d",
+      "description": "Tight shorts in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/shorttights_catalog.webp",
+      "image_details": "details/shorttights_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 29,
+    "fields": {
+      "name": "Socks",
+      "color": "white",
+      "hex": "#ffffff",
+      "description": "Socks in white – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/socks_catalog.webp",
+      "image_details": "details/socks_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 30,
+    "fields": {
+      "name": "Sports bra",
+      "color": "charcoal",
+      "hex": "#2d2d2d",
+      "description": "Sports bra in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/sportsbra_catalog.webp",
+      "image_details": "details/sportsbra_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 31,
+    "fields": {
+      "name": "Straps",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Straps in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/straps_catalog.webp",
+      "image_details": "details/straps_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 32,
+    "fields": {
+      "name": "Sweatshirt with logo",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Sweatshirt with logo in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/sweatshirt_catalog.webp",
+      "image_details": "details/sweatshirt_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 33,
+    "fields": {
+      "name": "Tank top",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Tank top in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tanktop_catalog.webp",
+      "image_details": "details/tanktop_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 34,
+    "fields": {
+      "name": "Small band",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Small band in mauve taupe – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 35,
+    "fields": {
+      "name": "Small band",
+      "color": "light beige",
+      "hex": "#e5ded6",
+      "description": "Small band in light beige – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 36,
+    "fields": {
+      "name": "Small band",
+      "color": "earth",
+      "hex": "#7c665e",
+      "description": "Small band in earth – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 37,
+    "fields": {
+      "name": "Tights",
+      "color": "charcoal",
+      "hex": "#2d2d2d",
+      "description": "Tights in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tightscharcol_catalog.webp",
+      "image_details": "details/tightscharcol_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 38,
+    "fields": {
+      "name": "Tights",
+      "color": "earth",
+      "hex": "#7c665e",
+      "description": "Tights in earth – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tightsearth_catalog.webp",
+      "image_details": "details/tightsearth_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 39,
+    "fields": {
+      "name": "Tights",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Tights in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tightsmauve_catalog.webp",
+      "image_details": "details/tightsmauve_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 40,
+    "fields": {
+      "name": "Tights",
+      "color": "moss",
+      "hex": "#5d6f63",
+      "description": "Tights in moss – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tightsmoss_catalog.webp",
+      "image_details": "details/tightsmoss_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 41,
+    "fields": {
+      "name": "Tights",
+      "color": "light beige",
+      "hex": "#e5ded6",
+      "description": "Tights in light beige – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tightslightbeige_catalog.webp",
+      "image_details": "details/tightslightbeige_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 42,
+    "fields": {
+      "name": "Trigger ball",
+      "color": "mauve taupe",
+      "hex": "#b1978c",
+      "description": "Trigger ball in mauve taupe – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/triggerball_catalog.webp",
+      "image_details": "details/triggerball_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 43,
+    "fields": {
+      "name": "T-shirt",
+      "color": "charcoal",
+      "hex": "#2d2d2d",
+      "description": "T-shirt in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tshirt_catalog.webp",
+      "image_details": "details/tshirt_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 44,
+    "fields": {
+      "name": "Weight plates heavy",
+      "color": null,
+      "description": "Weight plates heavy – perfect for your training needs.",
+      "price": 49.99
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 45,
+    "fields": {
+      "name": "Big water bottle",
+      "color": "earth",
+      "description": "Big water bottle in earth – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Accessories",
+      "image_catalog": "catalog/bottle_catalog.webp",
+      "image_details": "details/bottle_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 46,
+    "fields": {
+      "name": "Barbell with weights",
+      "color": "charcoal",
+      "description": "Barbell with weights in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/barebell_catalog.webp",
+      "image_details": "details/barebell_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 47,
+    "fields": {
+      "name": "Dumbbells",
+      "color": "charcoal",
+      "description": "Dumbbells in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/dumbbells_catalog.webp",
+      "image_details": "details/dumbbells_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 48,
+    "fields": {
+      "name": "Weight plates small",
+      "color": "charcoal",
+      "description": "Weight plates small in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/lightweights_catalog.webp",
+      "image_details": "details/lightweights_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 49,
+    "fields": {
+      "name": "Small band – 3-pack",
+      "color": null,
+      "description": "Bundle of three small resistance bands in light beige, charcoal and mauve taupe.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/threepack_catalog.webp",
+      "image_details": "details/threepack_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 50,
+    "fields": {
+      "name": "Weight plates heavy",
+      "color": "charcoal",
+      "description": "Weight plates heavy in charcoal – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Equipment",
+      "image_catalog": "catalog/weights_catalog.webp",
+      "image_details": "details/weights_detail.webp"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 51,
+    "fields": {
+      "name": "Tights",
+      "color": "brown",
+      "description": "Tights in brown – perfect for your training needs.",
+      "price": 49.99,
+      "category": "Clothes",
+      "image_catalog": "catalog/tightsbrown_catalog.webp",
+      "image_details": "details/tightsbrown_detail.webp"
+    }
+  }
+]
