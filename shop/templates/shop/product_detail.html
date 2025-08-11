@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="main-heading mb-3">{{ product.name }}</h1>
+
+  <div class="row">
+  <div class="col-md-6 mb-3">
+    <img src="{{ product.detail_image_url }}" class="img-fluid rounded shadow" alt="{{ product.name }}">
+  </div>
+
+    <div class="col-md-6">
+      {% if product.color %}
+        <div class="mb-2">Color: <strong>{{ product.color }}</strong></div>
+      {% endif %}
+      <div class="h4 mb-3">{{ product.price }} kr</div>
+
+      <!-- Sizes ( XS–XL ) -->
+      <form class="mb-4">
+        <div class="form-group">
+          <label for="id_size">Size</label>
+          <select id="id_size" class="form-control">
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+        </div>
+        <button class="btn btn-fem" type="button" disabled>Add to bag (coming soon)</button>
+      </form>
+
+      <h2 class="section-title">Description</h2>
+      <p class="page-text">{{ product.description }}</p>
+
+      <!-- Reviews -->
+      <h2 class="section-title">Reviews</h2>
+      {% if reviews %}
+        {% for r in reviews %}
+          <div class="mb-3">
+            <strong>{{ r.user }}</strong> – {{ r.rating }}/5
+            <small class="text-muted">{{ r.created_at|date:"Y-m-d H:i" }}</small>
+            {% if r.title %}<div><em>{{ r.title }}</em></div>{% endif %}
+            {% if r.body %}<div>{{ r.body }}</div>{% endif %}
+            {% if request.user == r.user %}
+              <div class="mt-1">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'review_update' r.pk %}">Edit</a>
+                <a class="btn btn-sm btn-outline-danger" href="{% url 'review_delete' r.pk %}">Delete</a>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="page-text">No reviews yet.</p>
+      {% endif %}
+
+      {% if user.is_authenticated and not user_review %}
+        <h3 class="section-title">Write a review</h3>
+        <form action="{% url 'review_create' product.pk %}" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="id_rating">Rating (1–5)</label>
+            {{ form.rating|add_class:"form-control" }}
+          </div>
+          <div class="form-group">
+            <label for="id_title">Title</label>
+            {{ form.title|add_class:"form-control" }}
+          </div>
+          <div class="form-group">
+            <label for="id_body">Review</label>
+            {{ form.body|add_class:"form-control" }}
+          </div>
+          <button class="btn btn-fem">Publish</button>
+        </form>
+      {% elif not user.is_authenticated %}
+        <p class="page-text"><a href="{% url 'account_login' %}">Log in</a> to write a review.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

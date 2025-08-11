@@ -72,6 +72,7 @@ TEMPLATES = [
             # Makes tags global
             'builtins': [
                 'django.templatetags.i18n',        # instead of {% load i18n %}
+                'django.templatetags.static',        # instead of {% static %}
                 'home.templatetags.form_tags',     # instead of {% load form_tags %}
             ],
         },

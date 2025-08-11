@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+
+  <h1 class="main-heading mb-3">Shop</h1>
+
+  <!-- Filter / search / sort -->
+  <form method="get" class="mb-4">
+    <div class="form-row">
+      <div class="col-md-4 mb-2">
+        <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search products...">
+      </div>
+      <div class="col-md-3 mb-2">
+        <select name="category" class="form-control">
+          <option value="">All categories</option>
+          {% for c in categories %}
+            <option value="{{ c }}" {% if cat == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 mb-2">
+        <select name="color" class="form-control">
+          <option value="">All colors</option>
+          {% for c in colors %}
+            <option value="{{ c }}" {% if color == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 mb-2">
+        <select name="sort" class="form-control">
+          <option value="name_asc"  {% if sort == "name_asc" %}selected{% endif %}>Name ↑</option>
+          <option value="name_desc" {% if sort == "name_desc" %}selected{% endif %}>Name ↓</option>
+          <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>Price ↑</option>
+          <option value="price_desc"{% if sort == "price_desc" %}selected{% endif %}>Price ↓</option>
+          <option value="newest"    {% if sort == "newest" %}selected{% endif %}>Newest</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-fem mt-2">Apply</button>
+  </form>
+
+  {% if page_obj.object_list %}
+    <div class="row">
+      {% for product in page_obj.object_list %}
+        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+          <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-reset">
+            <div class="card h-100 border-0 shadow-sm">
+              <!-- Helper -->
+              <img src="{{ product.catalog_image_url }}" class="card-img-top" alt="{{ product.name }}">
+              <div class="card-body">
+                <h5 class="card-title mb-1">{{ product.name }}</h5>
+                {% if product.color %}<div class="small text-muted">{{ product.color }}</div>{% endif %}
+                <div class="mt-2 font-weight-bold">{{ product.price }} kr</div>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Products">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if cat %}category={{ cat }}&{% endif %}{% if color %}color={{ color }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}">«</a>
+          </li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if cat %}category={{ cat }}&{% endif %}{% if color %}color={{ color }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}">»</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+  {% else %}
+    <p>No products matched your filters.</p>
+  {% endif %}
+</div>
+{% endblock %}
