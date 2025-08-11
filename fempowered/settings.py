@@ -69,6 +69,11 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth', 
                 'django.contrib.messages.context_processors.messages',
             ],
+            # Makes tags global
+            'builtins': [
+                'django.templatetags.i18n',        # instead of {% load i18n %}
+                'home.templatetags.form_tags',     # instead of {% load form_tags %}
+            ],
         },
     },
 ]
@@ -83,12 +88,9 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = True
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 LOGIN_URL = '/accounts/login/'
@@ -149,6 +151,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -157,3 +160,27 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+
+# Email & verification 
+
+if DEBUG:
+    # DEV: verification in terminal
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  
+    DEFAULT_FROM_EMAIL = 'noreply@example.local'  
+    ACCOUNT_EMAIL_VERIFICATION = 'optional'  
+else:
+    # PROD: verification 
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')  
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))  
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'  
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')  
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')  
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@your-domain.com') 
+
+    ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'  
