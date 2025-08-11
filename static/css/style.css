@@ -156,6 +156,20 @@ a:hover {
   font-size: 1.25rem;
 }
 
+/* About us */
+.about-hero {
+  width: 100%;
+  max-width: 1920px;
+  margin: 2rem auto; 
+}
+
+.about-hero img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px; 
+}
+
 /* Media queries */
 
 /* height navbar */

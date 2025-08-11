@@ -31,50 +31,38 @@
   </head>
 
   <body class="d-flex flex-column min-vh-100">
-    <header class="container-fluid fixed-top">
-      
-      <!-- Navbar -->
-      <nav class="navbar navbar-expand-lg fempowered-navbar">
-        <div class="container d-flex align-items-center justify-content-between">
-          <!-- Logo -->
-          <a class="navbar-brand d-flex align-items-center text-uppercase" href="{% url 'home' %}">
-            <img src="{% static 'img/branding/logo.webp' %}" alt="Fempowered Logo" width="40" height="40" class="mr-2">
-            <span class="font-weight-bold">Fempowered</span>
-          </a>
+  <header class="fixed-top"> <!-- ta bort container-fluid här -->
+    <nav class="navbar navbar-expand-lg fempowered-navbar"> <!-- bakgrund täcker 100% -->
+      <div class="container d-flex align-items-center justify-content-between">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center text-uppercase" href="{% url 'home' %}">
+          <img src="{% static 'img/branding/logo.webp' %}" alt="Fempowered Logo" width="40" height="40" class="mr-2">
+          <span class="font-weight-bold">Fempowered</span>
+        </a>
 
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-nav"
-            aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-nav"
+          aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-          <div class="collapse navbar-collapse" id="main-nav">
-            <ul class="navbar-nav ml-auto">
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'home' %}">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'shop' %}">Shop</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'about' %}">About Us</a>
-              </li>
-              {% if user.is_authenticated %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
-                </li>
-              {% else %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'account_login' %}">Login</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'account_signup' %}">Sign up</a>
-                </li>
-              {% endif %}
-            </ul>
-          </div>
+        <div class="collapse navbar-collapse" id="main-nav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'shop' %}">Shop</a></li>
+            {% if user.is_authenticated %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}">Logout</a></li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'account_login' %}">Login</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'account_signup' %}">Sign up</a></li>
+            {% endif %}
+          </ul>
         </div>
-      </nav>
-    </header>
+      </div>
+    </nav>
+  </header>
+
+
 
   <main class="container page-content flex-grow-1 py-4">
     {% block content %}{% endblock %}
