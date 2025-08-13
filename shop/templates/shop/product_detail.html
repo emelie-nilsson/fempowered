@@ -12,16 +12,19 @@
       {% if product.color %}
         <div class="mb-2">Color: <strong>{{ product.color }}</strong></div>
       {% endif %}
-      <div class="h4 mb-3">{{ product.price }} kr</div>
+      <div class="h4 mb-3">{{ product.price }} €</div>
 
-      <!-- Sizes ( XS–XL ) -->
-      <form class="mb-4">
-        <div class="form-group">
-          <label for="id_size">Size</label>
-          <select id="id_size" class="form-control">
-            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-          </select>
-        </div>
+      
+       <form class="mb-4">
+        {% if product.category == "Clothing" or product.category == "Clothes" %}
+          <!-- Sizes (XS–XL) clothes only -->
+          <div class="form-group">
+            <label for="id_size">Size</label>
+            <select id="id_size" class="form-control">
+              <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+            </select>
+          </div>
+        {% endif %}
         <button class="btn btn-fem" type="button" disabled>Add to bag (coming soon)</button>
       </form>
 

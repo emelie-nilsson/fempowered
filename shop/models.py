@@ -4,7 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.templatetags.static import static
-from django.db.models import Avg
+from django.db.models import Avg, Q
 
 
 class Product(models.Model):
@@ -42,24 +42,20 @@ class Product(models.Model):
         media_root = Path(settings.MEDIA_ROOT)
 
         if name:
-            
             full = media_root / name
             if full.exists():
-                
                 try:
                     return f.url
                 except Exception:
                     return settings.MEDIA_URL + name.replace("\\", "/")
 
-            
             base = media_root / base_subdir
             if base.exists():
-                matches = list(base.rglob(Path(name).name))  
+                matches = list(base.rglob(Path(name).name))
                 if matches:
                     rel = matches[0].relative_to(media_root).as_posix()
                     return settings.MEDIA_URL + rel
 
-       
         return None
 
     @property
@@ -68,7 +64,6 @@ class Product(models.Model):
 
     @property
     def detail_image_url(self):
-        
         return self._resolve_media_url("image_details", "details") or self.catalog_image_url
 
     @property
@@ -78,6 +73,22 @@ class Product(models.Model):
     @property
     def average_rating(self):
         return self.reviews.aggregate(avg=Avg("rating"))["avg"] or 0
+
+    class Meta:
+        # Stop duplicates
+        
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "color"],
+                condition=Q(color__isnull=False),
+                name="uq_product_name_color_when_color_not_null",
+            ),
+            models.UniqueConstraint(
+                fields=["name"],
+                condition=Q(color__isnull=True),
+                name="uq_product_name_when_color_is_null",
+            ),
+        ]
 
 
 class Review(models.Model):
