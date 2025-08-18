@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="main-heading">My account</h1>
+  <p class="page-text">Welcome, {{ request.user.get_full_name|default:request.user.username }}.</p>
+
+  <h2 class="section-title">Quick links</h2>
+  <ul>
+    <li><a href="{% url 'accounts:orders' %}">Orders</a></li>
+    <li><a href="{% url 'accounts:addresses' %}">Addresses</a></li>
+    <li><a href="{% url 'account_email' %}">Emails</a></li>
+    <li><a href="{% url 'account_change_password' %}">Change password</a></li>
+  </ul>
+{% endblock %}
