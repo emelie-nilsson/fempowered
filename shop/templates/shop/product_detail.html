@@ -1,79 +1,93 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container py-5">
-  <h1 class="main-heading mb-3">{{ product.name }}</h1>
+<div class="product-detail">
+  <h1 class="main-heading">{{ product.name }}</h1>
 
-  <div class="row">
-  <div class="col-md-6 mb-3">
-    <img src="{{ product.detail_image_url }}" class="img-fluid rounded shadow" alt="{{ product.name }}">
+  <div class="product-grid">
+    <!-- Image left -->
+    <figure class="product-media">
+      <img src="{{ product.detail_image_url }}" alt="{{ product.name }}">
+    </figure>
+
+    <!-- Info right -->
+    <section class="product-info">
+      <!-- 1) Description -->
+      <h2 class="section-title">Description</h2>
+      <p class="page-text">{{ product.description|linebreaks }}</p>
+
+      <!-- Color -->
+      {% if product.color %}
+        <div class="product-color">Color: <strong>{{ product.color }}</strong></div>
+      {% endif %}
+
+      <!-- Price -->
+      <div class="product-price">{{ product.price }} €</div>
+
+      <!-- Add to bag -->
+      <form class="product-actions" method="post" action="{% url 'cart_add' product.id %}">
+        {% csrf_token %}
+        {% if product.category == "Clothing" or product.category == "Clothes" %}
+        <div class="form-row">
+          <label for="id_size">Size</label>
+          <select id="id_size" name="size">
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+        </div>
+        {% endif %}
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="btn-fem">Add to bag</button>
+      </form>
+    </section>
   </div>
 
-    <div class="col-md-6">
-      {% if product.color %}
-        <div class="mb-2">Color: <strong>{{ product.color }}</strong></div>
-      {% endif %}
-      <div class="h4 mb-3">{{ product.price }} €</div>
-
-      
-       <form class="mb-4">
-        {% if product.category == "Clothing" or product.category == "Clothes" %}
-          <!-- Sizes (XS–XL) clothes only -->
-          <div class="form-group">
-            <label for="id_size">Size</label>
-            <select id="id_size" class="form-control">
-              <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-            </select>
-          </div>
-        {% endif %}
-        <button class="btn btn-fem" type="button" disabled>Add to bag (coming soon)</button>
-      </form>
-
-      <h2 class="section-title">Description</h2>
-      <p class="page-text">{{ product.description }}</p>
-
-      <!-- Reviews -->
-      <h2 class="section-title">Reviews</h2>
-      {% if reviews %}
+  <!-- Reviews -->
+  <section class="product-reviews">
+    <h2 class="section-title">Reviews</h2>
+    {% if reviews %}
+      <ul class="review-list">
         {% for r in reviews %}
-          <div class="mb-3">
-            <strong>{{ r.user }}</strong> – {{ r.rating }}/5
-            <small class="text-muted">{{ r.created_at|date:"Y-m-d H:i" }}</small>
+          <li class="review-item">
+            <div class="review-meta">
+              <strong>{{ r.user }}</strong>
+              <span>{{ r.rating }}/5</span>
+              <time>{{ r.created_at|date:"Y-m-d H:i" }}</time>
+            </div>
             {% if r.title %}<div><em>{{ r.title }}</em></div>{% endif %}
             {% if r.body %}<div>{{ r.body }}</div>{% endif %}
             {% if request.user == r.user %}
-              <div class="mt-1">
-                <a class="btn btn-sm btn-outline-secondary" href="{% url 'review_update' r.pk %}">Edit</a>
-                <a class="btn btn-sm btn-outline-danger" href="{% url 'review_delete' r.pk %}">Delete</a>
+              <div class="review-actions">
+                <a href="{% url 'review_update' r.pk %}" class="btn-fem-outline">Edit</a>
+                <a href="{% url 'review_delete' r.pk %}" class="btn-fem-outline">Delete</a>
               </div>
             {% endif %}
-          </div>
+          </li>
         {% endfor %}
-      {% else %}
-        <p class="page-text">No reviews yet.</p>
-      {% endif %}
+      </ul>
+    {% else %}
+      <p class="page-text">No reviews yet.</p>
+    {% endif %}
 
-      {% if user.is_authenticated and not user_review %}
-        <h3 class="section-title">Write a review</h3>
-        <form action="{% url 'review_create' product.pk %}" method="post">
-          {% csrf_token %}
-          <div class="form-group">
-            <label for="id_rating">Rating (1–5)</label>
-            {{ form.rating|add_class:"form-control" }}
-          </div>
-          <div class="form-group">
-            <label for="id_title">Title</label>
-            {{ form.title|add_class:"form-control" }}
-          </div>
-          <div class="form-group">
-            <label for="id_body">Review</label>
-            {{ form.body|add_class:"form-control" }}
-          </div>
-          <button class="btn btn-fem">Publish</button>
-        </form>
-      {% elif not user.is_authenticated %}
-        <p class="page-text"><a href="{% url 'account_login' %}">Log in</a> to write a review.</p>
-      {% endif %}
-    </div>
-  </div>
+    {% if user.is_authenticated and not user_review %}
+      <h3 class="section-title">Write a review</h3>
+      <form action="{% url 'review_create' product.pk %}" method="post" class="review-form">
+        {% csrf_token %}
+        <div class="form-row">
+          <label for="id_rating">Rating (1–5)</label>
+          {{ form.rating }}
+        </div>
+        <div class="form-row">
+          <label for="id_title">Title</label>
+          {{ form.title }}
+        </div>
+        <div class="form-row">
+          <label for="id_body">Review</label>
+          {{ form.body }}
+        </div>
+        <button class="btn-fem">Publish</button>
+      </form>
+    {% elif not user.is_authenticated %}
+      <p class="page-text"><a href="{% url 'account_login' %}">Log in</a> to write a review.</p>
+    {% endif %}
+  </section>
 </div>
 {% endblock %}

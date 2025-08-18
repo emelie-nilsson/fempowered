@@ -10,6 +10,9 @@ from django.views.generic import CreateView, UpdateView, DeleteView
 from .models import Product, Review
 from .forms import ReviewForm
 
+from django.views.decorators.http import require_POST
+from .cart import Cart
+
 
 def product_list(request):
     qs = Product.objects.all()
@@ -122,3 +125,36 @@ class ReviewDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView):
         messages.success(self.request, "Recension borttagen.")
         return reverse("product_detail", kwargs={"pk": self.object.product.pk})
 
+
+def cart_detail(request):
+    cart = Cart(request)
+    return render(request, "shop/cart_detail.html", {"cart": cart})
+
+@require_POST
+def cart_add(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, pk=product_id)
+    qty = int(request.POST.get("quantity", 1))
+    size = request.POST.get("size") or None
+    cart.add(product, quantity=qty, size=size)
+    messages.success(request, "Added to cart.")
+    return redirect("cart_detail")
+
+@require_POST
+def cart_update(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, pk=product_id)
+    qty = int(request.POST.get("quantity", 1))
+    size = request.POST.get("size") or None
+    cart.add(product, quantity=qty, size=size, override=True)
+    messages.info(request, "Cart updated.")
+    return redirect("cart_detail")
+
+@require_POST
+def cart_remove(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, pk=product_id)
+    size = request.POST.get("size") or None
+    cart.remove(product, size=size)
+    messages.warning(request, "Removed from cart.")
+    return redirect("cart_detail")
