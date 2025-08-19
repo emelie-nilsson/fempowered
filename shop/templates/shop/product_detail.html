@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <div class="product-detail">
   <h1 class="main-heading">{{ product.name }}</h1>
@@ -17,7 +18,9 @@
 
       <!-- Color -->
       {% if product.color %}
-        <div class="product-color">Color: <strong>{{ product.color }}</strong></div>
+      <div class="product-color">
+        Color: <strong>{{ product.color }}</strong>
+      </div>
       {% endif %}
 
       <!-- Price -->
@@ -26,16 +29,22 @@
       <!-- Add to bag -->
       <form class="product-actions" method="post" action="{% url 'cart_add' product.id %}">
         {% csrf_token %}
+
         {% if product.category == "Clothing" or product.category == "Clothes" %}
         <div class="form-row">
           <label for="id_size">Size</label>
           <select id="id_size" name="size">
-            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+            <option>XS</option>
+            <option>S</option>
+            <option>M</option>
+            <option>L</option>
+            <option>XL</option>
           </select>
         </div>
         {% endif %}
+
         <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="btn-fem">Add to bag</button>
+        <button type="submit" class="btn">Add to bag</button>
       </form>
     </section>
   </div>
@@ -43,50 +52,86 @@
   <!-- Reviews -->
   <section class="product-reviews">
     <h2 class="section-title">Reviews</h2>
+
     {% if reviews %}
-      <ul class="review-list">
-        {% for r in reviews %}
-          <li class="review-item">
-            <div class="review-meta">
-              <strong>{{ r.user }}</strong>
-              <span>{{ r.rating }}/5</span>
-              <time>{{ r.created_at|date:"Y-m-d H:i" }}</time>
-            </div>
-            {% if r.title %}<div><em>{{ r.title }}</em></div>{% endif %}
-            {% if r.body %}<div>{{ r.body }}</div>{% endif %}
-            {% if request.user == r.user %}
-              <div class="review-actions">
-                <a href="{% url 'review_update' r.pk %}" class="btn btn-sm btn-fem">Edit</a>
-                <a href="{% url 'review_delete' r.pk %}" class="btn btn-sm btn-fem-outline">Delete</a>
-              </div>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
+    <ul class="review-list">
+      {% for r in reviews %}
+      <li class="review-item">
+        <div class="review-meta">
+          <strong>{{ r.user }}</strong>
+
+          <!-- Star grade (read-only) -->
+          <div class="rating-static" aria-label="{{ r.rating }} out of 5">
+            {% for _ in "12345"|make_list %}
+            <span class="star {% if forloop.counter <= r.rating %}on{% endif %}">★</span>
+            {% endfor %}
+          </div>
+
+          <time class="text-muted">{{ r.created_at|date:"Y-m-d H:i" }}</time>
+        </div>
+
+        {% if r.title %}<div class="mt-1"><em>{{ r.title }}</em></div>{% endif %}
+        {% if r.body %}<div class="mt-1">{{ r.body }}</div>{% endif %}
+
+        {% if request.user == r.user %}
+        <div class="review-actions">
+          <a href="{% url 'review_update' r.pk %}" class="btn">Edit</a>
+
+          <form method="post" action="{% url 'review_delete' r.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn" onclick="return confirm('Delete this review?')">Delete</button>
+          </form>
+        </div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
     {% else %}
-      <p class="page-text">No reviews yet.</p>
+    <p class="page-text">No reviews yet.</p>
     {% endif %}
 
     {% if user.is_authenticated and not user_review %}
-      <h3 class="section-title">Write a review</h3>
-      <form action="{% url 'review_create' product.pk %}" method="post" class="review-form">
-        {% csrf_token %}
-        <div class="form-row">
-          <label for="id_rating">Rating (1–5)</label>
-          {{ form.rating }}
-        </div>
-        <div class="form-row">
-          <label for="id_title">Title</label>
-          {{ form.title }}
-        </div>
-        <div class="form-row">
-          <label for="id_body">Review</label>
-          {{ form.body }}
-        </div>
-        <button class="btn-fem">Publish</button>
-      </form>
+    <h3 class="section-title">Write a review</h3>
+
+    <form action="{% url 'review_create' product.pk %}" method="post" class="review-form">
+      {% csrf_token %}
+
+      <!-- Stars (1–5) -->
+      <label class="page-subtitle mb-1 d-block">Your rating</label>
+      <div class="rating-input" role="radiogroup" aria-label="Set rating">
+        <input type="radio" id="star5" name="rating" value="5" required>
+        <label for="star5" title="5 stars">★</label>
+
+        <input type="radio" id="star4" name="rating" value="4">
+        <label for="star4" title="4 stars">★</label>
+
+        <input type="radio" id="star3" name="rating" value="3">
+        <label for="star3" title="3 stars">★</label>
+
+        <input type="radio" id="star2" name="rating" value="2">
+        <label for="star2" title="2 stars">★</label>
+
+        <input type="radio" id="star1" name="rating" value="1">
+        <label for="star1" title="1 star">★</label>
+      </div>
+
+      <div class="form-row mt-3">
+        <label for="id_title">Title</label>
+        {{ form.title }}
+      </div>
+
+      <div class="form-row">
+        <label for="id_body">Review</label>
+        {{ form.body }}
+      </div>
+
+      <button type="submit" class="btn">Publish</button>
+    </form>
+
     {% elif not user.is_authenticated %}
-      <p class="page-text"><a href="{% url 'account_login' %}">Log in</a> to write a review.</p>
+    <p class="page-text">
+      <a href="{% url 'account_login' %}">Log in</a> to write a review.
+    </p>
     {% endif %}
   </section>
 </div>

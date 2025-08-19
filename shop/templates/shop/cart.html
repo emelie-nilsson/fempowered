@@ -1,0 +1,76 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="container py-5 cart">
+  <h1 class="main-heading">Your Bag</h1>
+
+  {% if cart_items %}
+  <div class="cart-grid">
+    <!-- Left: items -->
+    <ul class="cart-list">
+      {% for ci in cart_items %}
+      <li class="cart-item">
+        <img class="cart-thumb"
+             src="{{ ci.product.catalog_image_url }}"
+             alt="{{ ci.product.name }}"
+             width="80" height="80" loading="lazy">
+
+        <div class="cart-info">
+          <div class="cart-title">
+            <span class="name">{{ ci.product.name }}</span>
+            {% if ci.product.color %}<span class="pill">{{ ci.product.color }}</span>{% endif %}
+            {% if ci.size %}<span class="pill">Size {{ ci.size }}</span>{% endif %}
+          </div>
+
+          {% if ci.quantity > 1 %}
+            <small class="muted">Unit: {{ ci.unit_price|floatformat:2 }} €</small>
+          {% endif %}
+
+          <!-- Qty -->
+          <form method="post"
+                action="{% url 'cart_update' ci.product.id %}"
+                class="cart-row-actions two-rows">
+            {% csrf_token %}
+            {% if ci.size %}<input type="hidden" name="size" value="{{ ci.size }}">{% endif %}
+
+            <div class="qty-row">
+              <label class="sr-only" for="q{{ forloop.counter }}">Qty</label>
+              <input id="q{{ forloop.counter }}" type="number" name="quantity"
+                     min="1" max="99" value="{{ ci.quantity }}" class="qty-input">
+            </div>
+
+            <div class="btn-row">
+              <button class="btn">Update</button>
+              <button class="btn" formaction="{% url 'cart_remove' ci.product.id %}">Remove</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="cart-line-total">
+          <span>{{ ci.line_total|floatformat:2 }} €</span>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Right: summary -->
+    <aside class="cart-summary">
+      <h2 class="section-title">Summary</h2>
+      <div class="cart-summary-row">
+        <span>Items</span>
+        <span>{{ cart_items|length }}</span>
+      </div>
+      <div class="cart-summary-row total">
+        <span>Total</span>
+        <span>{{ cart_total|floatformat:2 }} €</span>
+      </div>
+      <p class="cart-note">Shipping & taxes calculated at checkout.</p>
+      <a href="#" class="btn">Checkout</a>
+      <a href="{% url 'shop' %}" class="btn">Continue shopping</a>
+    </aside>
+  </div>
+
+  {% else %}
+    <p class="page-text">Your bag is empty.</p>
+    <a href="{% url 'shop' %}" class="btn">Go to Shop</a>
+  {% endif %}
+</div>
+{% endblock %}
