@@ -87,14 +87,14 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
     def dispatch(self, request, *args, **kwargs):
         self.product = get_object_or_404(Product, pk=kwargs["pk"])
         if Review.objects.filter(product=self.product, user=request.user).exists():
-            messages.info(request, "Du har redan recenserat den här produkten.")
+            messages.info(request, "You have already reviewed this product.")
             return redirect("product_detail", pk=self.product.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.product = self.product
         form.instance.user = self.request.user
-        messages.success(self.request, "Recension skapad.")
+        messages.success(self.request, "Review created.")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -111,7 +111,7 @@ class ReviewUpdateView(LoginRequiredMixin, OwnerRequiredMixin, UpdateView):
     form_class = ReviewForm
 
     def form_valid(self, form):
-        messages.success(self.request, "Recension uppdaterad.")
+        messages.success(self.request, "Review updated.")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -122,7 +122,7 @@ class ReviewDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView):
     model = Review
 
     def get_success_url(self):
-        messages.success(self.request, "Recension borttagen.")
+        messages.success(self.request, "Review deleted.")
         return reverse("product_detail", kwargs={"pk": self.object.product.pk})
 
 

@@ -14,7 +14,7 @@ class Cart:
 
     def add(self, product, quantity=1, size=None, override=False):
         """
-        Nyckeln blir f"{product_id}:{size or '-'}" så olika storlekar räknas separat.
+        Key f"{product_id}:{size or '-'}" separate sizes.
         """
         key = f"{product.id}:{size or '-'}"
         if key not in self.cart:

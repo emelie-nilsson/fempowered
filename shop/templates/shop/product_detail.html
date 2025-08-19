@@ -56,8 +56,8 @@
             {% if r.body %}<div>{{ r.body }}</div>{% endif %}
             {% if request.user == r.user %}
               <div class="review-actions">
-                <a href="{% url 'review_update' r.pk %}" class="btn-fem-outline">Edit</a>
-                <a href="{% url 'review_delete' r.pk %}" class="btn-fem-outline">Delete</a>
+                <a href="{% url 'review_update' r.pk %}" class="btn btn-sm btn-fem">Edit</a>
+                <a href="{% url 'review_delete' r.pk %}" class="btn btn-sm btn-fem-outline">Delete</a>
               </div>
             {% endif %}
           </li>

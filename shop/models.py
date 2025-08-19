@@ -32,11 +32,7 @@ class Product(models.Model):
 
     # Helpers
     def _resolve_media_url(self, field_name: str, base_subdir: str):
-        """
-        1) Om fältets fil finns exakt -> returnera dess URL
-        2) Annars: sök efter samma FILNAMN under media/<base_subdir>/** och returnera första träffen
-        3) Om inget hittas -> None
-        """
+       
         f = getattr(self, field_name, None)
         name = getattr(f, "name", "") if f else ""
         media_root = Path(settings.MEDIA_ROOT)
