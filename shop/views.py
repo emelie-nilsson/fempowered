@@ -1,31 +1,26 @@
-# shop/views.py
 from django.db.models import Q
 from django.core.paginator import Paginator
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.views.generic import CreateView, UpdateView, DeleteView
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
+from django.views.generic import CreateView, UpdateView, DeleteView, ListView
 
-from .models import Product, Review
+from .models import Product, Review, Favorite
 from .forms import ReviewForm
 from .cart import Cart
 
 
-# =======================
 # Products
-# =======================
+
 
 def product_list(request):
     """
-    Produktlista med enkel sök, filter och sortering.
-    Parametrar:
-      - q: fritext (namn, beskrivning)
-      - category: exakt kategori
-      - color: exakt färg
-      - sort: name_asc|name_desc|price_asc|price_desc|newest
+    Product list with search, filter, sort, pagination.
     """
     qs = Product.objects.all()
 
@@ -60,18 +55,27 @@ def product_list(request):
               .exclude(color__isnull=True).exclude(color__exact="")
               .values_list("color", flat=True).distinct().order_by("color"))
 
+    
+    favorite_ids = set()
+    if request.user.is_authenticated:
+        favorite_ids = set(
+            Favorite.objects.filter(user=request.user, product__in=qs)
+                            .values_list("product_id", flat=True)
+        )
+
     ctx = {
         "page_obj": page_obj,
         "q": q, "cat": cat, "color": color, "sort": sort,
         "categories": categories,
         "colors": colors,
+        "favorite_ids": favorite_ids,
     }
     return render(request, "shop/product_list.html", ctx)
 
 
 def product_detail(request, pk):
     """
-    Produktdetalj + reviews. Visar formulär om user är inloggad och saknar review.
+    Product details + reviews (en recension per user).
     """
     product = get_object_or_404(Product, pk=pk)
 
@@ -82,7 +86,11 @@ def product_detail(request, pk):
         if not user_review:
             form = ReviewForm()
 
-    reviews = product.reviews.select_related("user")
+  
+    if hasattr(product, "reviews"):
+        reviews = product.reviews.select_related("user").all()
+    else:
+        reviews = Review.objects.select_related("user").filter(product=product)
 
     return render(request, "shop/product_detail.html", {
         "product": product,
@@ -92,9 +100,8 @@ def product_detail(request, pk):
     })
 
 
-# =======================
+
 # Reviews (CRUD)
-# =======================
 
 class ReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
@@ -142,13 +149,12 @@ class ReviewDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView):
         return reverse("product_detail", kwargs={"pk": self.object.product.pk})
 
 
-# =======================
+
 # Cart
-# =======================
 
 def cart_detail(request):
     """
-    Bygger en enkel context för templatet:
+    Context för templatet:
       - cart_items: lista med {product, size, quantity, unit_price, line_total}
       - cart_total: totalsumma
     """
@@ -167,13 +173,13 @@ def cart_detail(request):
         "cart_items": cart_items,
         "cart_total": cart.total(),
     }
-    return render(request, "shop/cart.html", context)  # <- templatet vi satte upp
+    return render(request, "shop/cart.html", context)
 
 
 @require_POST
 def cart_add(request, product_id):
     """
-    Lägg till i varukorgen. Default qty=1. Storlek skickas in om den finns.
+    Add to cart. Default qty=1. 
     """
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_id)
@@ -222,3 +228,35 @@ def cart_remove(request, product_id):
     cart.remove(product, size=size)
     messages.warning(request, "Removed from cart.")
     return redirect("cart_detail")
+
+
+
+# Favorites
+
+class FavoriteListView(LoginRequiredMixin, ListView):
+    template_name = "shop/favorites.html"
+    context_object_name = "favorites"
+    login_url = reverse_lazy("account_login")
+
+    def get_queryset(self):
+        return Favorite.objects.select_related("product").filter(user=self.request.user)
+
+
+@login_required(login_url="account_login")
+def toggle_favorite(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    fav, created = Favorite.objects.get_or_create(user=request.user, product=product)
+
+    if created:
+        status = "added"
+    else:
+        fav.delete()
+        status = "removed"
+
+    # AJAX
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"status": status, "product_id": product_id})
+
+    # Non-AJAX
+    next_url = request.GET.get("next") or request.META.get("HTTP_REFERER") or reverse("favorites")
+    return HttpResponseRedirect(next_url)

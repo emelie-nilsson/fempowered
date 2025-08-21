@@ -27,6 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Feature flags
+# Allow reviews without purchase in development. In production (DEBUG=False) is closing this.
+TEST_ALLOW_REVIEW_WITHOUT_PURCHASE = True
+if not DEBUG:
+    TEST_ALLOW_REVIEW_WITHOUT_PURCHASE = False
 
 # Application definition
 

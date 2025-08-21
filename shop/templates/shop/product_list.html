@@ -1,10 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
 <div class="container py-5">
-
   <h1 class="main-heading mb-3">Shop</h1>
 
-  <!-- Filter / search / sort -->
   <form method="get" class="mb-4">
     <div class="form-row">
       <div class="col-md-4 mb-2">
@@ -36,40 +36,71 @@
         </select>
       </div>
     </div>
+
     <button class="btn btn-fem mt-2">Apply</button>
+    {% if q or cat or color or sort != "name_asc" %}
+      <a href="{% url 'product_list' %}" class="btn btn-outline-secondary mt-2 ml-2">Rensa filter</a>
+    {% endif %}
   </form>
 
   {% if page_obj.object_list %}
     <div class="row">
       {% for product in page_obj.object_list %}
         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-          <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-reset">
-            <div class="card h-100 border-0 shadow-sm">
-              <!-- Helper -->
-              <img src="{{ product.catalog_image_url }}" class="card-img-top" alt="{{ product.name }}">
+          <div class="card h-100 border-0 shadow-sm product-card">
+
+            <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-reset d-block">
+              {% if product.catalog_image_url %}
+                <img src="{{ product.catalog_image_url }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+              {% elif product.image_catalog %}
+                <img src="{{ product.image_catalog.url }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+              {% else %}
+                <img src="{% static 'img/placeholder.webp' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+              {% endif %}
               <div class="card-body">
                 <h5 class="card-title mb-1">{{ product.name }}</h5>
                 {% if product.color %}<div class="small text-muted">{{ product.color }}</div>{% endif %}
-                <div class="mt-2 font-weight-bold">{{ product.price }} €</div>
+              </div>
+            </a>
+
+            <div class="card-footer product-footer">
+              <div class="product-meta">
+                <div class="price">{{ product.price }} €</div>
+                <form method="post"
+                      action="{% url 'toggle_favorite' product.id %}?next={{ request.get_full_path|urlencode }}"
+                      class="fav-form">
+                  {% csrf_token %}
+                  {% if favorite_ids and product.id in favorite_ids %}
+                    <button type="submit" class="fav-btn" aria-label="Remove from favorites"
+                            aria-pressed="true" title="Remove from favorites">
+                      <i class="fa-solid fa-heart fa-lg fav-icon"></i>
+                    </button>
+                  {% else %}
+                    <button type="submit" class="fav-btn" aria-label="Add to favorites"
+                            aria-pressed="false" title="Add to favorites">
+                      <i class="fa-regular fa-heart fa-lg fav-icon"></i>
+                    </button>
+                  {% endif %}
+                </form>
               </div>
             </div>
-          </a>
+
+          </div>
         </div>
       {% endfor %}
     </div>
 
-    <!-- Pagination -->
     <nav aria-label="Products">
       <ul class="pagination">
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if cat %}category={{ cat }}&{% endif %}{% if color %}color={{ color }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}">«</a>
+            <a class="page-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if cat %}category={{ cat|urlencode }}&{% endif %}{% if color %}color={{ color|urlencode }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}">«</a>
           </li>
         {% endif %}
         <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?{% if q %}q={{ q }}&{% endif %}{% if cat %}category={{ cat }}&{% endif %}{% if color %}color={{ color }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}">»</a>
+            <a class="page-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if cat %}category={{ cat|urlencode }}&{% endif %}{% if color %}color={{ color|urlencode }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}">»</a>
           </li>
         {% endif %}
       </ul>
@@ -79,4 +110,28 @@
     <p>No products matched your filters.</p>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("click", function(e){
+  const btn = e.target.closest(".fav-btn");
+  if(!btn) return;
+  e.preventDefault();
+  const form = btn.closest("form");
+  const url = form.action;
+  const csrftoken = form.querySelector("input[name=csrfmiddlewaretoken]").value;
+
+  fetch(url, {
+    method: "POST",
+    headers: {"X-CSRFToken": csrftoken, "X-Requested-With": "XMLHttpRequest"},
+  }).then(r => r.json()).then(() => {
+    const icon = btn.querySelector(".fav-icon");
+    const pressed = btn.getAttribute("aria-pressed") === "true";
+    btn.setAttribute("aria-pressed", (!pressed).toString());
+    if (pressed) { icon.classList.remove("fa-solid"); icon.classList.add("fa-regular"); }
+    else { icon.classList.remove("fa-regular"); icon.classList.add("fa-solid"); }
+  }).catch(() => form.submit());
+});
+</script>
 {% endblock %}

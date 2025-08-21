@@ -24,7 +24,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', views.index, name='home'),
     path('about/', views.about, name='about'),
-    path('shop/', include('shop.urls')),
+    path("shop/", include("shop.urls")),
     path('account/', include(('accounts.urls', 'accounts'), namespace='accounts')),
 ]
 

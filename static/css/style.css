@@ -68,7 +68,6 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.5rem;
   color: var(--primary-color);
 }
-
 .navbar .nav-link {
   color: var(--primary-color);
   font-weight: 600;
@@ -81,12 +80,12 @@ h1, h2, h3, h4, h5, h6 {
 .account-link { display: inline-flex; align-items: center; gap: .5rem; padding: .25rem .25rem !important; }
 .nav-label { display: inline; font-weight: 700; }
 
-/* Only show the icon on small screens */
+/* Only show the label on larger screens */
 @media (max-width: 991px) {
   .nav-label { display: none; }
 }
 
-/* Cart-icon */
+/* Cart icon */
 .cart-link { display: inline-block; padding: .25rem .25rem !important; }
 
 /* Cart badge */
@@ -128,7 +127,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .fempowered-footer .social-icons a:hover { color: var(--secondary-color); }
 
-/* All Buttons */
+/* Buttons */
 .btn,
 button,
 input[type="submit"],
@@ -137,8 +136,6 @@ a.btn,
 .nav-btn-outline,
 .btn-fem,
 .btn-fem-outline {
-
-  /* Bas */
   --btn-bg: var(--secondary-color);
   --btn-fg: #fff;
   --btn-border: var(--secondary-color);
@@ -383,7 +380,7 @@ a:hover { color: var(--middle-color); }
 
 .cart-item {
   display: grid;
-  grid-template-columns: 64px 1fr auto; /* bild | info | rad-total */
+  grid-template-columns: 64px 1fr auto; 
   gap: 1rem;
   background: #fff;
   border: 1px solid rgba(0,0,0,.08);
@@ -408,34 +405,109 @@ a:hover { color: var(--middle-color); }
 /* Cart actions */
 .cart-row-actions.two-rows {
   display: grid;
-  grid-template-columns: 1fr;                 
+  grid-template-columns: 1fr;
   grid-template-areas:
     "qty"
     "actions";
   gap: .5rem;
 }
-
 .cart-row-actions.two-rows .qty-row {
   grid-area: qty;
   display: flex;
   align-items: center;
   gap: .5rem;
 }
-
 .cart-row-actions.two-rows .qty-input {
-  width: 88px;            
+  width: 88px;
   text-align: center;
 }
-
 .cart-row-actions.two-rows .btn-row {
   grid-area: actions;
   display: flex;
   gap: .5rem;
-  flex-wrap: wrap;       
+  flex-wrap: wrap;
+}
+@media (max-width: 420px) {
+  .cart-row-actions.two-rows .btn-row .btn { flex: 1 1 100%; }
 }
 
-@media (max-width: 420px) {
-  .cart-row-actions.two-rows .btn-row .btn {
-    flex: 1 1 100%;
-  }
+/* Shop grid / product cards */
+
+.product-card { display: flex; flex-direction: column; height: 100%; }
+.product-card .card-img-top { height: 240px; object-fit: cover; }
+
+.product-card .card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;         
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1.25rem * 2); 
 }
+
+.product-card .card-body { min-height: 80px; }
+
+.product-footer {
+  background: #fff;
+  border-top: 0;
+  padding-top: .25rem;
+  padding-bottom: .75rem;
+  margin-top: auto;              
+}
+
+.product-meta { display: flex; align-items: center; justify-content: space-between; }
+.price { font-weight: 700; margin: 0; }
+
+.fav-form { margin: 0; padding: 0; }
+.fav-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+}
+.fav-btn:focus { outline: none; box-shadow: none; }
+.fav-btn:focus-visible { outline: 2px solid rgba(0,0,0,.18); border-radius: 6px; }
+
+.fav-icon { vertical-align: middle; transition: transform .08s ease, color .12s ease, opacity .08s ease; opacity: .95; }
+.fa-regular.fa-heart.fav-icon { color: #777; }                     
+.fa-solid.fa-heart.fav-icon   { color: var(--highlight-color); }   
+.fav-btn:hover .fav-icon { transform: scale(1.06); }
+
+
+/* Review form */
+
+.review-form {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* Star rating */
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse; 
+  gap: 6px;
+}
+.star-rating input[type="radio"] {
+  display: none; 
+}
+.star-rating label {
+  font-size: 2rem;
+  line-height: 1;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: gold;
+}
+
+.star-rating input[type="radio"]:focus + label {
+  outline: 2px solid var(--secondary-color, #5d6f63);
+  outline-offset: 2px;
+}
+
+

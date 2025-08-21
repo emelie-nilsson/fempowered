@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.templatetags.static import static
 from django.db.models import Avg, Q
-
+from django.utils import timezone
 
 class Product(models.Model):
     # Choices matching fixtures
@@ -29,6 +29,10 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.color})" if self.color else self.name
+    
+    def is_favorited_by(self, user):
+        return user.is_authenticated and self.favorited_by.filter(user=user).exists()
+
 
     # Helpers
     def _resolve_media_url(self, field_name: str, base_subdir: str):
@@ -102,3 +106,19 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.product} - {self.user} ({self.rating})"
+
+
+# Favorites
+
+class Favorite(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites")
+    product = models.ForeignKey("shop.Product", on_delete=models.CASCADE, related_name="favorited_by")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "product"], name="uniq_user_product_favorite")
+        ]
+
+    def __str__(self):
+        return f"{self.user} ❤ {self.product}"

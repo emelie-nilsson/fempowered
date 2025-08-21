@@ -1,0 +1,32 @@
+{% load static %}
+
+<form method="post" class="review-form">
+  {% csrf_token %}
+
+  <!-- Rating stars -->
+  <div class="form-group">
+    <label for="id_rating">Your rating:</label>
+    <ul class="star-rating">
+      {% for value, label in form.rating.field.choices %}
+        <li>
+          <input type="radio" id="star{{ value }}" name="rating" value="{{ value }}">
+          <label for="star{{ value }}">★</label>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Title -->
+  <div class="form-group">
+    {{ form.title.label_tag }}
+    {{ form.title }}
+  </div>
+
+  <!-- Content -->
+  <div class="form-group">
+    {{ form.content.label_tag }}
+    {{ form.content }}
+  </div>
+
+  <button type="submit" class="btn btn-primary">Submit review</button>
+</form>

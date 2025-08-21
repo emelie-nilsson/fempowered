@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="main-heading">My Favorites</h1>
+
+  {% if favorites %}
+    <ul class="row list-unstyled">
+      {% for f in favorites %}
+        {% with p=f.product %}
+        <li class="col-6 col-md-4 col-lg-3 mb-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <a href="{% url 'product_detail' p.id %}" class="text-reset text-decoration-none">
+              {% if p.catalog_image_url %}
+                <img src="{{ p.catalog_image_url }}" class="card-img-top" alt="{{ p.name }}" loading="lazy">
+              {% elif p.image_catalog %}
+                <img src="{{ p.image_catalog.url }}" class="card-img-top" alt="{{ p.name }}" loading="lazy">
+              {% else %}
+                <img src="{% static 'img/placeholder.webp' %}" class="card-img-top" alt="{{ p.name }}" loading="lazy">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title mb-1">{{ p.name }}</h5>
+                {% if p.color %}<div class="small text-muted">{{ p.color }}</div>{% endif %}
+                <div class="mt-2 font-weight-bold">{{ p.price }} €</div>
+              </div>
+            </a>
+            <form method="post" action="{% url 'toggle_favorite' p.id %}?next={{ request.get_full_path|urlencode }}" class="p-2 pt-0">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-secondary" aria-label="Remove from favorites">
+                <i class="fa-solid fa-heart mr-1"></i> Remove
+              </button>
+            </form>
+          </div>
+        </li>
+        {% endwith %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="text-center py-5">
+      <p class="mb-4">You don't have any favorites yet.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-fem">Browse the shop</a>
+      <p class="small text-muted mt-2">Tap the heart icon on a product to add it here.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
