@@ -511,3 +511,48 @@ a:hover { color: var(--middle-color); }
 }
 
 
+/* Product detail layout */
+
+/* Desktop/Tablet: image left, info right, reviews under image, write under reviews */
+.product-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "media   info"
+    "reviews info"
+    "write   info";
+}
+
+
+.product-media { grid-area: media; }
+.product-info { grid-area: info; }
+.product-reviews { grid-area: reviews; }
+.product-write-review { grid-area: write; }
+
+
+.product-media img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* mobile, stack the columns in the right order */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "media"
+      "info"
+      "reviews"
+      "write";
+  }
+}
+
+/* air between the columns*/
+.product-reviews,
+.product-write-review {
+  margin-top: 1rem;
+}
+
+

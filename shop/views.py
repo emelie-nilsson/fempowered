@@ -10,9 +10,17 @@ from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView
 
+from django.conf import settings
+
 from .models import Product, Review, Favorite
 from .forms import ReviewForm
 from .cart import Cart
+
+
+# --- Helper: have the user purchased the product? ---
+# TODO: echange to actuall Order/OrderItem-modell.
+def has_purchased_product(user, product):
+    return False
 
 
 # Products
