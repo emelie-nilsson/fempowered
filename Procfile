@@ -1,0 +1,1 @@
+web: gunicorn fempowered.wsgi:application
