@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-bf_nx7m0sd(kbofoqv1g*ba))$ux)2(ju#mr-kr5#21@5iql_d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Feature flags
 # Allow reviews without purchase in development. In production (DEBUG=False) is closing this.
@@ -48,12 +48,14 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'home',
     'shop',
-    "accounts",
-    "django_extensions",
+    'accounts',
+    'django_extensions',
+    'whitenoise.runserver_nostatic',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -162,6 +164,10 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# >>> Temporär, felsökning WhiteNoise
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+WHITENOISE_MANIFEST_STRICT = False
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -193,3 +199,21 @@ else:
 
     ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'  
+
+
+    # Logging in the console while DEBUG=False (500 - bug)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'ERROR', 'propagate': True},
+        'django.server': {'handlers': ['console'], 'level': 'ERROR', 'propagate': True},
+    },
+}

@@ -1,0 +1,43 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page not found – Fempowered</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+      integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  </head>
+  <body class="error-404">
+    <div class="container py-5 text-center">
+
+      <!-- Image -->
+      <picture>
+        <source srcset="{% static 'img/branding/404_lost_in_the_gym_1024.webp' %}" type="image/webp">
+        <img
+          src="{% static 'img/branding/404_lost_in_the_gym_1024.webp' %}"
+          class="img-fluid rounded shadow-sm mb-4"
+          alt="Lost in the gym illustration"
+          loading="lazy">
+      </picture>
+
+      <p class="lead mb-4">
+        Oops! The page you’re looking for got stuck between sets.  
+        Let’s get you back on track.
+      </p>
+
+      <!-- Action buttons -->
+      <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
+        <a href="{% url 'home' %}" class="btn btn-dark mb-2 mx-2">Go to Homepage</a>
+        <a href="{% url 'shop' %}" class="btn btn-outline-dark mb-2 mx-2">Visit the Shop</a>
+        <a href="{% url 'about' %}" class="btn btn-outline-secondary mb-2 mx-2">About Us</a>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary mb-2 mx-2">Go Back</a>
+      </div>
+
+    </div>
+  </body>
+</html>
+
+
