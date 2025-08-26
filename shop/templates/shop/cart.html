@@ -63,7 +63,7 @@
         <span>{{ cart_total|floatformat:2 }} €</span>
       </div>
       <p class="cart-note">Shipping & taxes calculated at checkout.</p>
-      <a href="#" class="btn">Checkout</a>
+      <a href="{% url 'checkout' %}" class="btn">Checkout</a>
       <a href="{% url 'shop' %}" class="btn">Continue shopping</a>
     </aside>
   </div>

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="main-heading">Checkout</h1>
+
+  <form id="payment-form" method="POST" class="mt-4">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="col-md-4 mb-3">
+        <label>Full name</label>
+        <input class="form-control" name="full_name" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" name="email" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Phone</label>
+        <input class="form-control" name="phone_number">
+      </div>
+    </div>
+
+    <label>Card details</label>
+    
+    <div id="card-element"></div>
+    <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+
+    <input type="hidden" name="client_secret" id="id_client_secret">
+
+    <button id="submit" class="btn btn-primary mt-3">Pay</button>
+  </form>
+</div>
+
+<style>
+  /* Gör Stripe-elementet klickbart och likt en input */
+  #card-element, .StripeElement {
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    background: #fff;
+  }
+</style>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const errorDiv = document.getElementById("card-errors");
+  const form = document.getElementById("payment-form");
+  const submitBtn = document.getElementById("submit");
+  const clientSecretInput = document.getElementById("id_client_secret");
+
+  
+  const pk = "{{ stripe_public_key }}";
+  if (!pk || !pk.startsWith("pk_")) {
+    errorDiv.textContent = "Stripe public key missing. Check .env/settings.";
+    return;
+  }
+
+  // 1) Init Stripe + Elements
+  const stripe = Stripe(pk);
+  const elements = stripe.elements();
+  const card = elements.create("card");
+  card.mount("#card-element");
+  card.on("change", (ev) => {
+    errorDiv.textContent = ev.error ? ev.error.message : "";
+  });
+
+  // 2) CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let c of cookies) {
+        c = c.trim();
+        if (c.substring(0, name.length + 1) === (name + "=")) {
+          cookieValue = decodeURIComponent(c.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie("csrftoken");
+
+  // 3) Get client_secret 
+  let clientSecret = null;
+  fetch("{% url 'create_payment_intent' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrftoken
+    },
+    body: JSON.stringify({})
+  })
+  .then(async res => {
+    const text = await res.text();
+    try {
+      const data = JSON.parse(text);
+      if (data.error) throw new Error(data.error);
+      clientSecret = data.client_secret;
+      clientSecretInput.value = clientSecret; // save to POST
+    } catch (e) {
+      errorDiv.textContent = `PaymentIntent failed (${res.status}). ${text.slice(0, 160)}...`;
+      console.error("PaymentIntent response was not JSON:", text);
+    }
+  })
+  .catch(err => {
+    errorDiv.textContent = err.message || String(err);
+  });
+
+  // 4) Submit: confirm payment
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorDiv.textContent = "";
+    submitBtn.disabled = true;
+
+    if (!clientSecret) {
+      errorDiv.textContent = "No client_secret. Please reload the page.";
+      submitBtn.disabled = false;
+      return;
+    }
+
+    const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: card,
+        billing_details: {
+          name: form.full_name.value,
+          email: form.email.value,
+        },
+      },
+    });
+
+    if (error) {
+      errorDiv.textContent = error.message || "Payment failed.";
+      submitBtn.disabled = false;
+      return;
+    }
+
+    // Success: send form to server
+    form.submit();
+  });
+});
+</script>
+{% endblock %}
