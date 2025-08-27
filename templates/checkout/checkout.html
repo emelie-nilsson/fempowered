@@ -4,93 +4,85 @@
 <div class="container py-5">
   <h1 class="main-heading">Checkout</h1>
 
-  <form id="payment-form" method="POST" class="mt-4">
+  <form id="payment-form" method="POST" class="mt-4" novalidate>
     {% csrf_token %}
     <div class="form-row">
       <div class="col-md-4 mb-3">
         <label>Full name</label>
-        <input class="form-control" name="full_name" required>
+        <input class="form-control" name="full_name" autocomplete="name" required>
       </div>
       <div class="col-md-4 mb-3">
         <label>Email</label>
-        <input type="email" class="form-control" name="email" required>
+        <input type="email" class="form-control" name="email" autocomplete="email" required>
       </div>
       <div class="col-md-4 mb-3">
         <label>Phone</label>
-        <input class="form-control" name="phone_number">
+        <input class="form-control" name="phone_number" autocomplete="tel">
       </div>
     </div>
 
     <label>Card details</label>
-    
     <div id="card-element"></div>
-    <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+    <div id="card-errors" class="text-danger mt-2" role="alert" aria-live="polite"></div>
 
     <input type="hidden" name="client_secret" id="id_client_secret">
 
-    <button id="submit" class="btn btn-primary mt-3">Pay</button>
+    <!-- Viktigt: inte id="submit" (krockar med form.submit) -->
+    <button id="pay-button" type="submit" class="btn btn-primary mt-3" disabled aria-disabled="true">Pay</button>
   </form>
 </div>
-
-<style>
-  /* Gör Stripe-elementet klickbart och likt en input */
-  #card-element, .StripeElement {
-    padding: 12px;
-    border: 1px solid #ced4da;
-    border-radius: .25rem;
-    background: #fff;
-  }
-</style>
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const errorDiv = document.getElementById("card-errors");
   const form = document.getElementById("payment-form");
-  const submitBtn = document.getElementById("submit");
+  const payBtn = document.getElementById("pay-button");
   const clientSecretInput = document.getElementById("id_client_secret");
 
-  
+  function setLoading(isLoading) {
+    payBtn.disabled = !!isLoading;
+    payBtn.setAttribute("aria-disabled", isLoading ? "true" : "false");
+    if (isLoading) {
+      payBtn.dataset.label = payBtn.textContent;
+      payBtn.textContent = "Processing…";
+    } else {
+      payBtn.textContent = payBtn.dataset.label || "Pay";
+    }
+  }
+  function showError(msg) { errorDiv.textContent = msg || ""; }
+
+  // 0) Init Stripe
   const pk = "{{ stripe_public_key }}";
   if (!pk || !pk.startsWith("pk_")) {
-    errorDiv.textContent = "Stripe public key missing. Check .env/settings.";
+    showError("Stripe public key missing. Check .env/settings.");
     return;
   }
-
-  // 1) Init Stripe + Elements
   const stripe = Stripe(pk);
   const elements = stripe.elements();
   const card = elements.create("card");
   card.mount("#card-element");
-  card.on("change", (ev) => {
-    errorDiv.textContent = ev.error ? ev.error.message : "";
-  });
+  card.on("change", ev => showError(ev.error ? ev.error.message : ""));
 
-  // 2) CSRF helper
+  // 1) CSRF
   function getCookie(name) {
-    let cookieValue = null;
+    let v = null;
     if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let c of cookies) {
+      document.cookie.split(";").forEach(c => {
         c = c.trim();
-        if (c.substring(0, name.length + 1) === (name + "=")) {
-          cookieValue = decodeURIComponent(c.substring(name.length + 1));
-          break;
-        }
-      }
+        if (c.startsWith(name + "=")) v = decodeURIComponent(c.split("=")[1]);
+      });
     }
-    return cookieValue;
+    return v;
   }
   const csrftoken = getCookie("csrftoken");
 
-  // 3) Get client_secret 
+  // 2) Hämta client_secret
   let clientSecret = null;
+  setLoading(true);
   fetch("{% url 'create_payment_intent' %}", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": csrftoken
-    },
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
     body: JSON.stringify({})
   })
   .then(async res => {
@@ -99,31 +91,34 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = JSON.parse(text);
       if (data.error) throw new Error(data.error);
       clientSecret = data.client_secret;
-      clientSecretInput.value = clientSecret; // save to POST
+      clientSecretInput.value = clientSecret;
+      setLoading(false);
     } catch (e) {
-      errorDiv.textContent = `PaymentIntent failed (${res.status}). ${text.slice(0, 160)}...`;
-      console.error("PaymentIntent response was not JSON:", text);
+      showError(`PaymentIntent failed (${res.status}). ${text.slice(0, 160)}...`);
+      setLoading(true); // keep disabled
     }
   })
   .catch(err => {
-    errorDiv.textContent = err.message || String(err);
+    showError(err.message || String(err));
+    setLoading(true); // keep disabled
   });
 
-  // 4) Submit: confirm payment
+  // 3) Submit → confirm → POST till servern
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    errorDiv.textContent = "";
-    submitBtn.disabled = true;
+    if (payBtn.disabled) return; // skydd mot dubbelklick
+    showError("");
+    setLoading(true);
 
     if (!clientSecret) {
-      errorDiv.textContent = "No client_secret. Please reload the page.";
-      submitBtn.disabled = false;
+      showError("Still preparing payment. Please reload and try again.");
+      setLoading(false);
       return;
     }
 
     const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
-        card: card,
+        card,
         billing_details: {
           name: form.full_name.value,
           email: form.email.value,
@@ -132,14 +127,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (error) {
-      errorDiv.textContent = error.message || "Payment failed.";
-      submitBtn.disabled = false;
+      showError(error.message || "Payment failed.");
+      setLoading(false);
       return;
     }
 
-    // Success: send form to server
-    form.submit();
+    
+    HTMLFormElement.prototype.submit.call(form);
   });
 });
 </script>
 {% endblock %}
+

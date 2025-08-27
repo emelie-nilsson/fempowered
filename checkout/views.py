@@ -1,4 +1,3 @@
-# checkout/views.py
 import json
 from decimal import Decimal
 
@@ -16,97 +15,148 @@ from .models import Order, OrderItem
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-def _calculate_cart_total(request):
-    """Sum the cart robustly; supports multiple cart shapes."""
-    cart = request.session.get("cart")
-    if cart is None:
-        cart = request.session.get("bag")  # some projects use 'bag'
-    cart = cart or {}
+# Cart helpers (robust snapshot)
 
-    total = Decimal("0.00")
+def _get_product_from_item(item_id, item_data):
+    """
+    Return a Product even if the cart has odd keys.
+    Try in this order:
+      1) item_id as int
+      2) item_data['product_id'] / item_data['id']
+      3) item_data['product']['id']
+    """
+    # 1) Direct from item_id
+    try:
+        pk = int(item_id)
+        p = Product.objects.filter(pk=pk).first()
+        if p:
+            return p
+    except (TypeError, ValueError):
+        pass
 
-    for item_id, item_data in cart.items():
-        # Keys i sessionen är ofta strängar
-        try:
-            pk = int(item_id)
-        except (TypeError, ValueError):
-            # Om du använder andra id-typer, hämta utan cast:
-            product = Product.objects.filter(pk=item_id).first()
-            if not product:
-                continue
-        else:
-            product = Product.objects.filter(pk=pk).first()
-            if not product:
-                continue
+    # 2) From dict fields
+    if isinstance(item_data, dict):
+        candidates = []
+        for k in ("product_id", "id"):
+            if k in item_data:
+                candidates.append(item_data.get(k))
+        if "product" in item_data and isinstance(item_data["product"], dict):
+            candidates.append(item_data["product"].get("id") or item_data["product"].get("pk"))
 
-        price = product.price or Decimal("0.00")
-
-        # 1) Enkel form: {"12": 2}
-        if isinstance(item_data, int):
-            qty = max(int(item_data), 0)
-            total += price * qty
-            continue
-
-        # 2) Dict-former
-        data = item_data or {}
-
-        # 2a) {"12": {"quantity": 2}} eller {"12": {"qty": 2}}
-        if "quantity" in data or "qty" in data:
+        for val in candidates:
             try:
-                qty = max(int(data.get("quantity", data.get("qty", 0))), 0)
+                pk = int(val)
+                p = Product.objects.filter(pk=pk).first()
+                if p:
+                    return p
             except (TypeError, ValueError):
-                qty = 0
-            total += price * qty
-            continue
+                continue
 
-        # 2b) {"12": {"items_by_size": {"M": 1, "L": 2}}}
-        sizes = data.get("items_by_size") or {}
-        if isinstance(sizes, dict):
-            for _size, s_qty in sizes.items():
+    return None
+
+
+def _extract_quantity(item_data):
+    """Extract quantity from multiple cart shapes."""
+    if isinstance(item_data, int):
+        return max(int(item_data), 0)
+
+    if isinstance(item_data, dict):
+        # {"quantity": 2} or {"qty": 2}
+        for k in ("quantity", "qty"):
+            if k in item_data:
                 try:
-                    q = max(int(s_qty), 0)
+                    return max(int(item_data[k]), 0)
                 except (TypeError, ValueError):
-                    q = 0
-                total += price * q
+                    return 0
+
+        # {"items_by_size": {"M": 1, "L": 2}}
+        sizes = item_data.get("items_by_size") or {}
+        if isinstance(sizes, dict):
+            q = 0
+            for v in sizes.values():
+                try:
+                    q += max(int(v), 0)
+                except (TypeError, ValueError):
+                    pass
+            return q
+
+    return 0
+
+
+def _normalized_cart_snapshot(request):
+    """
+    Build a normalized copy of the cart WITHOUT touching session.
+    Returns: {"<product_id>": quantity}
+    """
+    raw = request.session.get("cart") or request.session.get("bag") or {}
+    normalized = {}
+
+    iterable = enumerate(raw) if isinstance(raw, list) else raw.items()
+    for item_id, item_data in iterable:
+        product = _get_product_from_item(item_id, item_data)
+        if not product:
             continue
+        qty = _extract_quantity(item_data)
+        if qty <= 0:
+            continue
+        key = str(product.pk)
+        normalized[key] = normalized.get(key, 0) + qty
 
-        # 2c) fallback: ignorera okända former
-        # (vill du, kan du logga här)
-        continue
-
-    return total
+    return normalized
 
 
 
+# Stripe: PaymentIntent
 
 @require_POST
 def create_payment_intent(request):
+    """
+    Create a PaymentIntent for the current (normalized) cart.
+    Returns JSON with client_secret or a 4xx JSON error.
+    """
     try:
-        total = _calculate_cart_total(request)
+        normalized = _normalized_cart_snapshot(request)
+        # Compute total from normalized snapshot
+        total = Decimal("0.00")
+        for item_id, qty in normalized.items():
+            p = Product.objects.filter(pk=int(item_id)).first()
+            if not p:
+                continue
+            try:
+                q = max(int(qty), 0)
+            except (TypeError, ValueError):
+                q = 0
+            total += (p.price or Decimal("0.00")) * q
     except Exception as e:
-        return JsonResponse({"error": f"Cart error: {e}"}, status=400)
+        return JsonResponse(
+            {"error": f"Cart error: {e}", "debug_cart": request.session.get("cart")},
+            status=400,
+        )
 
+    # Convert to minor units
     try:
         amount = int(total * 100)
     except Exception as e:
         return JsonResponse({"error": f"Amount error: {e}"}, status=400)
 
     if amount <= 0:
-        # Skicka tillbaka ett litet snapshot som hjälp
-        return JsonResponse({
-            "error": "Your cart is empty or total is zero.",
-            "debug_cart": request.session.get("cart") or request.session.get("bag"),
-            "debug_total": str(total),
-            "debug_amount": amount,
-        }, status=400)
+        return JsonResponse(
+            {
+                "error": "Your cart is empty or total is zero.",
+                "debug_cart": request.session.get("cart"),
+                "debug_total": str(total),
+                "debug_amount": amount,
+            },
+            status=400,
+        )
 
     try:
         intent = stripe.PaymentIntent.create(
             amount=amount,
-            currency=settings.STRIPE_CURRENCY.lower(),
+            currency=settings.STRIPE_CURRENCY.lower(),  # e.g. "eur"
             automatic_payment_methods={"enabled": True},
             metadata={
-                "cart": json.dumps(request.session.get("cart") or request.session.get("bag") or {}),
+                "cart": json.dumps(request.session.get("cart") or {}),
                 "user": request.user.id if request.user.is_authenticated else "anon",
             },
         )
@@ -118,14 +168,17 @@ def create_payment_intent(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+
+# Checkout pages
+
 def checkout(request):
     """
     GET: Render checkout page (Stripe Elements).
-    POST: Create Order + OrderItems (after payment succeeded on frontend).
+    POST: Create Order + OrderItems after successful payment on frontend.
     """
     if request.method == "POST":
-        cart = request.session.get("cart", {})
-        if not cart:
+        normalized = _normalized_cart_snapshot(request)
+        if not normalized:
             return redirect("checkout")
 
         full_name = request.POST.get("full_name", "").strip()
@@ -136,37 +189,46 @@ def checkout(request):
         # Extract PaymentIntent ID ("pi_...") from the client_secret
         stripe_pid = client_secret.split("_secret")[0] if "_secret" in client_secret else ""
 
-        # Create the Order (pending); items below
+        # Create the Order (pending)
         order = Order.objects.create(
             full_name=full_name or "Customer",
             email=email or "",
             phone_number=phone or "",
             stripe_pid=stripe_pid,
-            original_cart=json.dumps(cart),
+            # store the ORIGINAL session cart for traceability
+            original_cart=json.dumps(request.session.get("cart") or request.session.get("bag") or {}),
         )
 
-        # Create OrderItems from cart
-        for item_id, item_data in cart.items():
-            product = get_object_or_404(Product, pk=item_id)
-            if isinstance(item_data, int):
-                OrderItem.objects.create(
-                    order=order,
-                    product=product,
-                    quantity=item_data,
-                    unit_price=product.price,
-                )
-            else:
-                for size, qty in item_data.get("items_by_size", {}).items():
-                    OrderItem.objects.create(
-                        order=order,
-                        product=product,
-                        size=size,
-                        quantity=qty,
-                        unit_price=product.price,
-                    )
+        # Create OrderItems from normalized snapshot: {"product_id": qty}
+        for item_id, qty in normalized.items():
+            try:
+                pk = int(item_id)
+            except (TypeError, ValueError):
+                continue
+            product = Product.objects.filter(pk=pk).first()
+            if not product:
+                continue
+            try:
+                q = max(int(qty), 0)
+            except (TypeError, ValueError):
+                q = 0
+            if q <= 0:
+                continue
 
-        # Clear the cart and go to success page
-        request.session["cart"] = {}
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=q,
+                unit_price=product.price,
+            )
+
+        # Clear the cart in session (keep format expectations in shop/cart.py)
+        if "cart" in request.session:
+            request.session["cart"] = {}
+        if "bag" in request.session:
+            request.session["bag"] = {}
+        request.session.modified = True
+
         return redirect("checkout_success", order_number=order.order_number)
 
     # GET
@@ -181,12 +243,13 @@ def checkout_success(request, order_number):
     return render(request, "checkout/checkout_success.html", {"order": order})
 
 
-#  Webhook 
+
+# Stripe webhook
 
 @csrf_exempt
 def stripe_webhook(request):
     """
-    Handle Stripe webhooks. We care about:
+    Handle Stripe webhooks we care about:
       - payment_intent.succeeded
       - payment_intent.payment_failed
     """
@@ -202,19 +265,16 @@ def stripe_webhook(request):
     except stripe.error.SignatureVerificationError:
         return HttpResponse(status=400)  # Invalid signature
 
-    # Process events
     if event["type"] == "payment_intent.succeeded":
-        pi = event["data"]["object"]  # contains id, amount, etc.
+        pi = event["data"]["object"]
         pid = pi.get("id")
-        # Mark order as paid if it exists
         try:
             order = Order.objects.get(stripe_pid=pid)
-           
+            # If you add status fields later:
             # order.payment_status = "paid"
             # order.paid_at = timezone.now()
-            order.save(update_fields=[])  
+            order.save(update_fields=[])  # no-op unless you add fields above
         except Order.DoesNotExist:
-            # Order is created in POST /checkout.
             pass
 
     elif event["type"] == "payment_intent.payment_failed":

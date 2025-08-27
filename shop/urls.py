@@ -19,6 +19,7 @@ urlpatterns = [
     path("cart/add/<int:product_id>/", views.cart_add, name="cart_add"),
     path("cart/remove/<int:product_id>/", views.cart_remove, name="cart_remove"),
     path("cart/update/<int:product_id>/", views.cart_update, name="cart_update"),
+    path('cart/reset/', views.cart_reset, name='cart_reset'),
 
     # Favorites
     path("favorites/", views.FavoriteListView.as_view(), name="favorites"),

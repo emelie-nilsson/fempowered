@@ -268,3 +268,15 @@ def toggle_favorite(request, product_id):
     # Non-AJAX
     next_url = request.GET.get("next") or request.META.get("HTTP_REFERER") or reverse("favorites")
     return HttpResponseRedirect(next_url)
+
+
+# reset cart
+from django.shortcuts import redirect
+
+def cart_reset(request):
+    """One-time: clear any broken cart shapes in session."""
+    request.session['cart'] = {}
+    if 'bag' in request.session:
+        request.session['bag'] = {}
+    request.session.modified = True
+    return redirect('cart_detail')  
