@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="main-heading">Shipping details</h1>
+
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-6">
+        <h5>Customer</h5>
+        <div class="form-group">
+          <label for="id_full_name">Full name</label>
+          {{ form.full_name }}
+        </div>
+        <div class="form-group">
+          <label for="id_email">Email</label>
+          {{ form.email }}
+        </div>
+        <div class="form-group">
+          <label for="id_phone">Phone</label>
+          {{ form.phone }}
+        </div>
+
+        <h5 class="mt-4">Shipping address</h5>
+        <div class="form-group">
+          <label for="id_address1">Address</label>
+          {{ form.address1 }}
+        </div>
+        <div class="form-group">
+          <label for="id_address2">Address line 2</label>
+          {{ form.address2 }}
+        </div>
+        <div class="form-row">
+          <div class="col-md-4 form-group">
+            <label for="id_postal_code">Postal code</label>
+            {{ form.postal_code }}
+          </div>
+          <div class="col-md-5 form-group">
+            <label for="id_city">City</label>
+            {{ form.city }}
+          </div>
+          <div class="col-md-3 form-group">
+            <label for="id_country">Country</label>
+            {{ form.country }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <h5>Shipping</h5>
+        <div class="form-group">
+          <label for="id_shipping_method">Method</label>
+          {{ form.shipping_method }}
+          <small class="form-text text-muted">Standard: free over €80.</small>
+        </div>
+
+        <h5 class="mt-4">Billing address</h5>
+        <div class="form-group form-check">
+          {{ form.billing_same_as_shipping }}
+          <label class="form-check-label" for="id_billing_same_as_shipping">
+            Billing same as shipping
+          </label>
+        </div>
+
+        <div id="billing-fields">
+          <div class="form-group">
+            <label for="id_billing_address1">Billing address</label>
+            {{ form.billing_address1 }}
+          </div>
+          <div class="form-group">
+            <label for="id_billing_address2">Billing address line 2</label>
+            {{ form.billing_address2 }}
+          </div>
+          <div class="form-row">
+            <div class="col-md-4 form-group">
+              <label for="id_billing_postal_code">Postal code</label>
+              {{ form.billing_postal_code }}
+            </div>
+            <div class="col-md-5 form-group">
+              <label for="id_billing_city">City</label>
+              {{ form.billing_city }}
+            </div>
+            <div class="col-md-3 form-group">
+              <label for="id_billing_country">Country</label>
+              {{ form.billing_country }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-dark mt-3" type="submit">Continue to payment</button>
+  </form>
+</div>
+
+{% block extra_js %}
+<script>
+  // Hide/show billing fields when "same as shipping" is toggled
+  const same = document.getElementById('id_billing_same_as_shipping');
+  const billing = document.getElementById('billing-fields');
+  function toggleBilling(){ billing.style.display = (same && same.checked) ? 'none' : 'block'; }
+  if (same) same.addEventListener('change', toggleBilling);
+  toggleBilling();
+</script>
+{% endblock %}
+{% endblock %}

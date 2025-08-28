@@ -1,117 +1,121 @@
 # checkout/models.py
-import uuid
-from decimal import Decimal
-
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-
-from shop.models import Product  # Import the Product model from the shop app
-
-
-def _generate_order_number():
-    """Generate a unique order number using UUID."""
-    return uuid.uuid4().hex.upper()
+from shop.models import Product
 
 
-SIZE_CHOICES = [
-    ("XS", "XS"),
-    ("S", "S"),
-    ("M", "M"),
-    ("L", "L"),
-    ("XL", "XL"),
-]
+class ShippingMethod(models.TextChoices):
+    # Storefront labels can stay Swedish; internal values are stable slugs.
+    STANDARD = "standard", "Standard (2–4 dagar)"
+    EXPRESS = "express", "Express (1–2 dagar)"
 
 
 class Order(models.Model):
     """
-    Represents a customer order.
-    Stores order totals, user reference, and Stripe payment ID.
+    Customer order created at step 1 (address/shipping) and paid at step 2 (Stripe).
+    All monetary amounts are stored as integer euro cents.
     """
-    order_number = models.CharField(max_length=32, unique=True, editable=False)
+    # Optional link to the authenticated user (guest checkout allowed)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, related_name="orders"
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="orders",
     )
 
-    # Customer information
-    full_name = models.CharField(max_length=80)
-    email = models.EmailField()
-    phone_number = models.CharField(max_length=32, blank=True)
+    # Contact
+    full_name = models.CharField(max_length=120, blank=True, default="")
+    email = models.EmailField(blank=True, default="")
+    phone = models.CharField(max_length=40, blank=True, default="")
 
-    date = models.DateTimeField(default=timezone.now)
+    # Shipping address
+    address1 = models.CharField(max_length=255, blank=True, default="")
+    address2 = models.CharField(max_length=255, blank=True, default="")
+    postal_code = models.CharField(max_length=20, blank=True, default="")
+    city = models.CharField(max_length=80, blank=True, default="")
+    country = models.CharField(max_length=2, default="SE")  # ISO-2 country code
 
-    # Totals
-    order_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    delivery_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    grand_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # Billing address
+    billing_same_as_shipping = models.BooleanField(default=True)
+    billing_address1 = models.CharField(max_length=255, blank=True, default="")
+    billing_address2 = models.CharField(max_length=255, blank=True, default="")
+    billing_postal_code = models.CharField(max_length=20, blank=True, default="")
+    billing_city = models.CharField(max_length=80, blank=True, default="")
+    billing_country = models.CharField(max_length=2, blank=True, default="")
 
-    # Stripe integration
-    stripe_pid = models.CharField(
-        max_length=255, blank=True, help_text="Stripe PaymentIntent ID"
+    # Shipping & totals (EUR in cents)
+    shipping_method = models.CharField(
+        max_length=20, choices=ShippingMethod.choices, default=ShippingMethod.STANDARD
     )
-    original_cart = models.TextField(
-        blank=True,
-        help_text="Snapshot of the cart at the time of purchase (JSON string).",
+    shipping_cost = models.IntegerField(default=0)  # euro cents
+    subtotal = models.IntegerField(default=0)       # euro cents
+    total = models.IntegerField(default=0)          # euro cents
+
+    # Stripe
+    payment_intent_id = models.CharField(max_length=120, blank=True, default="")
+    stripe_receipt_url = models.URLField(blank=True, default="")
+
+    # Status & timestamps
+    status = models.CharField(
+        max_length=20,
+        default="pending",  # pending|paid|failed|cancelled
     )
+    # Use default=timezone.now (NO auto_now_add) to avoid interactive prompts on existing rows
+    created_at = models.DateTimeField(default=timezone.now, editable=False, db_index=True)
 
     class Meta:
-        ordering = ["-date"]
+        ordering = ["-created_at"]
 
-    def __str__(self):
-        return self.order_number
+    def order_number(self) -> str:
+        return f"FP-{self.id:06d}"
 
-    def save(self, *args, **kwargs):
-        """Assign an order number if not set, then save the order."""
-        if not self.order_number:
-            self.order_number = _generate_order_number()
-        super().save(*args, **kwargs)
-
-    def update_totals(self):
-        """Recalculate totals based on order items."""
-        line_total = self.items.aggregate(
-            total=models.Sum("lineitem_total")
-        )["total"] or Decimal("0.00")
-
-        self.order_total = line_total
-
-        # Example: free delivery over 1000, otherwise 59
-        self.delivery_cost = Decimal("0.00") if self.order_total >= Decimal("1000") else Decimal("59.00")
-
-        self.grand_total = self.order_total + self.delivery_cost
-        self.save(update_fields=["order_total", "delivery_cost", "grand_total"])
+    def __str__(self) -> str:
+        return f"{self.order_number()} — {self.email}"
 
 
 class OrderItem(models.Model):
     """
-    Represents a single item within an order.
-    Stores product, quantity, size, and line total.
+    Single purchased line item.
+    Keep an optional FK to Product for convenience, and also freeze name/price
+    at purchase time for stable history. All amounts are integer euro cents.
     """
-    order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name="items"
-    )
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="order_items"
-    )
-    size = models.CharField(
-        max_length=4, choices=SIZE_CHOICES, null=True, blank=True,
-        help_text="Empty if product has no size."
-    )
-    quantity = models.PositiveIntegerField(default=1)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    lineitem_total = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
 
-    def __str__(self):
-        base = f"{self.product.name} x {self.quantity}"
+    # Optional FK; line still exists if product is later deleted
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, blank=True, related_name="order_items"
+    )
+
+    # Frozen fields
+    product_name = models.CharField(max_length=255, blank=True, default="")
+    unit_price = models.IntegerField(default=0)  # euro cents
+    quantity = models.PositiveIntegerField(default=1)
+    size = models.CharField(max_length=8, blank=True, default="")
+
+    class Meta:
+        verbose_name = "Order item"
+        verbose_name_plural = "Order items"
+
+    @property
+    def line_total(self) -> int:
+        return int(self.unit_price) * int(self.quantity)
+
+    def __str__(self) -> str:
+        base = f"{self.product_name} × {self.quantity}"
         return f"{base} ({self.size})" if self.size else base
 
     def save(self, *args, **kwargs):
         """
-        Calculate the line item total before saving.
-        Update the order totals after saving.
+        If a Product FK is present but frozen fields are missing, populate them
+        from Product before saving.
         """
-        if not self.unit_price:
-            self.unit_price = self.product.price
-        self.lineitem_total = (self.unit_price or Decimal("0")) * self.quantity
+        if self.product:
+            if not self.product_name:
+                self.product_name = self.product.name
+            if not self.unit_price:
+                # Assuming Product.price is a Decimal in EUR (e.g., 49.99)
+                price_decimal = getattr(self.product, "price", None)
+                if price_decimal is not None:
+                    self.unit_price = int(round(float(price_decimal) * 100))
         super().save(*args, **kwargs)
-        self.order.update_totals()

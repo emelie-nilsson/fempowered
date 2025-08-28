@@ -1,290 +1,361 @@
+# checkout/views.py
 import json
-from decimal import Decimal
+from django.conf import settings
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
+from django.shortcuts import redirect, render, get_object_or_404
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.urls import reverse
+
+from .forms import CheckoutAddressForm
+from .models import Order, OrderItem, ShippingMethod
+from shop.models import Product
 
 import stripe
-from django.conf import settings
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-
-from shop.models import Product
-from .models import Order, OrderItem
-
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-# Cart helpers (robust snapshot)
+# ---------- Cart helpers (normalize multiple formats to one shape) ----------
 
-def _get_product_from_item(item_id, item_data):
+def normalize_cart_items(request):
     """
-    Return a Product even if the cart has odd keys.
-    Try in this order:
-      1) item_id as int
-      2) item_data['product_id'] / item_data['id']
-      3) item_data['product']['id']
-    """
-    # 1) Direct from item_id
-    try:
-        pk = int(item_id)
-        p = Product.objects.filter(pk=pk).first()
-        if p:
-            return p
-    except (TypeError, ValueError):
-        pass
+    Normalize various session cart formats into a list of dicts:
+        [{'pid': 123, 'name': 'Name', 'qty': 2, 'price_cent': 5499, 'size': 'M'}, ...]
 
-    # 2) From dict fields
-    if isinstance(item_data, dict):
-        candidates = []
-        for k in ("product_id", "id"):
-            if k in item_data:
-                candidates.append(item_data.get(k))
-        if "product" in item_data and isinstance(item_data["product"], dict):
-            candidates.append(item_data["product"].get("id") or item_data["product"].get("pk"))
+    Supports:
+      A) {"123": {"name":..., "qty": 2, "price_cent": 5499, "size": "M"}}
+      B) {"123": {"name":..., "qty": 2, "price": "54.99"}}  # euros -> cents
+      C) Boutique Ado "bag":
+         - {"123": 2}
+         - {"123": {"items_by_size": {"S":1,"M":2}}}
 
-        for val in candidates:
-            try:
-                pk = int(val)
-                p = Product.objects.filter(pk=pk).first()
-                if p:
-                    return p
-            except (TypeError, ValueError):
-                continue
-
-    return None
-
-
-def _extract_quantity(item_data):
-    """Extract quantity from multiple cart shapes."""
-    if isinstance(item_data, int):
-        return max(int(item_data), 0)
-
-    if isinstance(item_data, dict):
-        # {"quantity": 2} or {"qty": 2}
-        for k in ("quantity", "qty"):
-            if k in item_data:
-                try:
-                    return max(int(item_data[k]), 0)
-                except (TypeError, ValueError):
-                    return 0
-
-        # {"items_by_size": {"M": 1, "L": 2}}
-        sizes = item_data.get("items_by_size") or {}
-        if isinstance(sizes, dict):
-            q = 0
-            for v in sizes.values():
-                try:
-                    q += max(int(v), 0)
-                except (TypeError, ValueError):
-                    pass
-            return q
-
-    return 0
-
-
-def _normalized_cart_snapshot(request):
-    """
-    Build a normalized copy of the cart WITHOUT touching session.
-    Returns: {"<product_id>": quantity}
+    Falls back to DB (shop.Product) for name/price when missing.
     """
     raw = request.session.get("cart") or request.session.get("bag") or {}
-    normalized = {}
+    items = []
 
-    iterable = enumerate(raw) if isinstance(raw, list) else raw.items()
-    for item_id, item_data in iterable:
-        product = _get_product_from_item(item_id, item_data)
-        if not product:
+    for pid, val in raw.items():
+        try:
+            pid_int = int(pid)
+        except Exception:
+            pid_int = None
+
+        def db_info():
+            name, cents = f"Product {pid}", 0
+            if pid_int:
+                try:
+                    p = Product.objects.get(pk=pid_int)
+                    name = p.name
+                    # p.price expected to be Decimal euros
+                    cents = int(round(float(p.price) * 100))
+                except Exception:
+                    pass
+            return name, cents
+
+        # Case: dict with flat qty/price fields (non BA)
+        if isinstance(val, dict) and "items_by_size" not in val:
+            qty = int(val.get("qty") or val.get("quantity") or 0)
+            size = (val.get("size") or "")[:8]
+            # price in cents or euros
+            if "price_cent" in val:
+                price_cents = int(val["price_cent"])
+            elif "price" in val or "price_eur" in val:
+                eur = float(val.get("price") or val.get("price_eur") or 0)
+                price_cents = int(round(eur * 100))
+            else:
+                _, price_cents = db_info()
+            name = val.get("name") or db_info()[0]
+            if qty > 0:
+                items.append({
+                    "pid": pid_int, "name": name, "qty": qty,
+                    "price_cent": price_cents, "size": size
+                })
             continue
-        qty = _extract_quantity(item_data)
-        if qty <= 0:
+
+        # Case: Boutique Ado style (no sizes)
+        if isinstance(val, int):
+            qty = int(val)
+            name, price_cents = db_info()
+            if qty > 0:
+                items.append({
+                    "pid": pid_int, "name": name, "qty": qty,
+                    "price_cent": price_cents, "size": ""
+                })
             continue
-        key = str(product.pk)
-        normalized[key] = normalized.get(key, 0) + qty
 
-    return normalized
+        # Case: Boutique Ado style with items_by_size
+        if isinstance(val, dict) and "items_by_size" in val:
+            name, price_cents = db_info()
+            for size, qty in (val.get("items_by_size") or {}).items():
+                qty = int(qty)
+                if qty > 0:
+                    items.append({
+                        "pid": pid_int, "name": name, "qty": qty,
+                        "price_cent": price_cents, "size": (size or "")[:8]
+                    })
+            continue
+
+    return items
 
 
+def get_cart_subtotal_cents(request) -> int:
+    return sum(i["price_cent"] * i["qty"] for i in normalize_cart_items(request))
 
-# Stripe: PaymentIntent
 
-@require_POST
-def create_payment_intent(request):
+def describe_cart_for_metadata(request) -> str:
+    items = normalize_cart_items(request)
+    return ", ".join(f"{i['name']}x{i['qty']}" for i in items)[:200]
+
+
+def calc_shipping_cost_cents(method: str, subtotal: int) -> int:
     """
-    Create a PaymentIntent for the current (normalized) cart.
-    Returns JSON with client_secret or a 4xx JSON error.
+    Simple example:
+      - Standard: free over €80, else €5.90
+      - Express: €9.90
     """
-    try:
-        normalized = _normalized_cart_snapshot(request)
-        # Compute total from normalized snapshot
-        total = Decimal("0.00")
-        for item_id, qty in normalized.items():
-            p = Product.objects.filter(pk=int(item_id)).first()
-            if not p:
-                continue
-            try:
-                q = max(int(qty), 0)
-            except (TypeError, ValueError):
-                q = 0
-            total += (p.price or Decimal("0.00")) * q
-    except Exception as e:
-        return JsonResponse(
-            {"error": f"Cart error: {e}", "debug_cart": request.session.get("cart")},
-            status=400,
-        )
-
-    # Convert to minor units
-    try:
-        amount = int(total * 100)
-    except Exception as e:
-        return JsonResponse({"error": f"Amount error: {e}"}, status=400)
-
-    if amount <= 0:
-        return JsonResponse(
-            {
-                "error": "Your cart is empty or total is zero.",
-                "debug_cart": request.session.get("cart"),
-                "debug_total": str(total),
-                "debug_amount": amount,
-            },
-            status=400,
-        )
-
-    try:
-        intent = stripe.PaymentIntent.create(
-            amount=amount,
-            currency=settings.STRIPE_CURRENCY.lower(),  # e.g. "eur"
-            automatic_payment_methods={"enabled": True},
-            metadata={
-                "cart": json.dumps(request.session.get("cart") or {}),
-                "user": request.user.id if request.user.is_authenticated else "anon",
-            },
-        )
-        return JsonResponse({"client_secret": intent.client_secret})
-    except stripe.error.StripeError as e:
-        msg = getattr(e, "user_message", None) or str(e)
-        return JsonResponse({"error": msg}, status=400)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+    if method == ShippingMethod.EXPRESS:
+        return 990   # €9.90
+    return 0 if subtotal >= 8000 else 590  # €5.90 or free over €80
 
 
+# ---------- STEP 1: Address & shipping ----------
 
-# Checkout pages
+@require_http_methods(["GET", "POST"])
+def address_view(request):
+    initial = {}
+    if request.user.is_authenticated:
+        initial["email"] = request.user.email
 
-def checkout(request):
-    """
-    GET: Render checkout page (Stripe Elements).
-    POST: Create Order + OrderItems after successful payment on frontend.
-    """
     if request.method == "POST":
-        normalized = _normalized_cart_snapshot(request)
-        if not normalized:
-            return redirect("checkout")
+        form = CheckoutAddressForm(request.POST)
+        if form.is_valid():
+            items = normalize_cart_items(request)
+            subtotal = sum(i["price_cent"] * i["qty"] for i in items)
+            if subtotal <= 0 or not items:
+                return render(request, "checkout/empty_cart.html", status=400)
 
-        full_name = request.POST.get("full_name", "").strip()
-        email = request.POST.get("email", "").strip()
-        phone = request.POST.get("phone_number", "").strip()
-        client_secret = request.POST.get("client_secret", "")
+            data = form.cleaned_data
+            shipping_cost = calc_shipping_cost_cents(data["shipping_method"], subtotal)
+            total = subtotal + shipping_cost
 
-        # Extract PaymentIntent ID ("pi_...") from the client_secret
-        stripe_pid = client_secret.split("_secret")[0] if "_secret" in client_secret else ""
-
-        # Create the Order (pending)
-        order = Order.objects.create(
-            full_name=full_name or "Customer",
-            email=email or "",
-            phone_number=phone or "",
-            stripe_pid=stripe_pid,
-            # store the ORIGINAL session cart for traceability
-            original_cart=json.dumps(request.session.get("cart") or request.session.get("bag") or {}),
-        )
-
-        # Create OrderItems from normalized snapshot: {"product_id": qty}
-        for item_id, qty in normalized.items():
-            try:
-                pk = int(item_id)
-            except (TypeError, ValueError):
-                continue
-            product = Product.objects.filter(pk=pk).first()
-            if not product:
-                continue
-            try:
-                q = max(int(qty), 0)
-            except (TypeError, ValueError):
-                q = 0
-            if q <= 0:
-                continue
-
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                quantity=q,
-                unit_price=product.price,
+            order = Order.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                full_name=data["full_name"],
+                email=data["email"],
+                phone=data.get("phone") or "",
+                address1=data["address1"],
+                address2=data.get("address2") or "",
+                postal_code=data["postal_code"],
+                city=data["city"],
+                country=data["country"],
+                billing_same_as_shipping=data["billing_same_as_shipping"],
+                billing_address1=data.get("billing_address1") or "",
+                billing_address2=data.get("billing_address2") or "",
+                billing_postal_code=data.get("billing_postal_code") or "",
+                billing_city=data.get("billing_city") or "",
+                billing_country=data.get("billing_country") or "",
+                shipping_method=data["shipping_method"],
+                shipping_cost=shipping_cost,
+                subtotal=subtotal,
+                total=total,
+                status="pending",
             )
 
-        # Clear the cart in session (keep format expectations in shop/cart.py)
-        if "cart" in request.session:
-            request.session["cart"] = {}
-        if "bag" in request.session:
-            request.session["bag"] = {}
-        request.session.modified = True
+            # Snapshot cart into OrderItems
+            for it in items:
+                product_fk = None
+                if it["pid"]:
+                    try:
+                        product_fk = Product.objects.get(pk=it["pid"])
+                    except Product.DoesNotExist:
+                        product_fk = None
+                OrderItem.objects.create(
+                    order=order,
+                    product=product_fk,  # model should allow null=True; otherwise adjust model
+                    product_name=it["name"],
+                    unit_price=it["price_cent"],
+                    quantity=it["qty"],
+                    size=it["size"],
+                )
 
-        return redirect("checkout_success", order_number=order.order_number)
+            # Link order in session and continue to payment
+            request.session["checkout_order_id"] = order.id
+            request.session.modified = True
+            return redirect("checkout_payment")
+    else:
+        form = CheckoutAddressForm(initial=initial)
 
-    # GET
+    return render(request, "checkout/checkout_address.html", {"form": form})
+
+
+# ---------- STEP 2: Payment (Stripe) ----------
+
+@ensure_csrf_cookie  # ensure CSRF cookie is set for subsequent POST to /confirm/
+@require_http_methods(["GET"])
+def payment_view(request):
+    order_id = request.session.get("checkout_order_id")
+    if not order_id:
+        return redirect("checkout_address")
+
+    order = get_object_or_404(Order, id=order_id, status="pending")
+
+    # Create or retrieve PaymentIntent
+    if not order.payment_intent_id:
+        intent = stripe.PaymentIntent.create(
+            amount=order.total,             # euro cents
+            currency="eur",
+            receipt_email=order.email,
+            metadata={
+                "order_id": str(order.id),
+                "email": order.email,
+                "cart": describe_cart_for_metadata(request),
+            },
+            automatic_payment_methods={"enabled": True},
+        )
+        order.payment_intent_id = intent.id
+        order.save(update_fields=["payment_intent_id"])
+        client_secret = intent.client_secret
+    else:
+        intent = stripe.PaymentIntent.retrieve(order.payment_intent_id)
+        client_secret = intent.client_secret
+
     context = {
-        "stripe_public_key": settings.STRIPE_PUBLIC_KEY,
+        "order": order,
+        "STRIPE_PUBLISHABLE_KEY": settings.STRIPE_PUBLISHABLE_KEY,
+        "client_secret": client_secret,
     }
-    return render(request, "checkout/checkout.html", context)
+    return render(request, "checkout/checkout_payment.html", context)
 
 
-def checkout_success(request, order_number):
-    order = get_object_or_404(Order, order_number=order_number)
-    return render(request, "checkout/checkout_success.html", {"order": order})
+# ---------- Confirm (AJAX from payment page AFTER Stripe success) ----------
+
+@require_http_methods(["POST"])
+def confirm_view(request):
+    # 1) Parse JSON from fetch
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    # 2) Get order from session
+    order_id = request.session.get("checkout_order_id")
+    if not order_id:
+        return JsonResponse({"ok": False, "error": "Missing order_id"}, status=400)
+
+    order = get_object_or_404(Order, id=order_id)
+
+    # 3) Ensure correct PaymentIntent is being confirmed
+    pi_id = payload.get("payment_intent_id")
+    if not pi_id or pi_id != order.payment_intent_id:
+        return JsonResponse({"ok": False, "error": "PaymentIntent mismatch"}, status=400)
+
+    # 4) Retrieve PaymentIntent from Stripe
+    try:
+        pi = stripe.PaymentIntent.retrieve(pi_id)
+    except Exception as e:
+        return JsonResponse({"ok": False, "error": f"Stripe retrieve failed: {e}"}, status=400)
+
+    if pi.status != "succeeded":
+        return JsonResponse({"ok": False, "error": "Payment not succeeded"}, status=400)
+
+    # 5) Get receipt URL via latest_charge (PaymentIntent doesn't include charges by default)
+    receipt_url = ""
+    try:
+        latest_charge_id = getattr(pi, "latest_charge", None)
+        if latest_charge_id:
+            ch = stripe.Charge.retrieve(latest_charge_id)
+            receipt_url = getattr(ch, "receipt_url", "") or (ch.get("receipt_url") if hasattr(ch, "get") else "")
+    except Exception:
+        # Not critical; lack of receipt link shouldn't block order completion
+        pass
+
+    # 6) Mark order as paid and store the receipt URL
+    order.status = "paid"
+    order.stripe_receipt_url = receipt_url
+    order.save(update_fields=["status", "stripe_receipt_url"])
+
+    # 7) Clear cart and unlink the order from the session
+    request.session["cart"] = {}
+    request.session.pop("checkout_order_id", None)
+    request.session.modified = True
+
+    # 8) Return redirect URL to success page
+    redirect_url = reverse("checkout_success", args=[order.order_number()])
+    return JsonResponse({"ok": True, "redirect_url": redirect_url})
 
 
+# ---------- Success page ----------
 
-# Stripe webhook
+def success_view(request, order_number: str):
+    # order_number like "FP-000123" -> extract numeric id
+    try:
+        order_id = int(order_number.split("-")[-1])
+    except Exception:
+        return HttpResponseBadRequest("Invalid order number")
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, "checkout/success.html", {"order": order})
+
+
+# ---------- Stripe Webhook (server-to-server, optional in dev) ----------
 
 @csrf_exempt
 def stripe_webhook(request):
-    """
-    Handle Stripe webhooks we care about:
-      - payment_intent.succeeded
-      - payment_intent.payment_failed
-    """
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
+    wh_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", "")
 
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError:
-        return HttpResponse(status=400)  # Invalid payload
-    except stripe.error.SignatureVerificationError:
-        return HttpResponse(status=400)  # Invalid signature
-
-    if event["type"] == "payment_intent.succeeded":
-        pi = event["data"]["object"]
-        pid = pi.get("id")
+    # Verify signature if a secret is configured
+    if wh_secret:
         try:
-            order = Order.objects.get(stripe_pid=pid)
-            # If you add status fields later:
-            # order.payment_status = "paid"
-            # order.paid_at = timezone.now()
-            order.save(update_fields=[])  # no-op unless you add fields above
-        except Order.DoesNotExist:
-            pass
-
-    elif event["type"] == "payment_intent.payment_failed":
-        pi = event["data"]["object"]
-        pid = pi.get("id")
+            event = stripe.Webhook.construct_event(
+                payload=payload, sig_header=sig_header, secret=wh_secret
+            )
+        except Exception:
+            return HttpResponseBadRequest("Invalid signature")
+    else:
+        # Fallback (dev environments): parse without verification
         try:
-            order = Order.objects.get(stripe_pid=pid)
-            # order.payment_status = "failed"
-            order.save(update_fields=[])
-        except Order.DoesNotExist:
-            pass
+            event = json.loads(payload.decode("utf-8"))
+        except Exception:
+            return HttpResponseBadRequest("Invalid payload")
+
+    event_type = event["type"] if isinstance(event, dict) else event.type
+    obj = event["data"]["object"] if isinstance(event, dict) else event.data.object
+
+    # Helper to mark order paid/failed
+    def _update_order_from_pi(pi, paid: bool):
+        # metadata access for both dict and StripeObject
+        meta = (pi.get("metadata") if isinstance(pi, dict) else getattr(pi, "metadata", None)) or {}
+        order_id_val = meta.get("order_id")
+        if not order_id_val:
+            return
+        try:
+            order = Order.objects.get(id=int(order_id_val))
+        except (Order.DoesNotExist, ValueError):
+            return
+
+        if paid and order.status != "paid":
+            receipt_url = ""
+            try:
+                latest_charge_id = (pi.get("latest_charge") if isinstance(pi, dict) else getattr(pi, "latest_charge", None))
+                if latest_charge_id:
+                    ch = stripe.Charge.retrieve(latest_charge_id)
+                    receipt_url = getattr(ch, "receipt_url", "") or (ch.get("receipt_url") if hasattr(ch, "get") else "")
+            except Exception:
+                pass
+
+            order.status = "paid"
+            order.stripe_receipt_url = receipt_url
+            order.save(update_fields=["status", "stripe_receipt_url"])
+        elif not paid and order.status != "failed":
+            order.status = "failed"
+            order.save(update_fields=["status"])
+
+    # Handle events
+    if event_type == "payment_intent.succeeded":
+        _update_order_from_pi(obj, paid=True)
+    elif event_type == "payment_intent.payment_failed":
+        _update_order_from_pi(obj, paid=False)
 
     return HttpResponse(status=200)
+

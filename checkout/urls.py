@@ -2,8 +2,18 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.checkout, name="checkout"),
-    path("create-payment-intent/", views.create_payment_intent, name="create_payment_intent"),
-    path("success/<order_number>/", views.checkout_success, name="checkout_success"),
-    path("webhook/", views.stripe_webhook, name="stripe_webhook"),
+    # Step 1: address & shipping
+    path("address/", views.address_view, name="checkout_address"),
+
+    # Step 2: payment
+    path("payment/", views.payment_view, name="checkout_payment"),
+
+    # AJAX confirm after Stripe success
+    path("confirm/", views.confirm_view, name="checkout_confirm"),
+
+    # Success page
+    path("success/<str:order_number>/", views.success_view, name="checkout_success"),
+
+    # Optional webhook 
+    path("webhook/", views.stripe_webhook, name="checkout_webhook"),
 ]
