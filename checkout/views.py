@@ -171,20 +171,26 @@ def address_view(request):
 
             # Snapshot cart into OrderItems
             for it in items:
+                # CHANGED: robust product lookup
+                
                 product_fk = None
-                if it["pid"]:
-                    try:
-                        product_fk = Product.objects.get(pk=it["pid"])
-                    except Product.DoesNotExist:
-                        product_fk = None
+                pid_val = it.get("pid")
+                if pid_val:
+                    product_fk = Product.objects.filter(pk=pid_val).first()  # säkrare än get()
+                    # Fallback: matcha på namn om PK lookup misslyckas
+                if not product_fk:
+                    product_fk = Product.objects.filter(name=it["name"]).first()
+                
                 OrderItem.objects.create(
                     order=order,
-                    product=product_fk,  
+                    product=product_fk,  # nu ska den nästan alltid sättas
                     product_name=it["name"],
                     unit_price=it["price_cent"],
                     quantity=it["qty"],
                     size=it["size"],
-                )
+                )    
+
+
 
             # Link order in session and continue to payment
             request.session["checkout_order_id"] = order.id

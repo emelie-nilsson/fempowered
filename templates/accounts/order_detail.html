@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+{% load currency %}
+
+{% block content %}
+<div class="container py-5">
+  {% if order %}
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+      <div>
+        <h1 class="main-heading mb-1">Order {{ order.order_number }}</h1>
+        <div class="text-muted">Placed: {{ order.created_at|date:"Y-m-d H:i" }}</div>
+        <div>
+          Status:
+          <span class="badge bg-secondary">
+            {% if order.get_status_display %}{{ order.get_status_display }}{% else %}{{ order.status }}{% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="text-end">
+        <div class="fs-5">Total: <strong>{{ order.total|eur }}</strong></div>
+        {% if order.stripe_receipt_url %}
+          <div class="mt-1">
+            <a href="{{ order.stripe_receipt_url }}" class="link-primary" target="_blank" rel="noopener">
+              View Stripe receipt
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h2 class="h4">Items</h2>
+ 
+    <div class="table-responsive mt-2">
+      <table class="table table-sm align-middle order-table">
+        <thead>
+          <tr>
+            <th style="width:64px;"></th>
+            <th>Product</th>
+            <th>Size</th>
+            <th class="text-end">Qty</th>
+            <th class="text-end">Unit price</th>
+            <th class="text-end">Total</th> 
+          </tr>
+        </thead>
+        <tbody>
+        {% for item in order.items.all %}
+          <tr>
+            <td>
+                {% if item.product and item.product.catalog_image_url %}
+                <img class="order-thumb"
+                src="{{ item.product.catalog_image_url }}"
+                alt="{{ item.product_name }}"
+                width="48" height="48" loading="lazy">
+                {% endif %}
+            </td>
+
+
+            <td>{{ item.product_name }}</td>
+            <td>{% if item.size %}{{ item.size }}{% else %}-{% endif %}</td>
+            <td class="text-end">{{ item.quantity }}</td>
+            <td class="text-end">{{ item.unit_price|eur }}</td>
+            <td class="text-end">{{ item.line_total|eur }}</td> 
+          </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="5" class="text-end">Subtotal</th>
+            <th class="text-end">{{ order.subtotal|eur }}</th>
+          </tr>
+          <tr>
+            <th colspan="5" class="text-end">Shipping ({{ order.get_shipping_method_display }})</th>
+            <th class="text-end">{{ order.shipping_cost|eur }}</th>
+          </tr>
+          <tr>
+            <th colspan="5" class="text-end">Total</th>
+            <th class="text-end">{{ order.total|eur }}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h3 class="h5 mb-3">Shipping address</h3>
+            <div>{{ order.full_name }}</div>
+            <div>{{ order.address1 }}</div>
+            {% if order.address2 %}<div>{{ order.address2 }}</div>{% endif %}
+            <div>{{ order.postal_code }} {{ order.city }}</div>
+            <div>{{ order.country }}</div>
+            {% if order.phone %}<div class="mt-2">Phone: {{ order.phone }}</div>{% endif %}
+            <div class="mt-2">Email: {{ order.email }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h3 class="h5 mb-3">Billing address</h3>
+            {% if order.billing_same_as_shipping %}
+              <div class="text-muted">Same as shipping address</div>
+            {% else %}
+              <div>{{ order.full_name }}</div>
+              <div>{{ order.billing_address1 }}</div>
+              {% if order.billing_address2 %}<div>{{ order.billing_address2 }}</div>{% endif %}
+              <div>{{ order.billing_postal_code }} {{ order.billing_city }}</div>
+              <div>{{ order.billing_country }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <a href="{% url 'accounts:orders' %}" class="btn btn-outline-secondary">Back to Orders</a>
+    </div>
+
+  {% else %}
+    <h1 class="main-heading">Order not found</h1>
+    <p>We couldn't find this order.</p>
+    <a href="{% url 'accounts:orders' %}" class="btn btn-outline-secondary mt-2">Back to Orders</a>
+  {% endif %}
+</div>
+{% endblock %}

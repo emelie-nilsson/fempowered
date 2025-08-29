@@ -1,10 +1,25 @@
 {% extends "base.html" %}
+{% load currency %}  
 {% block content %}
   <h1 class="main-heading">Orders</h1>
+
   {% if orders %}
-    <ul>
+    <ul class="list-unstyled">
       {% for order in orders %}
-        <li>Order #{{ order.id }} – {{ order.created_at|date:"Y-m-d" }} – {{ order.total }} €</li>
+        <li class="mb-2">
+          <!-- Link to order details -->
+          <a href="{% url 'accounts:order_detail' order.order_number %}">
+            <strong>Order {{ order.order_number }}</strong>
+          </a>
+
+          <!-- Date, status, total -->
+          — {{ order.created_at|date:"Y-m-d H:i" }}
+          — <span class="badge bg-secondary">
+              {% if order.get_status_display %}{{ order.get_status_display }}{% else %}{{ order.status }}{% endif %}
+            </span>
+          — {{ order.total|eur }}
+          — {{ order.items.all|length }} rader
+        </li>
       {% endfor %}
     </ul>
   {% else %}
