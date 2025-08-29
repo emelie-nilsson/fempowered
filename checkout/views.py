@@ -1,4 +1,3 @@
-# checkout/views.py
 import json
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
@@ -10,6 +9,15 @@ from django.urls import reverse
 from .forms import CheckoutAddressForm
 from .models import Order, OrderItem, ShippingMethod
 from shop.models import Product
+
+try:  
+    from .models import OrderStatus  
+except Exception:  
+    class OrderStatus:             
+        PENDING = "pending"
+        PAID = "paid"
+        FAILED = "failed"
+        CANCELLED = "cancelled"
 
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -158,7 +166,7 @@ def address_view(request):
                 shipping_cost=shipping_cost,
                 subtotal=subtotal,
                 total=total,
-                status="pending",
+                status=OrderStatus.PENDING,
             )
 
             # Snapshot cart into OrderItems
@@ -171,7 +179,7 @@ def address_view(request):
                         product_fk = None
                 OrderItem.objects.create(
                     order=order,
-                    product=product_fk,  # model should allow null=True; otherwise adjust model
+                    product=product_fk,  
                     product_name=it["name"],
                     unit_price=it["price_cent"],
                     quantity=it["qty"],
@@ -269,10 +277,14 @@ def confirm_view(request):
         # Not critical; lack of receipt link shouldn't block order completion
         pass
 
-    # 6) Mark order as paid and store the receipt URL
-    order.status = "paid"
+    ## 6) Mark order as paid + store receipt + (NEW) attach user if logged in
+    order.status = OrderStatus.PAID                      
     order.stripe_receipt_url = receipt_url
-    order.save(update_fields=["status", "stripe_receipt_url"])
+    if request.user.is_authenticated and order.user is None:  
+        order.user = request.user                               
+        order.save(update_fields=["status", "stripe_receipt_url", "user"])  
+    else:
+        order.save(update_fields=["status", "stripe_receipt_url"])
 
     # 7) Clear cart and unlink the order from the session
     request.session["cart"] = {}
@@ -293,6 +305,14 @@ def success_view(request, order_number: str):
     except Exception:
         return HttpResponseBadRequest("Invalid order number")
     order = get_object_or_404(Order, id=order_id)
+
+    if request.user.is_authenticated and order.user is None:
+        order.user = request.user
+        
+        if order.status != OrderStatus.PAID:
+            order.status = OrderStatus.PAID
+        order.save(update_fields=["user", "status"])
+
     return render(request, "checkout/success.html", {"order": order})
 
 
@@ -334,7 +354,7 @@ def stripe_webhook(request):
         except (Order.DoesNotExist, ValueError):
             return
 
-        if paid and order.status != "paid":
+        if paid and order.status != OrderStatus.PAID:
             receipt_url = ""
             try:
                 latest_charge_id = (pi.get("latest_charge") if isinstance(pi, dict) else getattr(pi, "latest_charge", None))
@@ -344,11 +364,11 @@ def stripe_webhook(request):
             except Exception:
                 pass
 
-            order.status = "paid"
+            order.status = OrderStatus.PAID
             order.stripe_receipt_url = receipt_url
             order.save(update_fields=["status", "stripe_receipt_url"])
-        elif not paid and order.status != "failed":
-            order.status = "failed"
+        elif not paid and order.status != OrderStatus.FAILED:
+            order.status = OrderStatus.FAILED
             order.save(update_fields=["status"])
 
     # Handle events

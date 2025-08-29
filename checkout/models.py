@@ -1,4 +1,3 @@
-# checkout/models.py
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -7,8 +6,16 @@ from shop.models import Product
 
 class ShippingMethod(models.TextChoices):
     # Storefront labels can stay Swedish; internal values are stable slugs.
-    STANDARD = "standard", "Standard (2–4 dagar)"
-    EXPRESS = "express", "Express (1–2 dagar)"
+    STANDARD = "standard", "Standard (2–4 days)"
+    EXPRESS = "express", "Express (1–2 days)"
+
+
+# Status
+class OrderStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    PAID = "paid", "Paid"
+    FAILED = "failed", "Failed"
+    CANCELLED = "cancelled", "Cancelled"    
 
 
 class Order(models.Model):
@@ -22,11 +29,12 @@ class Order(models.Model):
         null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name="orders",
+        db_index=True,
     )
 
     # Contact
     full_name = models.CharField(max_length=120, blank=True, default="")
-    email = models.EmailField(blank=True, default="")
+    email = models.EmailField(blank=True, default="", db_index=True)
     phone = models.CharField(max_length=40, blank=True, default="")
 
     # Shipping address
@@ -59,7 +67,9 @@ class Order(models.Model):
     # Status & timestamps
     status = models.CharField(
         max_length=20,
-        default="pending",  # pending|paid|failed|cancelled
+        default=OrderStatus.PENDING,   
+        choices=OrderStatus.choices,   
+        db_index=True,                 
     )
     # Use default=timezone.now (NO auto_now_add) to avoid interactive prompts on existing rows
     created_at = models.DateTimeField(default=timezone.now, editable=False, db_index=True)
@@ -69,6 +79,19 @@ class Order(models.Model):
 
     def order_number(self) -> str:
         return f"FP-{self.id:06d}"
+
+    def __str__(self) -> str:
+        return f"{self.order_number()} — {self.email}"
+    
+    
+    @property
+    def display_number(self) -> str:
+        return self.order_number()
+
+    
+    @property
+    def is_paid(self) -> bool:
+        return self.status == OrderStatus.PAID
 
     def __str__(self) -> str:
         return f"{self.order_number()} — {self.email}"
