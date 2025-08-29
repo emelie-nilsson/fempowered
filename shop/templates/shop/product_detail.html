@@ -61,8 +61,10 @@
                 {% endfor %}
               </div>
 
-              {% if r.verified %}<span class="pill">Verified purchase</span>{% endif %}
-              <time class="text-muted">{{ r.created_at|date:"Y-m-d H:i" }}</time>
+              {% if r.is_verified %}
+                <span class="pill pill-verified"><span class="icon">✓</span> Verified buyer</span>
+              {% endif %}
+              <time class="review-date">{{ r.created_at|date:"Y-m-d H:i" }}</time>
             </div>
 
             {% if r.title %}<div class="mt-1"><em>{{ r.title }}</em></div>{% endif %}
@@ -115,9 +117,9 @@
           <button type="submit" class="btn">Publish</button>
         </form>
 
-      {% elif not user.is_authenticated %}
+      {% elif not request.user.is_authenticated %}
         <h3 class="section-title">Write a review</h3>
-        <p class="page-text"><a href="{% url 'account_login' %}">Log in</a> to write a review.</p>
+        <p class="page-text"><a href="{% url 'account_login' %}?next={{ request.path }}">Log in</a> to write a review.</p>
 
       {% elif user_review %}
         <h3 class="section-title">Your review</h3>
@@ -128,7 +130,7 @@
 
       {% else %}
         <h3 class="section-title">Write a review</h3>
-        <p class="page-text">Only verified purchasers can review this product.</p>
+        <p class="page-text">Only verified buyers can review this product.</p>
       {% endif %}
     </section>
   </div>

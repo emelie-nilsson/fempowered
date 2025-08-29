@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponseForbidden  
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
@@ -17,14 +17,13 @@ from .forms import ReviewForm
 from .cart import Cart
 
 
-# --- Helper: have the user purchased the product? ---
-# TODO: echange to actuall Order/OrderItem-modell.
-def has_purchased_product(user, product):
-    return False
+# --- Helper: has the user purchased the product? ---
+
+def has_purchased_product(user, product):  
+    return product.user_has_purchased(user)
 
 
 # Products
-
 
 def product_list(request):
     """
@@ -63,7 +62,6 @@ def product_list(request):
               .exclude(color__isnull=True).exclude(color__exact="")
               .values_list("color", flat=True).distinct().order_by("color"))
 
-    
     favorite_ids = set()
     if request.user.is_authenticated:
         favorite_ids = set(
@@ -83,28 +81,55 @@ def product_list(request):
 
 def product_detail(request, pk):
     """
-    Product details + reviews (en recension per user).
+    Product details + reviews (one review per user).
+    Shows review form only for logged-in verified buyers who haven't reviewed yet.
     """
     product = get_object_or_404(Product, pk=pk)
 
     user_review = None
+    has_reviewed = False
+    can_review = False
     form = None
+
     if request.user.is_authenticated:
         user_review = Review.objects.filter(product=product, user=request.user).first()
-        if not user_review:
+        has_reviewed = user_review is not None
+        can_review = product.user_has_purchased(request.user) and not has_reviewed
+        if can_review:
             form = ReviewForm()
 
-  
-    if hasattr(product, "reviews"):
-        reviews = product.reviews.select_related("user").all()
-    else:
-        reviews = Review.objects.select_related("user").filter(product=product)
+    # --- Reviews list + verified-buyer badge calc ---
+    reviews_qs = product.reviews.select_related("user").all()  
+    reviews = list(reviews_qs)  
+
+    # Build sets of paid buyers (user_ids and emails) for this product
+    try:
+        from checkout.models import OrderItem, OrderStatus
+        paid_status = getattr(OrderStatus, "PAID", "paid")
+    except Exception:
+        from checkout.models import OrderItem
+        paid_status = "paid"
+
+    rows = OrderItem.objects.filter(
+        product=product,
+        order__status=paid_status,
+    ).values_list("order__user_id", "order__email")
+
+    paid_user_ids = {uid for uid, email in rows if uid}
+    paid_emails   = {email for uid, email in rows if email}
+
+    # Attach r.is_verified for the template
+    for r in reviews:
+        user_email = getattr(r.user, "email", None)
+        r.is_verified = (r.user_id in paid_user_ids) or (user_email in paid_emails)
 
     return render(request, "shop/product_detail.html", {
         "product": product,
-        "reviews": reviews,
+        "reviews": reviews,          # pass the list with is_verified set
         "user_review": user_review,
         "form": form,
+        "can_review": can_review,
+        "has_reviewed": has_reviewed,
     })
 
 
@@ -114,15 +139,28 @@ def product_detail(request, pk):
 class ReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
     form_class = ReviewForm
+    login_url = reverse_lazy("account_login")  
 
     def dispatch(self, request, *args, **kwargs):
         self.product = get_object_or_404(Product, pk=kwargs["pk"])
+
+        # block duplicates
         if Review.objects.filter(product=self.product, user=request.user).exists():
             messages.info(request, "You have already reviewed this product.")
             return redirect("product_detail", pk=self.product.pk)
+
+        # verified buyer neccessary
+        if not self.product.user_has_purchased(request.user):  
+            messages.error(request, "Only verified buyers can write a review.")  
+            return redirect("product_detail", pk=self.product.pk)                
+
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        # serverside-skydd (extra)
+        if not self.product.user_has_purchased(self.request.user):  
+            return HttpResponseForbidden("Only verified buyers can review this product.")  
+
         form.instance.product = self.product
         form.instance.user = self.request.user
         messages.success(self.request, "Review created.")
@@ -157,18 +195,17 @@ class ReviewDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView):
         return reverse("product_detail", kwargs={"pk": self.object.product.pk})
 
 
-
 # Cart
 
 def cart_detail(request):
     """
-    Context för templatet:
-      - cart_items: lista med {product, size, quantity, unit_price, line_total}
-      - cart_total: totalsumma
+    Context for template:
+      - cart_items: list of {product, size, quantity, unit_price, line_total}
+      - cart_total: sum
     """
     cart = Cart(request)
     cart_items = []
-    for key, item in cart:  # Cart.__iter__ yieldar (key, item)
+    for key, item in cart: 
         cart_items.append({
             "key": key,
             "product": item["product"],
@@ -187,7 +224,7 @@ def cart_detail(request):
 @require_POST
 def cart_add(request, product_id):
     """
-    Add to cart. Default qty=1. 
+    Add to cart. Default qty=1.
     """
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_id)
@@ -206,7 +243,7 @@ def cart_add(request, product_id):
 @require_POST
 def cart_update(request, product_id):
     """
-    Uppdatera radens qty. qty <= 0 tolkar vi som remove.
+    Update row qty. qty <= 0 means remove.
     """
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_id)
@@ -228,7 +265,7 @@ def cart_update(request, product_id):
 @require_POST
 def cart_remove(request, product_id):
     """
-    Ta bort en rad (produkt + ev. storlek).
+    Remove a row (product + optional size).
     """
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_id)
@@ -236,7 +273,6 @@ def cart_remove(request, product_id):
     cart.remove(product, size=size)
     messages.warning(request, "Removed from cart.")
     return redirect("cart_detail")
-
 
 
 # Favorites
@@ -279,4 +315,4 @@ def cart_reset(request):
     if 'bag' in request.session:
         request.session['bag'] = {}
     request.session.modified = True
-    return redirect('cart_detail')  
+    return redirect('cart_detail')

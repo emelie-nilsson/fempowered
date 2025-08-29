@@ -612,3 +612,32 @@ body.error-404 .btn-outline-secondary {
   box-shadow: 0 0 0 1px rgba(0,0,0,.06); 
   background: var(--light-highlight-color);
 }
+
+/* Verified buyer review */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .15rem .5rem;
+  border-radius: 999px;
+  font-size: .85rem;
+  line-height: 1;
+}
+
+.pill-verified {
+  font-style: italic;
+  margin-right: .5rem;
+  background: #e8f5e9;           
+  color: #1b5e20;
+  border: 1px solid rgba(27, 94, 32, .25);
+}
+
+.pill-verified .icon { font-size: .9em; }
+
+
+.review-date {
+  font-style: italic;                            
+  font-size: 0.85rem;                            
+  opacity: 0.75;                                 
+  white-space: nowrap;                           
+}

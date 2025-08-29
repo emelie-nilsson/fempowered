@@ -33,10 +33,8 @@ class Product(models.Model):
     def is_favorited_by(self, user):
         return user.is_authenticated and self.favorited_by.filter(user=user).exists()
 
-
     # Helpers
     def _resolve_media_url(self, field_name: str, base_subdir: str):
-       
         f = getattr(self, field_name, None)
         name = getattr(f, "name", "") if f else ""
         media_root = Path(settings.MEDIA_ROOT)
@@ -74,9 +72,42 @@ class Product(models.Model):
     def average_rating(self):
         return self.reviews.aggregate(avg=Avg("rating"))["avg"] or 0
 
+    # ---------- REVIEWS / VERIFIED BUYER HELPERS ----------
+    def user_has_purchased(self, user) -> bool:  # NEW
+        """
+        Return True om användaren är inloggad och har minst en *paid* orderrad
+        för denna produkt – antingen via Order.user eller via samma e-post
+        (om köpet gjordes som gäst).
+        """
+        if not getattr(user, "is_authenticated", False):
+            return False
+        try:
+            
+            from checkout.models import OrderItem, OrderStatus  
+            paid_status = getattr(OrderStatus, "PAID", "paid")
+        except Exception:
+            from checkout.models import OrderItem  
+            paid_status = "paid"
+
+        return OrderItem.objects.filter(
+            product=self,
+            order__status=paid_status,
+        ).filter(
+            Q(order__user=user) | Q(order__email=user.email)
+        ).exists()
+
+    def has_user_reviewed(self, user) -> bool:  
+        """True om användaren redan har lämnat en review för denna produkt."""
+        if not getattr(user, "is_authenticated", False):
+            return False
+        return self.reviews.filter(user=user).exists()
+
+    def user_can_review(self, user) -> bool:  
+        """True om inloggad, verifierad köpare och ännu inte recenserat."""
+        return self.user_has_purchased(user) and not self.has_user_reviewed(user)
+
     class Meta:
         # Stop duplicates
-        
         constraints = [
             models.UniqueConstraint(
                 fields=["name", "color"],
