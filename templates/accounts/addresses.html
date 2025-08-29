@@ -1,5 +1,98 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1 class="main-heading">Addresses</h1>
-  <p class="page-text">Coming soon.</p>
+<div class="container py-5">
+  <h1 class="main-heading mb-3">My Address</h1>
+
+  <form method="post" class="row g-3" novalidate>
+    {% csrf_token %}
+
+    <div class="col-12">
+      <h2 class="h5">Shipping</h2>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="{{ form.full_name.id_for_label }}">Full name</label>
+      {{ form.full_name }}
+      {{ form.full_name.errors }}
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email }}
+      {{ form.email.errors }}
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="{{ form.phone.id_for_label }}">Phone</label>
+      {{ form.phone }}
+      {{ form.phone.errors }}
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="{{ form.address1.id_for_label }}">Address 1</label>
+      {{ form.address1 }}
+      {{ form.address1.errors }}
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="{{ form.address2.id_for_label }}">Address 2</label>
+      {{ form.address2 }}
+      {{ form.address2.errors }}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="{{ form.postal_code.id_for_label }}">Postal code</label>
+      {{ form.postal_code }}
+      {{ form.postal_code.errors }}
+    </div>
+    <div class="col-md-5">
+      <label class="form-label" for="{{ form.city.id_for_label }}">City</label>
+      {{ form.city }}
+      {{ form.city.errors }}
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="{{ form.country.id_for_label }}">Country</label>
+      {{ form.country }}
+      {{ form.country.errors }}
+    </div>
+
+    <div class="col-12 mt-3">
+      <div class="form-check">
+        {{ form.billing_same_as_shipping }} 
+        <label class="form-check-label" for="{{ form.billing_same_as_shipping.id_for_label }}">
+          Billing same as shipping
+        </label>
+        {{ form.billing_same_as_shipping.errors }}
+      </div>
+    </div>
+
+    <div class="col-12">
+      <h2 class="h5 mt-2">Billing</h2>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="{{ form.billing_address1.id_for_label }}">Address 1</label>
+      {{ form.billing_address1 }}
+      {{ form.billing_address1.errors }}
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="{{ form.billing_address2.id_for_label }}">Address 2</label>
+      {{ form.billing_address2 }}
+      {{ form.billing_address2.errors }}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="{{ form.billing_postal_code.id_for_label }}">Postal code</label>
+      {{ form.billing_postal_code }}
+      {{ form.billing_postal_code.errors }}
+    </div>
+    <div class="col-md-5">
+      <label class="form-label" for="{{ form.billing_city.id_for_label }}">City</label>
+      {{ form.billing_city }}
+      {{ form.billing_city.errors }}
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="{{ form.billing_country.id_for_label }}">Country</label>
+      {{ form.billing_country }}
+      {{ form.billing_country.errors }}
+    </div>
+
+    <div class="col-12 mt-3">
+      <button class="btn btn-primary">Save address</button>
+    </div>
+  </form>
+</div>
 {% endblock %}

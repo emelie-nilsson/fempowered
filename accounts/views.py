@@ -1,7 +1,11 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
+from django.contrib import messages 
+
 from checkout.models import Order
+from .forms import UserAddressForm                                  
+from .models import UserAddress 
 
 
 @login_required
@@ -47,4 +51,29 @@ def order_detail(request, order_number):
 @login_required
 def addresses(request):
     
-    return render(request, "accounts/addresses.html")
+    try:
+        ua = request.user.address
+    except UserAddress.DoesNotExist:
+        ua = None
+
+    if request.method == "POST":
+        form = UserAddressForm(request.POST, instance=ua)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.user = request.user
+            obj.save()
+            messages.success(request, "Address saved.")
+            return redirect("accounts:addresses")
+    else:
+        if ua:
+            form = UserAddressForm(instance=ua)
+        else:
+            
+            form = UserAddressForm(initial={
+                "full_name": request.user.get_full_name() or "",
+                "email": request.user.email,
+                "country": "SE",
+                "billing_same_as_shipping": True,
+            })
+
+    return render(request, "accounts/addresses.html", {"form": form})

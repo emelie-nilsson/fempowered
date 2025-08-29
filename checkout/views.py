@@ -9,6 +9,8 @@ from django.urls import reverse
 from .forms import CheckoutAddressForm
 from .models import Order, OrderItem, ShippingMethod
 from shop.models import Product
+from accounts.models import UserAddress   
+
 
 try:  
     from .models import OrderStatus  
@@ -130,9 +132,30 @@ def calc_shipping_cost_cents(method: str, subtotal: int) -> int:
 
 @require_http_methods(["GET", "POST"])
 def address_view(request):
+    # Prefill from saved address for logged-in users
     initial = {}
     if request.user.is_authenticated:
         initial["email"] = request.user.email
+        try:
+            ua = request.user.address  
+        except (AttributeError, UserAddress.DoesNotExist):
+            ua = None
+        if ua:
+            initial.update({
+                "full_name": ua.full_name or (request.user.get_full_name() or ""),
+                "phone": ua.phone or "",
+                "address1": ua.address1 or "",
+                "address2": ua.address2 or "",
+                "postal_code": ua.postal_code or "",
+                "city": ua.city or "",
+                "country": ua.country or "SE",
+                "billing_same_as_shipping": ua.billing_same_as_shipping,
+                "billing_address1": ua.billing_address1 or "",
+                "billing_address2": ua.billing_address2 or "",
+                "billing_postal_code": ua.billing_postal_code or "",
+                "billing_city": ua.billing_city or "",
+                "billing_country": ua.billing_country or "",
+            })
 
     if request.method == "POST":
         form = CheckoutAddressForm(request.POST)
@@ -166,31 +189,57 @@ def address_view(request):
                 shipping_cost=shipping_cost,
                 subtotal=subtotal,
                 total=total,
-                status=OrderStatus.PENDING,
+                status=OrderStatus.PENDING, 
             )
 
             # Snapshot cart into OrderItems
             for it in items:
-                # CHANGED: robust product lookup
-                
                 product_fk = None
                 pid_val = it.get("pid")
                 if pid_val:
-                    product_fk = Product.objects.filter(pk=pid_val).first()  # säkrare än get()
-                    # Fallback: matcha på namn om PK lookup misslyckas
+                    product_fk = Product.objects.filter(pk=pid_val).first()
                 if not product_fk:
-                    product_fk = Product.objects.filter(name=it["name"]).first()
-                
+                    product_fk = (
+                        Product.objects.filter(name__iexact=it["name"]).first()
+                        or Product.objects.filter(name__icontains=it["name"]).first()
+                    )
                 OrderItem.objects.create(
                     order=order,
-                    product=product_fk,  # nu ska den nästan alltid sättas
+                    product=product_fk,
                     product_name=it["name"],
                     unit_price=it["price_cent"],
                     quantity=it["qty"],
                     size=it["size"],
-                )    
+                )
 
-
+            # --- Auto-save address back to profile (logged-in users) ---
+            if request.user.is_authenticated:
+                ua, _ = UserAddress.objects.get_or_create(user=request.user)
+                # shipping
+                ua.full_name = data["full_name"]
+                ua.email = data["email"]
+                ua.phone = data.get("phone") or ""
+                ua.address1 = data["address1"]
+                ua.address2 = data.get("address2") or ""
+                ua.postal_code = data["postal_code"]
+                ua.city = data["city"]
+                ua.country = data["country"]
+                # billing
+                ua.billing_same_as_shipping = data["billing_same_as_shipping"]
+                if ua.billing_same_as_shipping:
+                    ua.billing_address1 = ua.address1
+                    ua.billing_address2 = ua.address2
+                    ua.billing_postal_code = ua.postal_code
+                    ua.billing_city = ua.city
+                    ua.billing_country = ua.country
+                else:
+                    ua.billing_address1 = data.get("billing_address1") or ""
+                    ua.billing_address2 = data.get("billing_address2") or ""
+                    ua.billing_postal_code = data.get("billing_postal_code") or ""
+                    ua.billing_city = data.get("billing_city") or ""
+                    ua.billing_country = data.get("billing_country") or ""
+                ua.save()
+            
 
             # Link order in session and continue to payment
             request.session["checkout_order_id"] = order.id
