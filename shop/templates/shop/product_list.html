@@ -50,13 +50,25 @@
           <div class="card h-100 border-0 shadow-sm product-card">
 
             <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-reset d-block">
+              {# ---- Bildlogik: först försök med catalog_image_url (genom {% static %}) ---- #}
               {% if product.catalog_image_url %}
-                <img src="{{ product.catalog_image_url }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-              {% elif product.image_catalog %}
-                <img src="{{ product.image_catalog.url }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% with p=product.catalog_image_url %}
+                  {% if p|slice:":4" == "http" %}
+                    <img src="{{ p }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                  {% elif p|slice:":8" == "/static/" %}
+                    {# DB råkar innehålla prefixet /static/ → strip:a bort #}
+                    <img src="{% static p|slice:'8:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                  {% elif p|slice:":7" == "static/" %}
+                    <img src="{% static p|slice:'7:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                  {% else %}
+                    <img src="{% static p %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                  {% endif %}
+                {% endwith %}
               {% else %}
+                {# Fallback: placeholder istället för MEDIA (image_catalog.url) på Heroku #}
                 <img src="{% static 'img/placeholder.webp' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
               {% endif %}
+
               <div class="card-body">
                 <h5 class="card-title mb-1">{{ product.name }}</h5>
                 {% if product.color %}<div class="small text-muted">{{ product.color }}</div>{% endif %}

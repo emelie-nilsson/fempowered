@@ -6,12 +6,37 @@
   <h1 class="main-heading">{{ product.name }}</h1>
 
   <div class="product-grid">
-    <!-- Left: Image -->
+    <!-- Image -->
     <figure class="product-media">
-      <img src="{{ product.detail_image_url }}" alt="{{ product.name }}">
+      
+      {% with p=product.detail_image_url|default_if_none:'' %}
+        {% if p and p|slice:":4" == "http" %}
+          <img src="{{ p }}" alt="{{ product.name }}">
+        {% elif p and p|slice:":8" == "/static/" %}
+          <img src="{% static p|slice:'8:' %}" alt="{{ product.name }}">
+        {% elif p and p|slice:":7" == "static/" %}
+          <img src="{% static p|slice:'7:' %}" alt="{{ product.name }}">
+        {% elif p %}
+          <img src="{% static p %}" alt="{{ product.name }}">
+        {% elif product.catalog_image_url %}
+          {% with c=product.catalog_image_url %}
+            {% if c|slice:":4" == "http" %}
+              <img src="{{ c }}" alt="{{ product.name }}">
+            {% elif c|slice:":8" == "/static/" %}
+              <img src="{% static c|slice:'8:' %}" alt="{{ product.name }}">
+            {% elif c|slice:":7" == "static/" %}
+              <img src="{% static c|slice:'7:' %}" alt="{{ product.name }}">
+            {% else %}
+              <img src="{% static c %}" alt="{{ product.name }}">
+            {% endif %}
+          {% endwith %}
+        {% else %}
+          <img src="{% static 'img/placeholder.webp' %}" alt="{{ product.name }}">
+        {% endif %}
+      {% endwith %}
     </figure>
 
-    <!-- Right: Info / description -->
+    <!-- Description -->
     <section class="product-info">
       <h2 class="section-title">Description</h2>
       <p class="page-text">{{ product.description|linebreaks }}</p>
@@ -43,7 +68,7 @@
       </form>
     </section>
 
-    <!-- Left (under image): Reviews -->
+    <!-- Reviews -->
     <section class="product-reviews">
       <h2 class="section-title">Reviews</h2>
 
@@ -54,7 +79,7 @@
             <div class="review-meta">
               <strong>{{ r.user }}</strong>
 
-              <!-- Star grade (read-only) -->
+              <!-- Star grade -->
               <div class="rating-static" aria-label="{{ r.rating }} out of 5">
                 {% for _ in "12345"|make_list %}
                   <span class="star {% if forloop.counter <= r.rating %}on{% endif %}">★</span>
@@ -87,7 +112,7 @@
       {% endif %}
     </section>
 
-    <!-- Left: Write a review -->
+    <!-- Write a review -->
     <section class="product-write-review">
       {% if can_review %}
         <h3 id="write-review" class="section-title">Write a review</h3>

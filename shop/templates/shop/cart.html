@@ -1,17 +1,42 @@
-{% extends "base.html" %} {% load static %} {% block content %} {% load currency %}
+{% extends "base.html" %}
+{% load static %}
+{% load currency %}
+{% block content %}
 <div class="container py-5 cart">
   <h1 class="main-heading">Your Bag</h1>
 
   {% if cart_items %}
   <div class="cart-grid">
-    <!-- Left: items -->
+    <!-- Items -->
     <ul class="cart-list">
       {% for ci in cart_items %}
       <li class="cart-item">
-        <img class="cart-thumb"
-             src="{{ ci.product.catalog_image_url }}"
-             alt="{{ ci.product.name }}"
-             width="80" height="80" loading="lazy">
+        <!-- Images -->
+        {% with p=ci.product.catalog_image_url|default_if_none:'' %}
+          {% if p and p|slice:":4" == "http" %}
+            <img class="cart-thumb" src="{{ p }}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+          {% elif p and p|slice:":8" == "/static/" %}
+            <img class="cart-thumb" src="{% static p|slice:'8:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+          {% elif p and p|slice:":7" == "static/" %}
+            <img class="cart-thumb" src="{% static p|slice:'7:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+          {% elif p %}
+            <img class="cart-thumb" src="{% static p %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+          {% else %}
+            {% with d=ci.product.detail_image_url|default_if_none:'' %}
+              {% if d and d|slice:":4" == "http" %}
+                <img class="cart-thumb" src="{{ d }}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+              {% elif d and d|slice:":8" == "/static/" %}
+                <img class="cart-thumb" src="{% static d|slice:'8:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+              {% elif d and d|slice:":7" == "static/" %}
+                <img class="cart-thumb" src="{% static d|slice:'7:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+              {% elif d %}
+                <img class="cart-thumb" src="{% static d %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+              {% else %}
+                <img class="cart-thumb" src="{% static 'img/placeholder.webp' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+              {% endif %}
+            {% endwith %}
+          {% endif %}
+        {% endwith %}
 
         <div class="cart-info">
           <div class="cart-title">
@@ -51,7 +76,7 @@
       {% endfor %}
     </ul>
 
-    <!-- Right: summary -->
+    <!-- Summary -->
     <aside class="cart-summary">
       <h2 class="section-title">Summary</h2>
       <div class="cart-summary-row">
