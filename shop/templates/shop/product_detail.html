@@ -8,7 +8,7 @@
   <div class="product-grid">
     <!-- Image -->
     <figure class="product-media">
-      
+      <!-- Image logic: http, /static/, static/, /media/ . Fallback catalog_image_url and placeholder. -->
       {% with p=product.detail_image_url|default_if_none:'' %}
         {% if p and p|slice:":4" == "http" %}
           <img src="{{ p }}" alt="{{ product.name }}">
@@ -16,18 +16,28 @@
           <img src="{% static p|slice:'8:' %}" alt="{{ product.name }}">
         {% elif p and p|slice:":7" == "static/" %}
           <img src="{% static p|slice:'7:' %}" alt="{{ product.name }}">
+        {% elif p and p|slice:":7" == "/media/" %}
+          <img src="{% static p|slice:'7:' %}" alt="{{ product.name }}">
+        {% elif p and p|first == "/" %}
+          <img src="{% static p|slice:'1:' %}" alt="{{ product.name }}">
         {% elif p %}
           <img src="{% static p %}" alt="{{ product.name }}">
         {% elif product.catalog_image_url %}
           {% with c=product.catalog_image_url %}
-            {% if c|slice:":4" == "http" %}
+            {% if c and c|slice:":4" == "http" %}
               <img src="{{ c }}" alt="{{ product.name }}">
-            {% elif c|slice:":8" == "/static/" %}
+            {% elif c and c|slice:":8" == "/static/" %}
               <img src="{% static c|slice:'8:' %}" alt="{{ product.name }}">
-            {% elif c|slice:":7" == "static/" %}
+            {% elif c and c|slice:":7" == "static/" %}
               <img src="{% static c|slice:'7:' %}" alt="{{ product.name }}">
-            {% else %}
+            {% elif c and c|slice:":7" == "/media/" %}
+              <img src="{% static c|slice:'7:' %}" alt="{{ product.name }}">
+            {% elif c and c|first == "/" %}
+              <img src="{% static c|slice:'1:' %}" alt="{{ product.name }}">
+            {% elif c %}
               <img src="{% static c %}" alt="{{ product.name }}">
+            {% else %}
+              <img src="{% static 'img/placeholder.webp' %}" alt="{{ product.name }}">
             {% endif %}
           {% endwith %}
         {% else %}

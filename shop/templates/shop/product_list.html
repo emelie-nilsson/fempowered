@@ -50,24 +50,24 @@
           <div class="card h-100 border-0 shadow-sm product-card">
 
             <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-reset d-block">
-              {# ---- Bildlogik: först försök med catalog_image_url (genom {% static %}) ---- #}
-              {% if product.catalog_image_url %}
-                {% with p=product.catalog_image_url %}
-                  {% if p|slice:":4" == "http" %}
-                    <img src="{{ p }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                  {% elif p|slice:":8" == "/static/" %}
-                    {# DB råkar innehålla prefixet /static/ → strip:a bort #}
-                    <img src="{% static p|slice:'8:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                  {% elif p|slice:":7" == "static/" %}
-                    <img src="{% static p|slice:'7:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                  {% else %}
-                    <img src="{% static p %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                  {% endif %}
-                {% endwith %}
-              {% else %}
-                {# Fallback: placeholder istället för MEDIA (image_catalog.url) på Heroku #}
-                <img src="{% static 'img/placeholder.webp' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-              {% endif %}
+              <!-- Image http, /static/, static/, /media/ -->
+              {% with p=product.catalog_image_url|default_if_none:'' %}
+                {% if p and p|slice:":4" == "http" %}
+                  <img src="{{ p }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% elif p and p|slice:":8" == "/static/" %}
+                  <img src="{% static p|slice:'8:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% elif p and p|slice:":7" == "static/" %}
+                  <img src="{% static p|slice:'7:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% elif p and p|slice:":7" == "/media/" %}
+                  <img src="{% static p|slice:'7:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% elif p and p|first == "/" %}
+                  <img src="{% static p|slice:'1:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% elif p %}
+                  <img src="{% static p %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% else %}
+                  <img src="{% static 'img/placeholder.webp' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                {% endif %}
+              {% endwith %}
 
               <div class="card-body">
                 <h5 class="card-title mb-1">{{ product.name }}</h5>
@@ -147,3 +147,4 @@ document.addEventListener("click", function(e){
 });
 </script>
 {% endblock %}
+
