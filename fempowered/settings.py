@@ -176,17 +176,30 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    DEFAULT_FROM_EMAIL = "noreply@example.local"
+    DEFAULT_FROM_EMAIL = "Fempowered <no-reply@example.local>"
     ACCOUNT_EMAIL_VERIFICATION = "optional"
 else:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    # Läser från miljövariabler så Heroku Config Vars faktiskt styr
+    EMAIL_BACKEND = os.getenv(
+        "EMAIL_BACKEND",
+        "django.core.mail.backends.smtp.EmailBackend"   # default: smtp i prod
+    )
     EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.sendgrid.net")
     EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True")
+    # Gör om sträng till bool
+    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "apikey")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@your-domain.com")
-    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
+    # UNDvik placeholder → sätt en vettig default (kan överskridas i Heroku)
+    DEFAULT_FROM_EMAIL = os.getenv(
+        "DEFAULT_FROM_EMAIL",
+        "Fempowered <no-reply@fempowered.shop>"
+    )
+    SERVER_EMAIL = os.getenv("SERVER_EMAIL", "no-reply@fempowered.shop")
+
+    # Gör verifiering styrbar från env (så du kan sätta 'none' tills SMTP är klart)
+    ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 
