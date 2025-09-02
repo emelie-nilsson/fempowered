@@ -673,3 +673,22 @@ body.error-404 .btn-outline-secondary {
   font-size: 1.1em;
   vertical-align: middle;
 }
+
+/* Override Bootstrap's success alert to match Fempowered green */
+.alert-success {
+  color: #1b5e20;           
+  background-color: #e8f5e9; 
+  border-color: #1b5e20;     
+}
+
+.alert-success .alert-link {
+  color: #1b5e20;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.alert-success h2 i {
+  color: var(--middle-color);
+  font-size: 1.1em;
+  vertical-align: middle;
+}
