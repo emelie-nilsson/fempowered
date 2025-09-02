@@ -674,21 +674,27 @@ body.error-404 .btn-outline-secondary {
   vertical-align: middle;
 }
 
-/* Override Bootstrap's success alert to match Fempowered green */
-.alert-success {
-  color: #1b5e20;           
-  background-color: #e8f5e9; 
-  border-color: #1b5e20;     
+.checkout-nudge {
+  background-color: #e3e7e5; /* light moss tone */
+  border: 1px solid var(--secondary-color); /* moss border */
+  border-radius: .5rem;
+  padding: 1rem 1.25rem;
+  color: var(--primary-color); /* dark text for contrast */
 }
 
-.alert-success .alert-link {
-  color: #1b5e20;
+.checkout-nudge h2 {
+  font-size: 1rem;
+  margin-bottom: .5rem;
+  color: var(--primary-color);
+}
+
+.checkout-nudge h2 i {
+  color: var(--secondary-color); 
+}
+
+.checkout-nudge a {
+  color: var(--secondary-color);
   font-weight: 600;
   text-decoration: underline;
 }
 
-.alert-success h2 i {
-  color: var(--middle-color);
-  font-size: 1.1em;
-  vertical-align: middle;
-}
