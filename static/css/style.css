@@ -642,59 +642,33 @@ body.error-404 .btn-outline-secondary {
   white-space: nowrap;                           
 }
 
-/* Why create an account */
-.why-account {
-  border: 1px solid var(--highlight-color);
-  background: var(--light-highlight-color);
-}
-.why-account h2 { color: var(--middle-color); }
-.why-account .why-list { padding-left: 1.1rem; }
-.why-account .why-list li { margin-bottom: .35rem; }
 
-.account-nudge {
-  background-color: var(--light-highlight-color); 
-  border: 1px solid var(--highlight-color);
+
+/* Shared styling for all account boxes */
+.why-account,
+.account-nudge,
+.checkout-nudge {
+  background-color: #e3e7e5; 
+  border: 1px solid var(--secondary-color); 
   border-radius: .5rem;
   padding: 1rem 1.25rem;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-.account-nudge a {
-  font-weight: 600;
-  color: var(--middle-color);
-  text-decoration: underline;
+  color: var(--primary-color); 
 }
 
-/* Heading & icon */
+/* Headings & icons */
+.why-account h2 i,
 .account-nudge h2 i,
-.alert-account h2 i,
-.why-account h2 i {
-  color: var(--middle-color);
+.checkout-nudge h2 i {
+  color: var(--secondary-color); 
   font-size: 1.1em;
   vertical-align: middle;
 }
 
-.checkout-nudge {
-  background-color: #e3e7e5; /* light moss tone */
-  border: 1px solid var(--secondary-color); /* moss border */
-  border-radius: .5rem;
-  padding: 1rem 1.25rem;
-  color: var(--primary-color); /* dark text for contrast */
-}
-
-.checkout-nudge h2 {
-  font-size: 1rem;
-  margin-bottom: .5rem;
-  color: var(--primary-color);
-}
-
-.checkout-nudge h2 i {
-  color: var(--secondary-color); 
-}
-
+/* Links inside the boxes */
+.why-account a,
+.account-nudge a,
 .checkout-nudge a {
   color: var(--secondary-color);
   font-weight: 600;
   text-decoration: underline;
 }
-
