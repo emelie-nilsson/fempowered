@@ -8,17 +8,15 @@
   {% if not user.is_authenticated %}
     <div class="checkout-nudge mt-3">
       <h2 class="h6 mb-2">
-        <i class="fa-solid fa-user-check mr-2"></i> Create an account?
+        <i class="fa-solid fa-user-check mr-2"></i> Aren’t you a part of Fempowered yet?
       </h2>
       <p class="mb-0">
-        <a href="{% url 'account_login' %}">Log in</a> for faster checkout and order history.  
-        New here? <a href="{% url 'account_signup' %}">Sign up</a> — it only takes a minute.  
-        You can still continue as a guest.
+        Join now for faster checkout, order tracking and saved favorites.  
+        <a href="{% url 'account_signup' %}">Sign up</a> or
+        <a href="{% url 'account_login' %}?next={{ request.path }}">log in</a>.
       </p>
     </div>
-  {% endif %}
-
-
+    {% endif %}
 
 
   <form method="post" class="mt-4">

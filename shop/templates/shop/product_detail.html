@@ -78,18 +78,19 @@
       </form>
     </section>
 
-    {% if not user.is_authenticated %}
-      <div class="account-nudge">
-        <h2 class="h6 mb-2">
-          <i class="fa-solid fa-user-check mr-2"></i> Want to leave a review?
-        </h2>
-        <p class="mb-0">
-          Create an account to write reviews and track your orders.  
-          <a href="{% url 'account_signup' %}">Sign up</a> or
-          <a href="{% url 'account_login' %}?next={{ request.path }}">log in</a>.
-        </p>
-      </div>
-    {% endif %}
+  {% if not user.is_authenticated %}
+    <div class="account-nudge">
+      <h2 class="h6 mb-2">
+        <i class="fa-solid fa-user-check mr-2"></i> Aren’t you a part of Fempowered yet?
+      </h2>
+      <p class="mb-0">
+        Create a free account to enjoy faster checkout, saved favorites and order tracking.  
+        <a href="{% url 'account_signup' %}">Sign up</a> or
+        <a href="{% url 'account_login' %}?next={{ request.path }}">log in</a>.
+      </p>
+    </div>
+  {% endif %}
+
 
 
     <!-- Reviews -->
