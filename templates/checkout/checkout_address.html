@@ -6,13 +6,18 @@
   <h1 class="main-heading">Shipping details</h1>
   <!-- Show a compact account hint only for guests -->
   {% if not user.is_authenticated %}
-    <div class="alert alert-info mt-3" role="alert">
-      <strong>Have an account?</strong>
-      <a href="{% url 'account_login' %}" class="alert-link">Log in</a> for faster checkout and order history.
-      New here? <a href="{% url 'account_signup' %}" class="alert-link">Create an account</a> — it only takes a minute.
+  <div class="alert-account mt-3" role="alert">
+    <h2 class="h6 mb-2">
+      <i class="fa-solid fa-user-check mr-2"></i> Create an account?
+    </h2>
+    <p class="mb-0">
+      <a href="{% url 'account_login' %}" class="alert-link">Log in</a> for faster checkout and order history.  
+      New here? <a href="{% url 'account_signup' %}" class="alert-link">Sign up</a> — it only takes a minute.  
       You can still continue as a guest.
-    </div>
-  {% endif %}
+    </p>
+  </div>
+{% endif %}
+
 
   <form method="post" class="mt-4">
     {% csrf_token %}

@@ -665,3 +665,11 @@ body.error-404 .btn-outline-secondary {
   text-decoration: underline;
 }
 
+/* Heading & icon */
+.account-nudge h2 i,
+.alert-account h2 i,
+.why-account h2 i {
+  color: var(--middle-color);
+  font-size: 1.1em;
+  vertical-align: middle;
+}
