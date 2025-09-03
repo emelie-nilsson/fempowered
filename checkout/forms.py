@@ -1,6 +1,6 @@
 from django import forms
 from .models import ShippingMethod
-
+import re
 
 # Reusable widgets for Bootstrap styling
 TEXT = forms.TextInput(attrs={"class": "form-control"})
@@ -56,7 +56,31 @@ class CheckoutAddressForm(forms.Form):
         max_length=2, required=False, widget=TEXT, label="Billing country"
     )
 
-    # Normalizers/validators
+    # --- Custom validators / normalizers ---
+
+    def clean_full_name(self):
+        name = (self.cleaned_data.get("full_name") or "").strip()
+        if len(name.split()) < 2:
+            raise forms.ValidationError("Please enter both first and last name.")
+        return name
+
+    def clean_phone(self):
+        phone = (self.cleaned_data.get("phone") or "").strip()
+        if phone:
+            if not re.match(r"^[0-9+\-\s]+$", phone):
+                raise forms.ValidationError("Phone may only contain digits, spaces, + or -.")
+            if len(phone) < 7:
+                raise forms.ValidationError("Phone number seems too short.")
+        return phone
+
+    def clean_postal_code(self):
+        code = (self.cleaned_data.get("postal_code") or "").strip()
+        if not code.isdigit():
+            raise forms.ValidationError("Postal code must contain digits only.")
+        if len(code) < 4 or len(code) > 6:
+            raise forms.ValidationError("Enter a valid postal code (4–6 digits).")
+        return code
+
     def clean_country(self):
         val = (self.cleaned_data.get("country") or "").strip().upper()
         return val
