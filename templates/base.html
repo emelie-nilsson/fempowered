@@ -9,6 +9,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     {% endblock %} {% block extra_meta %}{% endblock %}
 
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'img/icons/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img/icons/favicon-32x32.png' %}" sizes="32x32" type="image/png">
+    <link rel="icon" href="{% static 'img/icons/favicon-16x16.png' %}" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="{% static 'img/icons/apple-touch-icon.png' %}">
+    <link rel="manifest" href="{% static 'img/icons/site.webmanifest' %}">
+
+
     <title>Fempowered {% block extra_title %}{% endblock %}</title>
 
     {% block corecss %}
