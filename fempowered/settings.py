@@ -188,8 +188,8 @@ else:
     # Läser från miljövariabler så Heroku Config Vars faktiskt styr
     EMAIL_BACKEND = os.getenv(
         "EMAIL_BACKEND",
-        "django.core.mail.backends.smtp.EmailBackend"   # default: smtp i prod
-    )
+        "django.core.mail.backends.smtp.EmailBackend",   # default: smtp i prod
+    ).strip()
     EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.sendgrid.net")
     EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
     # Gör om sträng till bool
