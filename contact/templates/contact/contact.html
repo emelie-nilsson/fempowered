@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5 contact-page">
+  <h1 class="main-heading mb-3">Contact us</h1>
+  <p class="mb-4">
+    Questions about sizing, orders or products? Send us a message here – we usually reply within 1–2 business days.
+  </p>
+
+  <form method="post" novalidate class="contact-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.name.id_for_label }}">Name</label>
+      {{ form.name }}
+      {% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email }}
+      {% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.subject.id_for_label }}">Subject (optional)</label>
+      {{ form.subject }}
+      {% for e in form.subject.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.message.id_for_label }}">Message</label>
+      {{ form.message }}
+      {% for e in form.message.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <!-- Honeypot -->
+    {{ form.website }}
+
+    <button type="submit" class="btn btn-fem">Send message</button>
+  </form>
+</div>
+{% endblock %}

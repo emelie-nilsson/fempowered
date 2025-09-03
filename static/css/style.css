@@ -162,6 +162,24 @@ a.btn,
               border-color .2s ease;
 }
 
+.btn-fem:hover { 
+  filter: brightness(0.95);
+}
+.btn-fem:active {
+  transform: translateY(1px);
+  filter: brightness(0.9);
+}
+.btn-fem:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(93,111,99,.35);
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(93,111,99,.35);
+}
+
+
 /* Outline */
 .btn-outline,
 a.btn-outline,

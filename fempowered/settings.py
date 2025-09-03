@@ -19,12 +19,13 @@ def env_list(name: str, default: str = "") -> list[str]:
     return [x.strip() for x in raw.split(",") if x.strip()]
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-change-me")
-DEBUG = os.getenv("DEBUG", "True").lower() == "True"
+
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
 
 CSRF_TRUSTED_ORIGINS = env_list(
-    "CSRF_TRUSTED_ORIGINS", "http://127.0.0.1,http://localhost"
+    "CSRF_TRUSTED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000"  
 )
 
 # Stripe
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
     "shop",
     "accounts",
     "checkout",
+    "contact",
 
     # Dev-tools
     "django_extensions",
@@ -174,6 +176,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Email
 
+# Who receives contact form emails
+CONTACT_RECIPIENTS = env_list("CONTACT_RECIPIENTS", "info@fempowered.com") 
+
+
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "Fempowered <no-reply@example.local>"
@@ -191,7 +197,7 @@ else:
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "apikey")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
-    # UNDvik placeholder → sätt en vettig default (kan överskridas i Heroku)
+    # Undvik placeholder → sätt en vettig default (kan överskridas i Heroku)
     DEFAULT_FROM_EMAIL = os.getenv(
         "DEFAULT_FROM_EMAIL",
         "Fempowered <no-reply@fempowered.shop>"
@@ -200,24 +206,33 @@ else:
 
     # Gör verifiering styrbar från env (så du kan sätta 'none' tills SMTP är klart)
     ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+    
 
 
-# Production security (Heroku)
+# Security dev vs prod
 
-if not DEBUG:
+if DEBUG:
+    # Local - no https
+    SECURE_SSL_REDIRECT = False       
+    SESSION_COOKIE_SECURE = False     
+    CSRF_COOKIE_SECURE = False        
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"  
+else:
+    # Production security (Heroku)
     # Force HTTPS
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
     # HSTS
-    SECURE_HSTS_SECONDS = 31536000  
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
     # Heroku router
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"  
 
 
 # Logging
