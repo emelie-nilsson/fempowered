@@ -92,25 +92,22 @@
     </div>
 
     <!-- Save/Cancel -->
-<div class="col-12 mt-3">
-  <div class="d-flex flex-column gap-2">
-    <div>
-      <button class="btn btn-fem" type="submit">Save</button>
-    </div>
-    <div>
-      <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a>
-    </div>
-    {% if address and address.is_active %}
-    <div>
-      <form method="post" action="{% url 'address_delete' %}" 
-            onsubmit="return confirm('Clear your saved address?');">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-outline-danger">Delete</button>
-      </form>
-    </div>
-    {% endif %}
+  <div class="col-12 mt-3">
+  <div class="d-flex gap-3 mb-2">
+    <button class="btn btn-fem" type="submit">Save</button>
+    <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a>
   </div>
+
+  <!-- Delete -->
+  {% if address and address.is_active %}
+    <form method="post" action="{% url 'address_delete' %}" 
+          onsubmit="return confirm('Clear your saved address?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger">Delete</button>
+    </form>
+  {% endif %}
 </div>
+
 
 
 <script>
