@@ -91,17 +91,18 @@
     </div>
 
     <div class="col-12 mt-3 d-flex gap-2 flex-wrap">
-      <button class="btn btn-fem">Save address</button> 
+      <button class="btn btn-fem">Save</button> 
       <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a> 
     </div>
   </form>
 
 
   <!-- Separate soft-delete/clear form -->
-  <div class="mt-4">
+{% if address and address.is_active %}   
+  <div class="col-12 mt-4">
     <form method="post" action="{% url 'address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
       {% csrf_token %}
-      <button type="submit" class="btn btn-outline-danger">Delete address</button>
+      <button type="submit" class="btn btn-outline-danger">Delete</button>
     </form>
   </div>
 </div>
