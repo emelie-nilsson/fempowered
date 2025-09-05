@@ -53,7 +53,7 @@
 
     <div class="col-12 mt-3">
       <div class="form-check">
-        {{ form.billing_same_as_shipping }} 
+        {{ form.billing_same_as_shipping }}
         <label class="form-check-label" for="{{ form.billing_same_as_shipping.id_for_label }}">
           Billing same as shipping
         </label>
@@ -61,7 +61,7 @@
       </div>
     </div>
 
- <div class="col-12">
+    <div class="col-12">
       <h2 class="h5 mt-2">Billing</h2>
     </div>
     <div class="col-12 billing-field">
@@ -90,44 +90,42 @@
       {{ form.billing_country.errors }}
     </div>
 
+    <!-- Save/Cancel -->
     <div class="col-12 mt-3 d-flex gap-2 flex-wrap">
-      <button class="btn btn-fem">Save</button> 
-      <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a> 
+      <button class="btn btn-fem" type="submit">Save</button>
+      <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a>
     </div>
+
+    <!-- Conditional Delete (only if an active address exists) -->
+    {% if address and address.is_active %}
+    <div class="col-12 mt-4">
+      <form method="post" action="{% url 'address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">Delete</button>
+      </form>
+    </div>
+    {% endif %}
+
   </form>
-
-
-  <!-- Separate soft-delete/clear form -->
-{% if address and address.is_active %}   
-  <div class="col-12 mt-4">
-    <form method="post" action="{% url 'address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-outline-danger">Delete</button>
-    </form>
-  </div>
 </div>
 
-<!-- Helper script to toggle billing fields when 'same as shipping' is checked -->
 <script>
+  // Toggle billing fields when "Billing same as shipping" is checked
   (function () {
     const same = document.getElementById('{{ form.billing_same_as_shipping.id_for_label }}');
     const billingBlocks = document.querySelectorAll('.billing-field');
-
     function toggleBilling() {
       const hide = same && same.checked;
       billingBlocks.forEach(function (el) {
         if (!el) return;
         el.style.opacity = hide ? '0.6' : '1';
-        // disable/enable inputs inside block
         el.querySelectorAll('input, select, textarea').forEach(function (inp) {
           inp.disabled = !!hide;
         });
       });
     }
-
     if (same) {
       same.addEventListener('change', toggleBilling);
-      // run once on load
       toggleBilling();
     }
   })();
