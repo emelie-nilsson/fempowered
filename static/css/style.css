@@ -240,6 +240,11 @@ a.btn[aria-disabled="true"] {
 
 .btn-block { width: 100% !important; display: flex; }
 
+/* Address action buttons */
+.address-actions .btn { margin-right: .75rem; margin-bottom: .5rem; }
+.address-actions .btn:last-child { margin-right: 0; }
+
+
 /* Links */
 a { color: var(--secondary-color); }
 a:hover { color: var(--middle-color); }
@@ -713,3 +718,5 @@ body.error-404 .btn-outline-secondary {
   border-radius: 0.25rem;
   z-index: 1000;
 }
+
+
