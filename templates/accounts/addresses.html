@@ -3,6 +3,7 @@
 <div class="container py-5">
   <h1 class="main-heading mb-3">My Address</h1>
 
+  <!-- Address form -->
   <form method="post" class="row g-3" novalidate>
     {% csrf_token %}
 
@@ -91,28 +92,23 @@
     </div>
 
     <!-- Save/Cancel -->
-    
-    <div class="col-12 mt-3">
-      <div class="d-flex flex-wrap gap-3">
-        <button class="btn btn-fem me-3 mb-2" type="submit">Save</button>
+    <div class="col-12 mt-3 address-actions">
+      <div class="d-flex flex-wrap">
+        <button class="btn btn-fem me-3 mr-3 mb-2" type="submit">Save</button>
         <a href="{% url 'addresses' %}" class="btn btn-fem-outline mb-2">Cancel</a>
       </div>
     </div>
+  </form>
 
-
-
-
-    <!-- Conditional Delete (only if an active address exists) -->
-    {% if address and address.is_active %}
+  <!-- Delete -->
+  {% if address and address.is_active %}
     <div class="col-12 mt-4">
       <form method="post" action="{% url 'address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
         {% csrf_token %}
         <button type="submit" class="btn btn-outline-danger">Delete</button>
       </form>
     </div>
-    {% endif %}
-
-  </form>
+  {% endif %}
 </div>
 
 <script>

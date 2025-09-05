@@ -241,8 +241,8 @@ a.btn[aria-disabled="true"] {
 .btn-block { width: 100% !important; display: flex; }
 
 /* Address action buttons */
-.address-actions .btn { margin-right: .75rem; margin-bottom: .5rem; }
-.address-actions .btn:last-child { margin-right: 0; }
+.address-actions .btn + .btn { margin-left: 12px; }
+.address-actions .btn { margin-bottom: 8px; }
 
 
 /* Links */
