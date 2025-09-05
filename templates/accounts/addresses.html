@@ -99,7 +99,7 @@
 
   <!-- Separate soft-delete/clear form -->
   <div class="mt-4">
-    <form method="post" action="{% url 'accounts:address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
+    <form method="post" action="{% url 'address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
       {% csrf_token %}
       <button type="submit" class="btn btn-outline-danger">Delete address</button>
     </form>

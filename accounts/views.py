@@ -73,7 +73,7 @@ def addresses(request):
             obj.is_active = True  # Re-activate on save
             obj.save()
             messages.success(request, "Address saved.")
-            return redirect("accounts:addresses")
+            return redirect("addresses")
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -104,7 +104,7 @@ def address_delete(request):
 
     if not addr or not addr.is_active:
         messages.info(request, "No active address to delete.")
-        return redirect("accounts:addresses")
+        return redirect("addresses")
 
     addr.is_active = False
 
@@ -132,4 +132,4 @@ def address_delete(request):
     ])
 
     messages.success(request, "Your address was deleted.")
-    return redirect("accounts:addresses")
+    return redirect("addresses")
