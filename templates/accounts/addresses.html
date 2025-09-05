@@ -92,24 +92,26 @@
     </div>
 
     <!-- Save/Cancel -->
-    <div class="col-12 mt-3 address-actions">
-      <div class="d-flex flex-wrap">
-        <button class="btn btn-fem me-3 mr-3 mb-2" type="submit">Save</button>
-        <a href="{% url 'addresses' %}" class="btn btn-fem-outline mb-2">Cancel</a>
-      </div>
+ <div class="col-12 mt-3">
+    <div class="d-flex flex-wrap">
+      <button class="btn btn-fem me-3 mr-3 mb-2" type="submit">Save</button>
+      <a href="{% url 'addresses' %}" class="btn btn-fem-outline mb-2">Cancel</a>
     </div>
-  </form>
+  </div>
+</form>
 
-  <!-- Delete -->
-  {% if address and address.is_active %}
-    <div class="col-12 mt-4">
+<!-- Delete form -->
+{% if address and address.is_active %}
+  <div class="col-12 mt-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+      <div></div> <!-- Push Delete to the right -->
       <form method="post" action="{% url 'address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
         {% csrf_token %}
         <button type="submit" class="btn btn-outline-danger">Delete</button>
       </form>
     </div>
-  {% endif %}
-</div>
+  </div>
+{% endif %}
 
 <script>
   // Toggle billing fields when "Billing same as shipping" is checked

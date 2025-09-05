@@ -55,22 +55,20 @@ def order_detail(request, order_number):
 def addresses(request):
     """
     Display and update the logged-in user's address.
-    - If the address exists but is soft-deleted (is_active=False), treat it as None until saved again.
-    - Saving = re-activate (is_active=True).
+    Reuse the same OneToOne instance even if soft-deleted (is_active=False),
+    and re-activate on save to avoid unique constraint collisions.
     """
     try:
-        ua = request.user.address
-        if ua and not ua.is_active:
-            ua = None
+        ua = request.user.address  
     except UserAddress.DoesNotExist:
-        ua = None
+        ua = None  
 
     if request.method == "POST":
-        form = UserAddressForm(request.POST, instance=ua)
+        form = UserAddressForm(request.POST, instance=ua)  
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user = request.user
-            obj.is_active = True  # Re-activate on save
+            obj.is_active = True  # re-activate when saved
             obj.save()
             messages.success(request, "Address saved.")
             return redirect("addresses")
@@ -80,7 +78,6 @@ def addresses(request):
         if ua:
             form = UserAddressForm(instance=ua)
         else:
-            # Pre-fill with reasonable defaults for first-time/soft-deleted users
             form = UserAddressForm(initial={
                 "full_name": request.user.get_full_name() or "",
                 "email": request.user.email,
@@ -88,7 +85,7 @@ def addresses(request):
                 "billing_same_as_shipping": True,
             })
 
-    # Pass `address` to the template so it can hide the Delete button if no active address exists
+    # No active, no delete
     return render(request, "accounts/addresses.html", {"form": form, "address": ua})
 
 
