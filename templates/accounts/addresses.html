@@ -91,10 +91,16 @@
     </div>
 
     <!-- Save/Cancel -->
-    <div class="col-12 mt-3 d-flex gap-2 flex-wrap">
-      <button class="btn btn-fem" type="submit">Save</button>
-      <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a>
+    
+    <div class="col-12 mt-3">
+      <div class="d-flex flex-wrap gap-3">
+        <button class="btn btn-fem me-3 mb-2" type="submit">Save</button>
+        <a href="{% url 'addresses' %}" class="btn btn-fem-outline mb-2">Cancel</a>
+      </div>
     </div>
+
+
+
 
     <!-- Conditional Delete (only if an active address exists) -->
     {% if address and address.is_active %}
