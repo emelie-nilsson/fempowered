@@ -8,7 +8,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env local (Heroku use Config Vars, not .env-file)
+# Load .env locally (Heroku uses Config Vars)
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 
@@ -24,9 +24,26 @@ DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
 
+# Allow extra hosts via env in prod, and default to .herokuapp.com
+if not DEBUG:
+    ALLOWED_HOSTS += env_list("ALLOWED_HOSTS_EXTRA", "")
+    if all("herokuapp.com" not in h for h in ALLOWED_HOSTS):
+        ALLOWED_HOSTS.append(".herokuapp.com")  
+
+# CSRF 
 CSRF_TRUSTED_ORIGINS = env_list(
-    "CSRF_TRUSTED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000"  
+    "CSRF_TRUSTED_ORIGINS",
+    "http://127.0.0.1:8000,http://localhost:8000,https://127.0.0.1:8000,https://localhost:8000,https://*.herokuapp.com"  
 )
+
+# Optional explicit Heroku app domain (e.g. fempowered-12345.herokuapp.com)
+HEROKU_APP_DOMAIN = os.getenv("HEROKU_APP_DOMAIN", "").strip()
+if HEROKU_APP_DOMAIN:
+    # ensure https origin is present
+    origin = f"https://{HEROKU_APP_DOMAIN}"
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)  
+
 
 # Stripe
 
@@ -55,7 +72,7 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "whitenoise.runserver_nostatic",  
+    "whitenoise.runserver_nostatic",
 
     # Apps
     "home",
@@ -70,7 +87,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -89,7 +106,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
-                "django.template.context_processors.request",  
+                "django.template.context_processors.request",  # allauth needs this
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "shop.context_processors.cart_counter",
@@ -122,7 +139,7 @@ WSGI_APPLICATION = "fempowered.wsgi.application"
 
 # Database
 
-# Default (SQLite i dev)
+# Default (SQLite in dev)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -130,7 +147,7 @@ DATABASES = {
     }
 }
 
-# Heroku Postgres DATABASE_URL (Heroku config vars)
+# Heroku Postgres via DATABASE_URL (Heroku Config Vars)
 if os.environ.get("DATABASE_URL"):
     DATABASES["default"] = dj_database_url.config(
         conn_max_age=600, ssl_require=True
@@ -161,7 +178,7 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Whitenoise Storages 
+# Whitenoise storages
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -177,46 +194,52 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Email
 
 # Who receives contact form emails
-CONTACT_RECIPIENTS = env_list("CONTACT_RECIPIENTS", "info@fempowered.com") 
-
+CONTACT_RECIPIENTS = env_list("CONTACT_RECIPIENTS", "info@fempowered.com")
 
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "Fempowered <no-reply@example.local>"
     ACCOUNT_EMAIL_VERIFICATION = "optional"
 else:
-    # Läser från miljövariabler så Heroku Config Vars faktiskt styr
+    # Read from environment so Heroku Config Vars actually control this
     EMAIL_BACKEND = os.getenv(
         "EMAIL_BACKEND",
-        "django.core.mail.backends.smtp.EmailBackend",   # default: smtp i prod
+        "django.core.mail.backends.smtp.EmailBackend",   
     ).strip()
     EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.sendgrid.net")
     EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-    # Gör om sträng till bool
+    # Coerce string to bool
     EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "apikey")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
-    # Undvik placeholder → sätt en vettig default (kan överskridas i Heroku)
+    # Avoid placeholder
     DEFAULT_FROM_EMAIL = os.getenv(
         "DEFAULT_FROM_EMAIL",
         "Fempowered <no-reply@fempowered.shop>"
     )
     SERVER_EMAIL = os.getenv("SERVER_EMAIL", "no-reply@fempowered.shop")
 
-    # Gör verifiering styrbar från env (så du kan sätta 'none' tills SMTP är klart)
+    # Make verification configurable via env (so you can set 'none' until SMTP is ready)
     ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
-    
 
 
 # Security dev vs prod
 
+# Harden common defaults 
+SECURE_CONTENT_TYPE_NOSNIFF = True  
+X_FRAME_OPTIONS = "DENY"            
+SECURE_REFERRER_POLICY = "same-origin"  
+SESSION_COOKIE_SAMESITE = "Lax"     
+CSRF_COOKIE_SAMESITE = "Lax"        
+USE_X_FORWARDED_HOST = True         
+
 if DEBUG:
-    # Local - no https
-    SECURE_SSL_REDIRECT = False       
-    SESSION_COOKIE_SECURE = False     
-    CSRF_COOKIE_SECURE = False        
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"  
+    # Local - no HTTPS
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 else:
     # Production security (Heroku)
     # Force HTTPS
@@ -232,7 +255,7 @@ else:
     # Heroku router
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"  
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 
 # Logging
