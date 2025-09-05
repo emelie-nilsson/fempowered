@@ -117,13 +117,13 @@
     </div>
 
     <div class="mt-4">
-      <a href="{% url 'accounts:orders' %}" class="btn btn-outline-secondary">Back to Orders</a>
+      <a href="{% url 'orders' %}" class="btn btn-outline-secondary">Back to Orders</a>
     </div>
 
   {% else %}
     <h1 class="main-heading">Order not found</h1>
     <p>We couldn't find this order.</p>
-    <a href="{% url 'accounts:orders' %}" class="btn btn-outline-secondary mt-2">Back to Orders</a>
+    <a href="{% url 'orders' %}" class="btn btn-outline-secondary mt-2">Back to Orders</a>
   {% endif %}
 </div>
 {% endblock %}
