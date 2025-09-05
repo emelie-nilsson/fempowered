@@ -61,38 +61,73 @@
       </div>
     </div>
 
-    <div class="col-12">
+ <div class="col-12">
       <h2 class="h5 mt-2">Billing</h2>
     </div>
-    <div class="col-12">
+    <div class="col-12 billing-field">
       <label class="form-label" for="{{ form.billing_address1.id_for_label }}">Address 1</label>
       {{ form.billing_address1 }}
       {{ form.billing_address1.errors }}
     </div>
-    <div class="col-12">
+    <div class="col-12 billing-field">
       <label class="form-label" for="{{ form.billing_address2.id_for_label }}">Address 2</label>
       {{ form.billing_address2 }}
       {{ form.billing_address2.errors }}
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 billing-field">
       <label class="form-label" for="{{ form.billing_postal_code.id_for_label }}">Postal code</label>
       {{ form.billing_postal_code }}
       {{ form.billing_postal_code.errors }}
     </div>
-    <div class="col-md-5">
+    <div class="col-md-5 billing-field">
       <label class="form-label" for="{{ form.billing_city.id_for_label }}">City</label>
       {{ form.billing_city }}
       {{ form.billing_city.errors }}
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 billing-field">
       <label class="form-label" for="{{ form.billing_country.id_for_label }}">Country</label>
       {{ form.billing_country }}
       {{ form.billing_country.errors }}
     </div>
 
-    <div class="col-12 mt-3">
-      <button class="btn btn-primary">Save address</button>
+    <div class="col-12 mt-3 d-flex gap-2 flex-wrap">
+      <button class="btn btn-fem">Save address</button> 
+      <a href="{% url 'accounts:addresses' %}" class="btn btn-fem-outline">Cancel</a> 
     </div>
   </form>
+
+  <!-- Separate soft-delete/clear form -->
+  <div class="mt-4">
+    <form method="post" action="{% url 'accounts:address_delete' %}" onsubmit="return confirm('Clear your saved address?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger">Delete address</button>
+    </form>
+  </div>
 </div>
+
+<!-- Helper script to toggle billing fields when 'same as shipping' is checked -->
+<script>
+  (function () {
+    const same = document.getElementById('{{ form.billing_same_as_shipping.id_for_label }}');
+    const billingBlocks = document.querySelectorAll('.billing-field');
+
+    function toggleBilling() {
+      const hide = same && same.checked;
+      billingBlocks.forEach(function (el) {
+        if (!el) return;
+        el.style.opacity = hide ? '0.6' : '1';
+        // disable/enable inputs inside block
+        el.querySelectorAll('input, select, textarea').forEach(function (inp) {
+          inp.disabled = !!hide;
+        });
+      });
+    }
+
+    if (same) {
+      same.addEventListener('change', toggleBilling);
+      // run once on load
+      toggleBilling();
+    }
+  })();
+</script>
 {% endblock %}

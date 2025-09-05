@@ -26,7 +26,10 @@ class UserAddress(models.Model):
     billing_city = models.CharField(max_length=80, blank=True, default="")
     billing_country = models.CharField(max_length=2, blank=True, default="")
 
+    # Management
+    is_active = models.BooleanField(default=True)  
     updated_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return f"Address for {self.user.email}"
