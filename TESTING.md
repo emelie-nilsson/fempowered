@@ -25,7 +25,6 @@ To confirm that the checkout form enforces key server-side validation rules:
 All validation rules worked as expected, and the tests passed successfully ✔
 
 ## Manual Testing
-## Manual Testing
 
 ### User Story 1  
 **As a Visitor, I want to browse available products so that I can explore what the shop offers without needing an account.**
