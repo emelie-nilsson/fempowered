@@ -10,19 +10,49 @@
 
 ## Automated Testing
 
-### Checkout Form Validation
-
-**File:** checkout/tests/test_forms.py  
-**Command:** python manage.py test checkout.tests.test_forms  
-
-**Purpose:**  
-To confirm that the checkout form enforces key server-side validation rules:  
-- Full name must include both first and last name  
-- Phone number may only contain digits (and +, - or spaces)  
-- Postal code must be numeric and within a valid length  
+### Checkout Form Tests
+Unit tests for the `CheckoutAddressForm` are located in `checkout/tests/test_forms.py`.  
+The tests verify that the form enforces key validation rules:
+- **Full name**: must contain both first and last name.
+- **Phone number**: must be sufficiently long and contain only valid characters.
+- **Postal code**: must consist of digits only.
+- **Billing fields**: required when billing address is not the same as shipping.
 
 **Result:**  
-All validation rules worked as expected, and the tests passed successfully ✔
+All validation rules worked as expected. The tests passed successfully ✔
+
+---
+
+### Checkout Views Tests
+View tests for the checkout address step are located in `checkout/tests/test_views.py`.  
+The tests check the following:
+- **GET request**: the checkout address page renders successfully.
+- **Invalid POST**: submitting an incomplete form stays on the page and displays errors.
+- **Valid POST**: submitting a valid form redirects to the next step (or responds with `400` if business preconditions, such as an empty cart, are not met).
+- **Billing requirements**: ensures billing address fields are validated when `billing_same_as_shipping` is unchecked.
+
+**Result:**  
+All tests passed ✔.  
+The tests are written to tolerate variations in URL structure or checkout preconditions.
+
+---
+
+### Smoke Tests
+High-level smoke tests are located in `tests/test_smoke.py`.  
+These perform lightweight checks on key routes:
+- Home (`/`)
+- Shop (`/shop/` or `/products/`)
+- Cart (`/cart/` or `/basket/`)
+- Checkout (`/checkout/` or `/checkout/address/`)
+- Login (`/accounts/login/`)
+- Signup (`/accounts/signup/`)
+
+The smoke test accepts common response codes (200, 302, 303, 403, 400) and skips gracefully if a route is not found in the project.
+
+**Result:**  
+Some paths were skipped depending on the project’s URL configuration.  
+The smoke testing framework is in place and can easily be updated as routes are finalized.
+
 
 ## Manual Testing
 
