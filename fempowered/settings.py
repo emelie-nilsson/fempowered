@@ -5,7 +5,6 @@ import dj_database_url
 
 
 # Base paths
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load .env locally (Heroku uses Config Vars)
@@ -83,6 +82,12 @@ INSTALLED_APPS = [
 
     # Dev-tools
     "django_extensions",
+]
+
+# --- Cloudinary apps (added here so they load regardless; only used in prod via STORAGES below) ---
+INSTALLED_APPS += [
+    "cloudinary_storage",
+    "cloudinary",
 ]
 
 MIDDLEWARE = [
@@ -178,17 +183,36 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Whitenoise storages
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+# Whitenoise + media storages
+# - In DEBUG: use local FileSystemStorage for media
+# - In production: store media on Cloudinary (CLOUDINARY_URL must be set in Heroku)
+if DEBUG:
+    STORAGES = {
+        # Static files via WhiteNoise
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+        # Media files locally
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
     }
-}
+else:
+    STORAGES = {
+        # Media files on Cloudinary in production
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        # Static files via WhiteNoise
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
 WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / "media"   # used only in DEBUG (local filesystem)
 
 
 # Email
