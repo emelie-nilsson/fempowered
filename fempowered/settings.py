@@ -184,22 +184,26 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Whitenoise + media storages
-# - In DEBUG: use local FileSystemStorage for media
-# - In production: store media on Cloudinary (CLOUDINARY_URL must be set in Heroku)
-if DEBUG:
+# - In DEBUG: default = FileSystemStorage (lokala filer)
+# - In DEBUG + USE_CLOUDINARY=True: default = Cloudinary
+# - In production (DEBUG=False): default = Cloudinary
+
+USE_CLOUDINARY = os.getenv("USE_CLOUDINARY", "False").lower() == "true"
+
+if DEBUG and not USE_CLOUDINARY:
     STORAGES = {
         # Static files via WhiteNoise
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
-        # Media files locally
+        # Media files locally (saved under MEDIA_ROOT)
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
     }
 else:
     STORAGES = {
-        # Media files on Cloudinary in production
+        # Media files on Cloudinary
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
@@ -208,6 +212,7 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+
 
 WHITENOISE_MANIFEST_STRICT = False
 
