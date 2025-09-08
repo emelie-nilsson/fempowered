@@ -213,6 +213,9 @@ else:
         },
     }
 
+CLOUDINARY_STORAGE = {
+    "PREFIX": "media",   
+}
 
 WHITENOISE_MANIFEST_STRICT = False
 
