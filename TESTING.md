@@ -9,6 +9,11 @@
 ---
 
 ## Automated Testing
+All automated tests were executed module by module during development, using the Django test runner. Each test file was run individually with commands such as:
+
+`python manage.py test checkout.tests.test_forms`   
+`python manage.py test checkout.tests.test_views`  
+`python manage.py test shop.tests.test_models`
 
 ### Checkout Form Tests
 Unit tests for the `CheckoutAddressForm` are located in `checkout/tests/test_forms.py`.  
@@ -52,6 +57,144 @@ The smoke test accepts common response codes (200, 302, 303, 403, 400) and skips
 **Result:**  
 Some paths were skipped depending on the project’s URL configuration.  
 The smoke testing framework is in place and can easily be updated as routes are finalized.
+
+### Checkout Payment and Success Views
+Tests for the checkout payment and success steps are located in  
+`checkout/tests/test_payment_views.py` and `checkout/tests/test_success_view.py`.  
+
+The tests check that:
+- **Payment view (GET/POST)**: page loads without server errors and responds gracefully.
+- **Success view**: renders correctly both with and without a valid order id in the session.
+
+**Result:**  
+All tests passed ✔.  
+
+---
+
+### Checkout Flow End-to-End
+End-to-end style tests for the checkout process are in  
+`checkout/tests/test_checkout_flow.py`.  
+
+These tests simulate:
+- **Address step (GET)**: page renders successfully.
+- **Address step (POST)**: valid data is submitted and accepted.
+- **Payment step (GET)**: can be accessed after address step.
+
+**Result:**  
+The checkout flow worked correctly and all tests passed ✔.  
+
+---
+
+### Shop Model Tests
+Unit tests for `shop` models are located in `shop/tests/test_models.py`.  
+The tests cover:
+- `__str__` methods for `Product`, `Category`, and `Review`.
+- Skips are in place for models that require relations not set up in the test database.
+
+**Result:**  
+All applicable tests passed ✔.  
+Skipped tests were expected and documented.  
+
+---
+
+### Shop View Tests
+Smoke tests for shop views are in `shop/tests/test_views.py` and  
+`shop/tests/test_product_list_smoke.py`.  
+
+They confirm that:
+- **Product listing page** renders successfully.
+- **Search and filtering** endpoints respond without error.
+- **Pagination** (if present) returns valid responses.
+
+**Result:**  
+All tests passed ✔.  
+
+---
+
+### Cart View Tests
+Cart view tests are located in `shop/tests/test_cart_views.py`.  
+They check:
+- **Cart page** loads correctly.
+- Cart view integrates with session data.
+- Skips are in place for flows requiring advanced setup.
+
+**Result:**  
+All tests passed ✔ (with expected skips).  
+
+---
+
+### URL Resolution Tests
+Tests for URL resolution are in `tests/test_urls.py`.  
+
+They ensure that:
+- Named URLs resolve to the correct endpoints.
+- Each route responds with a valid HTTP status (200, 302, 303, 400, or 403).
+
+**Result:**  
+All tested URLs resolved correctly ✔.  
+
+---
+
+### Authentication View Tests
+Smoke tests for authentication flows are in `tests/test_auth_views_smoke.py`.  
+
+They check:
+- **Login** page loads (GET) and handles invalid POST gracefully.
+- **Signup** page renders successfully.
+- **Password reset** page loads correctly.
+
+**Result:**  
+All tests passed ✔.  
+
+---
+
+### Password Reset Email Test
+Password reset email tests are located in `tests/test_password_reset_email.py`.  
+
+They verify:
+- A registered user can trigger a password reset.
+- An email is sent and captured in Django’s outbox.
+
+**Result:**  
+Test passed ✔.  
+
+---
+
+### Admin Site Tests
+Smoke tests for the Django admin are in `tests/test_admin_smoke.py`.  
+
+They ensure:
+- Admin login works with a superuser.
+- Admin index page loads.
+- Product and Order changelists are accessible if registered.
+
+**Result:**  
+All tests passed ✔ (with expected skips for models not present).  
+
+---
+
+### CSRF Token Tests
+CSRF smoke tests are in `tests/test_csrf_smoke.py`.  
+
+They confirm that:
+- Login, signup, and checkout address forms include a CSRF token when rendered.
+
+**Result:**  
+All tested forms included CSRF tokens ✔.  
+
+---
+
+### Error Page Tests
+Error page tests are located in `tests/test_error_pages.py`.  
+
+They ensure that:
+- **404 page** is returned for non-existent URLs.
+- **500 page** is returned when a view raises an exception.
+- Tests run with `DEBUG=False` to simulate production.
+
+**Result:**  
+Both error pages rendered correctly ✔.  
+
 
 
 ## Manual Testing

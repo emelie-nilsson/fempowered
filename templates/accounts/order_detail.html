@@ -48,14 +48,23 @@
         {% for item in order.items.all %}
           <tr>
             <td>
-                {% if item.product and item.product.catalog_image_url %}
+              {% if item.product and item.product.image_catalog %}
                 <img class="order-thumb"
-                src="{{ item.product.catalog_image_url }}"
-                alt="{{ item.product_name }}"
-                width="48" height="48" loading="lazy">
-                {% endif %}
+                     src="{{ item.product.image_catalog.url }}"
+                     alt="{{ item.product_name }}"
+                     width="48" height="48" loading="lazy">
+              {% elif item.product and item.product.image_details %}
+                <img class="order-thumb"
+                     src="{{ item.product.image_details.url }}"
+                     alt="{{ item.product_name }}"
+                     width="48" height="48" loading="lazy">
+              {% else %}
+                <img class="order-thumb"
+                     src="{% static 'img/branding/placeholder.webp' %}"
+                     alt="{{ item.product_name }}"
+                     width="48" height="48" loading="lazy">
+              {% endif %}
             </td>
-
 
             <td>{{ item.product_name }}</td>
             <td>{% if item.size %}{{ item.size }}{% else %}-{% endif %}</td>
