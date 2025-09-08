@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
-{% load currency %}
+
 {% block content %}
 <div class="container py-5">
+  <!-- Page title -->
   <h1 class="main-heading mb-3">Shop</h1>
 
+  <!-- Filters form -->
   <form method="get" class="mb-4">
     <div class="form-row">
       <div class="col-md-4 mb-2">
@@ -37,6 +39,7 @@
       </div>
     </div>
 
+    <!-- Apply & Clear buttons -->
     <button class="btn btn-fem mt-2">Apply</button>
     {% if q or cat or color or sort != "name_asc" %}
       <a href="{% url 'product_list' %}" class="btn btn-outline-secondary mt-2 ml-2">Clear filters</a>
@@ -44,37 +47,30 @@
   </form>
 
   {% if page_obj.object_list %}
+    <!-- Product grid -->
     <div class="row">
       {% for product in page_obj.object_list %}
         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
           <div class="card h-100 border-0 shadow-sm product-card">
-
             <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-reset d-block">
-              <!-- Image http, /static/, static/, /media/ -->
-              {% with p=product.catalog_image_url|default_if_none:'' %}
-                {% if p and p|slice:":4" == "http" %}
-                  <img src="{{ p }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                {% elif p and p|slice:":8" == "/static/" %}
-                  <img src="{% static p|slice:'8:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                {% elif p and p|slice:":7" == "static/" %}
-                  <img src="{% static p|slice:'7:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                {% elif p and p|slice:":7" == "/media/" %}
-                  <img src="{% static p|slice:'7:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                {% elif p and p|first == "/" %}
-                  <img src="{% static p|slice:'1:' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                {% elif p %}
-                  <img src="{% static p %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                {% else %}
-                  <img src="{% static 'img/placeholder.webp' %}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
-                {% endif %}
-              {% endwith %}
+              <!-- Direct /media/ path from image_catalog -->
+              {% if product.image_catalog %}
+                <img src="/media/{{ product.image_catalog }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+              {% else %}
+                <!-- Neutral box when no image is available -->
+                <div class="bg-light" style="aspect-ratio:1/1;"></div>
+              {% endif %}
 
+              <!-- Product text -->
               <div class="card-body">
                 <h5 class="card-title mb-1">{{ product.name }}</h5>
-                {% if product.color %}<div class="small text-muted">{{ product.color }}</div>{% endif %}
+                {% if product.color %}
+                  <div class="small text-muted">{{ product.color }}</div>
+                {% endif %}
               </div>
             </a>
 
+            <!-- Footer: price + favorite toggle -->
             <div class="card-footer product-footer">
               <div class="product-meta">
                 <div class="price">{{ product.price }} €</div>
@@ -102,6 +98,7 @@
       {% endfor %}
     </div>
 
+    <!-- Pagination -->
     <nav aria-label="Products">
       <ul class="pagination">
         {% if page_obj.has_previous %}
@@ -109,7 +106,9 @@
             <a class="page-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if cat %}category={{ cat|urlencode }}&{% endif %}{% if color %}color={{ color|urlencode }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}">«</a>
           </li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled">
+          <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
         {% if page_obj.has_next %}
           <li class="page-item">
             <a class="page-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if cat %}category={{ cat|urlencode }}&{% endif %}{% if color %}color={{ color|urlencode }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}">»</a>
@@ -119,32 +118,8 @@
     </nav>
 
   {% else %}
+    <!-- Empty state -->
     <p>No products matched your filters.</p>
   {% endif %}
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener("click", function(e){
-  const btn = e.target.closest(".fav-btn");
-  if(!btn) return;
-  e.preventDefault();
-  const form = btn.closest("form");
-  const url = form.action;
-  const csrftoken = form.querySelector("input[name=csrfmiddlewaretoken]").value;
-
-  fetch(url, {
-    method: "POST",
-    headers: {"X-CSRFToken": csrftoken, "X-Requested-With": "XMLHttpRequest"},
-  }).then(r => r.json()).then(() => {
-    const icon = btn.querySelector(".fav-icon");
-    const pressed = btn.getAttribute("aria-pressed") === "true";
-    btn.setAttribute("aria-pressed", (!pressed).toString());
-    if (pressed) { icon.classList.remove("fa-solid"); icon.classList.add("fa-regular"); }
-    else { icon.classList.remove("fa-regular"); icon.classList.add("fa-solid"); }
-  }).catch(() => form.submit());
-});
-</script>
-{% endblock %}
-

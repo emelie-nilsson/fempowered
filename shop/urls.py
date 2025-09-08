@@ -2,24 +2,17 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Shop home 
+    # Listing
     path("", views.product_list, name="shop"),
-
-    # Product list & details
     path("products/", views.product_list, name="product_list"),
     path("products/<int:pk>/", views.product_detail, name="product_detail"),
 
-    # Reviews
-    path("products/<int:pk>/reviews/new/", views.ReviewCreateView.as_view(), name="review_create"),
-    path("reviews/<int:pk>/edit/", views.ReviewUpdateView.as_view(), name="review_update"),
-    path("reviews/<int:pk>/delete/", views.ReviewDeleteView.as_view(), name="review_delete"),
-
     # Cart
     path("cart/", views.cart_detail, name="cart_detail"),
-    path("cart/add/<int:product_id>/", views.cart_add, name="cart_add"),
-    path("cart/remove/<int:product_id>/", views.cart_remove, name="cart_remove"),
+    path("cart/add/<int:product_id>/", views.cart_add, name="add_to_cart"),   # alias so template's 'add_to_cart' works
     path("cart/update/<int:product_id>/", views.cart_update, name="cart_update"),
-    path('cart/reset/', views.cart_reset, name='cart_reset'),
+    path("cart/remove/<int:product_id>/", views.cart_remove, name="cart_remove"),
+    path("cart/reset/", views.cart_reset, name="cart_reset"),
 
     # Favorites
     path("favorites/", views.FavoriteListView.as_view(), name="favorites"),

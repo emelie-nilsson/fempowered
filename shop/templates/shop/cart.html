@@ -1,68 +1,49 @@
 {% extends "base.html" %}
 {% load static %}
-{% load currency %}
+
 {% block content %}
 <div class="container py-5 cart">
+  <!-- Page title -->
   <h1 class="main-heading">Your Bag</h1>
 
   {% if cart_items %}
   <div class="cart-grid">
-    <!-- Items -->
+    <!-- Line items -->
     <ul class="cart-list">
       {% for ci in cart_items %}
       <li class="cart-item">
-        <!-- Image logic, http, /static/, static/, /media/. Fallback detail_image_url and placeholder. -->
-        {% with p=ci.product.catalog_image_url|default_if_none:'' %}
-          {% if p and p|slice:":4" == "http" %}
-            <img class="cart-thumb" src="{{ p }}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-          {% elif p and p|slice:":8" == "/static/" %}
-            <img class="cart-thumb" src="{% static p|slice:'8:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-          {% elif p and p|slice:":7" == "static/" %}
-            <img class="cart-thumb" src="{% static p|slice:'7:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-          {% elif p and p|slice:":7" == "/media/" %}
-            <img class="cart-thumb" src="{% static p|slice:'7:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-          {% elif p and p|first == "/" %}
-            <img class="cart-thumb" src="{% static p|slice:'1:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-          {% elif p %}
-            <img class="cart-thumb" src="{% static p %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-          {% else %}
-            {% with d=ci.product.detail_image_url|default_if_none:'' %}
-              {% if d and d|slice:":4" == "http" %}
-                <img class="cart-thumb" src="{{ d }}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-              {% elif d and d|slice:":8" == "/static/" %}
-                <img class="cart-thumb" src="{% static d|slice:'8:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-              {% elif d and d|slice:":7" == "static/" %}
-                <img class="cart-thumb" src="{% static d|slice:'7:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-              {% elif d and d|slice:":7" == "/media/" %}
-                <img class="cart-thumb" src="{% static d|slice:'7:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-              {% elif d and d|first == "/" %}
-                <img class="cart-thumb" src="{% static d|slice:'1:' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-              {% elif d %}
-                <img class="cart-thumb" src="{% static d %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-              {% else %}
-                <img class="cart-thumb" src="{% static 'img/placeholder.webp' %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
-              {% endif %}
-            {% endwith %}
-          {% endif %}
-        {% endwith %}
+        <!-- Compact thumbnail: use image_catalog -->
+        {% if ci.product.image_catalog %}
+          <img class="cart-thumb" src="/media/{{ ci.product.image_catalog }}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+        {% else %}
+          <!-- Neutral box when no image is available -->
+          <div class="cart-thumb bg-light" style="width:80px;height:80px;"></div>
+        {% endif %}
 
+        <!-- Item info -->
         <div class="cart-info">
           <div class="cart-title">
             <span class="name">{{ ci.product.name }}</span>
-            {% if ci.product.color %}<span class="pill">{{ ci.product.color }}</span>{% endif %}
-            {% if ci.size %}<span class="pill">Size {{ ci.size }}</span>{% endif %}
+            {% if ci.product.color %}
+              <span class="pill">{{ ci.product.color }}</span>
+            {% endif %}
+            {% if ci.size %}
+              <span class="pill">Size {{ ci.size }}</span>
+            {% endif %}
           </div>
 
           {% if ci.quantity > 1 %}
             <small class="muted">Unit: {{ ci.unit_price|floatformat:2 }} €</small>
           {% endif %}
 
-          <!-- Qty -->
+          <!-- Quantity and actions -->
           <form method="post"
                 action="{% url 'cart_update' ci.product.id %}"
                 class="cart-row-actions two-rows">
             {% csrf_token %}
-            {% if ci.size %}<input type="hidden" name="size" value="{{ ci.size }}">{% endif %}
+            {% if ci.size %}
+              <input type="hidden" name="size" value="{{ ci.size }}">
+            {% endif %}
 
             <div class="qty-row">
               <label class="sr-only" for="q{{ forloop.counter }}">Qty</label>
@@ -77,6 +58,7 @@
           </form>
         </div>
 
+        <!-- Line total -->
         <div class="cart-line-total">
           <span>{{ ci.line_total|floatformat:2 }} €</span>
         </div>
@@ -84,7 +66,7 @@
       {% endfor %}
     </ul>
 
-    <!--Summary -->
+    <!-- Summary -->
     <aside class="cart-summary">
       <h2 class="section-title">Summary</h2>
       <div class="cart-summary-row">
@@ -102,6 +84,7 @@
   </div>
 
   {% else %}
+    <!-- Empty cart -->
     <p class="page-text">Your bag is empty.</p>
     <a href="{% url 'shop' %}" class="btn">Go to Shop</a>
   {% endif %}

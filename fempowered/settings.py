@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
-
+import mimetypes
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +11,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 
-# Core security & env
+# Ensure correct content types for assets that Python's mimetypes may not know on Windows
+mimetypes.add_type("image/webp", ".webp", True)
+mimetypes.add_type("image/svg+xml", ".svg", True)
+
+
+# Core security & env 
 
 def env_list(name: str, default: str = "") -> list[str]:
     raw = os.getenv(name, default)
@@ -27,24 +32,23 @@ ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
 if not DEBUG:
     ALLOWED_HOSTS += env_list("ALLOWED_HOSTS_EXTRA", "")
     if all("herokuapp.com" not in h for h in ALLOWED_HOSTS):
-        ALLOWED_HOSTS.append(".herokuapp.com")  
+        ALLOWED_HOSTS.append(".herokuapp.com")
 
-# CSRF 
+# CSRF
 CSRF_TRUSTED_ORIGINS = env_list(
     "CSRF_TRUSTED_ORIGINS",
-    "http://127.0.0.1:8000,http://localhost:8000,https://127.0.0.1:8000,https://localhost:8000,https://*.herokuapp.com"  
+    "http://127.0.0.1:8000,http://localhost:8000,https://127.0.0.1:8000,https://localhost:8000,https://*.herokuapp.com"
 )
 
 # Optional explicit Heroku app domain (e.g. fempowered-12345.herokuapp.com)
 HEROKU_APP_DOMAIN = os.getenv("HEROKU_APP_DOMAIN", "").strip()
 if HEROKU_APP_DOMAIN:
-    # ensure https origin is present
     origin = f"https://{HEROKU_APP_DOMAIN}"
     if origin not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(origin)  
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 
-# Stripe
+# Stripe 
 
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
@@ -55,7 +59,7 @@ STRIPE_CURRENCY = os.getenv("STRIPE_CURRENCY", "eur")
 TEST_ALLOW_REVIEW_WITHOUT_PURCHASE = DEBUG  # allow in dev, off in prod
 
 
-# Django apps
+# Django apps 
 
 INSTALLED_APPS = [
     # Django
@@ -80,14 +84,8 @@ INSTALLED_APPS = [
     "checkout",
     "contact",
 
-    # Dev-tools
+    # Dev-tools (optional)
     "django_extensions",
-]
-
-# --- Cloudinary apps (added here so they load regardless; only used in prod via STORAGES below) ---
-INSTALLED_APPS += [
-    "cloudinary_storage",
-    "cloudinary",
 ]
 
 MIDDLEWARE = [
@@ -120,6 +118,7 @@ TEMPLATES = [
                 "django.templatetags.i18n",
                 "django.templatetags.static",
                 "home.templatetags.form_tags",
+                "shop.templatetags.image_urls",
             ],
         },
     },
@@ -142,9 +141,8 @@ LOGIN_REDIRECT_URL = "/"
 WSGI_APPLICATION = "fempowered.wsgi.application"
 
 
-# Database
+# Database 
 
-# Default (SQLite in dev)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -154,12 +152,10 @@ DATABASES = {
 
 # Heroku Postgres via DATABASE_URL (Heroku Config Vars)
 if os.environ.get("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.config(
-        conn_max_age=600, ssl_require=True
-    )
+    DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 
-# Password validation
+#  Password validation 
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -169,7 +165,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization / Timezone
+# Internationalization / Timezone 
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Stockholm"
@@ -177,55 +173,33 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static & Media
+# Static & Media 
+# WhiteNoise for static, local filesystem for media (both dev & prod)
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Whitenoise + media storages
-# - In DEBUG: default = FileSystemStorage (lokala filer)
-# - In DEBUG + USE_CLOUDINARY=True: default = Cloudinary
-# - In production (DEBUG=False): default = Cloudinary
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
-USE_CLOUDINARY = os.getenv("USE_CLOUDINARY", "False").lower() == "true"
-
-if DEBUG and not USE_CLOUDINARY:
-    STORAGES = {
-        # Static files via WhiteNoise
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-        # Media files locally (saved under MEDIA_ROOT)
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-    }
-else:
-    STORAGES = {
-        # Media files on Cloudinary
-        "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        },
-        # Static files via WhiteNoise
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
-
-CLOUDINARY_STORAGE = {
-    "PREFIX": "media",   
+STORAGES = {
+    # Static files via WhiteNoise
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+    # Media files stored on local filesystem
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
 }
 
+# Avoid 500 if manifest file missing after first collectstatic
 WHITENOISE_MANIFEST_STRICT = False
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"   # used only in DEBUG (local filesystem)
 
+# Email 
 
-# Email
-
-# Who receives contact form emails
 CONTACT_RECIPIENTS = env_list("CONTACT_RECIPIENTS", "info@fempowered.com")
 
 if DEBUG:
@@ -233,48 +207,36 @@ if DEBUG:
     DEFAULT_FROM_EMAIL = "Fempowered <no-reply@example.local>"
     ACCOUNT_EMAIL_VERIFICATION = "optional"
 else:
-    # Read from environment so Heroku Config Vars actually control this
     EMAIL_BACKEND = os.getenv(
         "EMAIL_BACKEND",
-        "django.core.mail.backends.smtp.EmailBackend",   
+        "django.core.mail.backends.smtp.EmailBackend",
     ).strip()
     EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.sendgrid.net")
     EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-    # Coerce string to bool
     EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "apikey")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-
-    # Avoid placeholder
-    DEFAULT_FROM_EMAIL = os.getenv(
-        "DEFAULT_FROM_EMAIL",
-        "Fempowered <no-reply@fempowered.shop>"
-    )
+    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Fempowered <no-reply@fempowered.shop>")
     SERVER_EMAIL = os.getenv("SERVER_EMAIL", "no-reply@fempowered.shop")
-
-    # Make verification configurable via env (so you can set 'none' until SMTP is ready)
     ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
 
 
-# Security dev vs prod
+# Security dev vs prod 
 
-# Harden common defaults 
-SECURE_CONTENT_TYPE_NOSNIFF = True  
-X_FRAME_OPTIONS = "DENY"            
-SECURE_REFERRER_POLICY = "same-origin"  
-SESSION_COOKIE_SAMESITE = "Lax"     
-CSRF_COOKIE_SAMESITE = "Lax"        
-USE_X_FORWARDED_HOST = True         
+# Harden common defaults
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_REFERRER_POLICY = "same-origin"
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+USE_X_FORWARDED_HOST = True
 
 if DEBUG:
-    # Local - no HTTPS
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 else:
-    # Production security (Heroku)
-    # Force HTTPS
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -290,7 +252,7 @@ else:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 
-# Logging
+# Logging 
 
 LOGGING = {
     "version": 1,
