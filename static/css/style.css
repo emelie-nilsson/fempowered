@@ -825,3 +825,11 @@ body.error-404 .btn-outline-secondary {
 .stars input[type="radio"]:checked ~ label {
   color: var(--secondary-color);
 }
+
+/* Review create/edit – luft mellan knapparna */
+.review-form .review-submit {
+  margin-top: 1rem;                  /* luft ovanför knappraden */
+}
+.review-form .review-submit .btn + .btn {
+  margin-left: 0.75rem;              /* luft mellan knapparna */
+}
