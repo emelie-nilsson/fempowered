@@ -14,14 +14,14 @@
       {% elif product.image_catalog %}
         <img src="/media/{{ product.image_catalog }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
       {% else %}
-        <!-- Neutral box when no image is available -->
-        <div class="bg-light w-100" style="aspect-ratio:2/3;"></div>
+        <!-- Placeholder (styled in CSS only) -->
+        <div class="img-placeholder img-placeholder--portrait rounded shadow-sm"></div>
       {% endif %}
     </div>
 
     <!-- Right: product info and actions -->
     <div class="col-md-6">
-      <!-- Bigger green heading: size from main-heading, color from page-subtitle -->
+      <!-- Bigger green heading via existing classes -->
       <h1 class="main-heading page-subtitle mb-2">{{ product.name }}</h1>
 
       {% if product.color %}
@@ -34,10 +34,10 @@
         <p class="lead">{{ product.description }}</p>
       {% endif %}
 
-      <!-- Actions: Add to cart + Add/Remove favorites -->
-      <div class="d-flex flex-wrap align-items-end">
+      <!-- Actions: Add to cart + Add/Remove favorites (no layout jump) -->
+      <div class="actions">
         <!-- Add to cart -->
-        <form method="post" action="{% url 'add_to_cart' product.id %}" class="mr-2 mb-2">
+        <form method="post" action="{% url 'add_to_cart' product.id %}">
           {% csrf_token %}
           <div class="form-row align-items-end">
             <div class="col-auto">
@@ -45,31 +45,30 @@
               <input id="qty" type="number" name="quantity" min="1" value="1" class="form-control" required>
             </div>
             <div class="col-auto">
-              <button class="btn btn-fem mt-3">Add to cart</button>
+              <button class="btn btn-fem">Add to cart</button>
             </div>
           </div>
         </form>
 
-        <!-- Add/Remove favorites: same primary button style so hover matches -->
+        <!-- Favorites: same primary style; text/icon toggled by aria-pressed -->
         <form method="post"
               action="{% url 'toggle_favorite' product.id %}?next={{ request.get_full_path|urlencode }}"
-              class="mb-2">
+              class="fav-detail-form">
           {% csrf_token %}
-          {% if is_favorite %}
-            <button type="submit" class="btn btn-fem mt-3">
-              <i class="fa-solid fa-heart mr-1"></i> Remove from favorites
-            </button>
-          {% else %}
-            <button type="submit" class="btn btn-fem mt-3">
-              <i class="fa-regular fa-heart mr-1"></i> Add to favorites
-            </button>
-          {% endif %}
+          <button type="submit"
+                  class="btn btn-fem fav-detail-btn"
+                  aria-pressed="{{ is_favorite|yesno:'true,false' }}">
+            <i class="fa-regular fa-heart mr-1 fav-icon not-fav"></i>
+            <i class="fa-solid fa-heart mr-1 fav-icon is-fav"></i>
+            <span data-add>Add to favorites</span>
+            <span data-remove>Remove from favorites</span>
+          </button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Reviews section -->
+  <!-- Reviews -->
   <hr class="my-4">
   <h2 class="h5 page-subtitle mb-3">Reviews</h2>
 
@@ -78,15 +77,15 @@
       {% for r in reviews %}
         <li class="mb-3">
           <strong>{{ r.user }}</strong>
-          {% if r.is_verified %}
-            <span class="badge badge-success">Verified buyer</span>
-          {% endif %}
-          <!-- Render the review text; adjust field name if your model differs -->
-          <div class="mt-1">
-            {{ r.comment|default:r.text|default:r.body|default:"" }}
-          </div>
 
-          <!-- Optional owner actions -->
+          {% if r.is_verified %}
+            <span class="pill pill-verified">
+              <i class="fa-solid fa-check icon"></i> Verified buyer
+            </span>
+          {% endif %}
+
+          <div class="mt-1">{% firstof r.comment r.body r.text "" %}</div>
+
           {% if request.user.is_authenticated and r.user_id == request.user.id %}
             <div class="mt-1">
               <a class="btn btn-sm btn-outline-secondary" href="{% url 'review_update' r.pk %}">Edit</a>
@@ -97,11 +96,10 @@
       {% endfor %}
     </ul>
   {% else %}
-    <!-- Empty state when there are no reviews -->
     <p class="text-muted mb-0">No reviews yet.</p>
   {% endif %}
 
-  <!-- Write a review: shown when allowed by the view -->
+  <!-- Write a review / login prompt + nudge -->
   {% if can_review and form %}
     <hr class="my-4">
     <h3 class="h6 page-subtitle">Write a review</h3>
@@ -112,14 +110,11 @@
     </form>
 
   {% elif not request.user.is_authenticated %}
-    <!-- Not logged in: friendly prompt to log in -->
     <hr class="my-4">
     <p class="mb-2">
       <a class="btn btn-outline-secondary" href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">Log in</a>
       to write a review.
     </p>
-
-    <!-- Account nudge -->
     <div class="account-nudge">
       <h2 class="h6 mb-2">
         <i class="fa-solid fa-user-check mr-2"></i> Aren’t you a part of Fempowered yet?
@@ -127,20 +122,43 @@
       <p class="mb-0">
         Create a free account to enjoy faster checkout, saved favorites and order tracking.
         <a href="{% url 'account_signup' %}">Sign up</a> or
-        <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">Log in</a>.
+        <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">log in</a>.
       </p>
     </div>
 
   {% elif has_reviewed %}
-    <!-- Already reviewed -->
     <hr class="my-4">
     <p class="text-muted mb-0">You have already reviewed this product.</p>
 
   {% else %}
-    <!-- Logged in but not a verified buyer -->
     <hr class="my-4">
     <p class="text-muted mb-0">Only verified buyers can write a review.</p>
   {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* AJAX favorite toggle with instant UI feedback */
+document.addEventListener("click", function(e){
+  const btn = e.target.closest(".fav-detail-btn");
+  if(!btn) return;
+  e.preventDefault();
+
+  const form = btn.closest(".fav-detail-form");
+  const csrftoken = form.querySelector("input[name=csrfmiddlewaretoken]").value;
+
+  fetch(form.action, {
+    method: "POST",
+    headers: { "X-CSRFToken": csrftoken, "X-Requested-With": "XMLHttpRequest" }
+  })
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(() => {
+    const pressed = btn.getAttribute("aria-pressed") === "true";
+    btn.setAttribute("aria-pressed", (!pressed).toString());
+  })
+  .catch(() => form.submit());
+});
+</script>
 {% endblock %}

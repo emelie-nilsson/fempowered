@@ -665,7 +665,49 @@ body.error-404 .btn-outline-secondary {
   white-space: nowrap;                           
 }
 
+/* 1) Actions-rad: tajt rad med jämn luft */
+.actions {
+  display: flex;
+  align-items: flex-end;
+  gap: .5rem;          /* lite luft mellan Add to cart och Add to favorites */
+  flex-wrap: wrap;     /* tillåt radbrytning på riktigt små skärmar */
+}
+.actions > form {      /* båda formulären ska vara innehållsbreda */
+  display: inline-flex;
+  align-items: flex-end;
+  margin: 0;
+  flex: 0 0 auto;      /* förhindra att de krymper konstigt */
+}
 
+/* 2) Inuti Add to cart-formen: qty + knapp i rad med liten gap */
+.actions .form-row {
+  display: inline-flex; /* ersätt BS form-row som annars har negativa marginaler */
+  align-items: flex-end;
+  gap: .5rem;           /* luft mellan Qty och Add to cart */
+  margin: 0;
+}
+.actions .form-row .col-auto { padding: 0; }
+
+/* Komprimera qty-fältet så helheten får plats även när etiketten blir längre */
+.actions input[type="number"] {
+  width: 5.5rem;        /* justera vid behov: 5rem–6rem */
+  max-width: 100%;
+}
+
+/* 3) Favoritknappen: inga radbrott i labeln + liten stabil min-bredd */
+.fav-detail-form { flex: 0 0 auto; }
+.fav-detail-btn  { white-space: nowrap; }
+@media (min-width: 576px) {
+  .fav-detail-btn { min-width: 22ch; } /* 21–24ch brukar bli perfekt */
+}
+
+/* Toggla ikon/label via aria-pressed (måste matcha din HTML) */
+.fav-detail-btn .is-fav { display: none; }
+.fav-detail-btn[aria-pressed="true"] .not-fav { display: none; }
+.fav-detail-btn[aria-pressed="true"] .is-fav { display: inline; }
+.fav-detail-btn [data-remove] { display: none; }
+.fav-detail-btn[aria-pressed="true"] [data-remove] { display: inline; }
+.fav-detail-btn[aria-pressed="true"] [data-add] { display: none; }
 
 /* Shared styling for all account boxes */
 .why-account,
