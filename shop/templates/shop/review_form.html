@@ -1,32 +1,89 @@
+{% extends "base.html" %}
 {% load static %}
 
-<form method="post" class="review-form">
-  {% csrf_token %}
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
 
-  <!-- Rating stars -->
-  <div class="form-group">
-    <label for="id_rating">Your rating:</label>
-    <ul class="star-rating">
-      {% for value, label in form.rating.field.choices %}
-        <li>
-          <input type="radio" id="star{{ value }}" name="rating" value="{{ value }}">
-          <label for="star{{ value }}">★</label>
-        </li>
-      {% endfor %}
-    </ul>
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h1 class="h5 mb-3">
+            {% if is_edit %}Edit review{% else %}Write a review{% endif %}
+          </h1>
+
+          <form
+            method="post"
+            action="{% if is_edit %}{% url 'review_update' review.pk %}{% else %}{% url 'review_create' product.pk %}{% endif %}"
+            class="review-form row g-3"
+            novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="col-12">
+                <div class="alert alert-danger mb-0">
+                  {{ form.non_field_errors }}
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Title -->
+            <div class="col-12">
+              <label class="form-label" for="{{ form.title.id_for_label }}">Title</label>
+              {{ form.title }}
+              {% if form.title.errors %}
+                <div class="invalid-feedback d-block">{{ form.title.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Rating (5 stars) -->
+            <div class="col-12">
+              <label class="form-label d-block mb-2">Your rating</label>
+              {% with selected=form.data.rating|default:form.initial.rating|default:form.instance.rating|default:'' %}
+                <div class="stars" role="radiogroup" aria-label="Betyg 1 till 5">
+                  <input type="radio" name="rating" id="star5" value="5" {% if selected|stringformat:"s" == "5" %}checked{% endif %}>
+                  <label for="star5" title="5 stars" aria-label="5 stars">★</label>
+
+                  <input type="radio" name="rating" id="star4" value="4" {% if selected|stringformat:"s" == "4" %}checked{% endif %}>
+                  <label for="star4" title="4 stars" aria-label="4 stars">★</label>
+
+                  <input type="radio" name="rating" id="star3" value="3" {% if selected|stringformat:"s" == "3" %}checked{% endif %}>
+                  <label for="star3" title="3 stars" aria-label="3 stars">★</label>
+
+                  <input type="radio" name="rating" id="star2" value="2" {% if selected|stringformat:"s" == "2" %}checked{% endif %}>
+                  <label for="star2" title="2 stars" aria-label="2 stars">★</label>
+
+                  <input type="radio" name="rating" id="star1" value="1" {% if selected|stringformat:"s" == "1" %}checked{% endif %}>
+                  <label for="star1" title="1 star" aria-label="1 star">★</label>
+                </div>
+              {% endwith %}
+              {% if form.rating.errors %}
+                <div class="invalid-feedback d-block">{{ form.rating.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Body -->
+            <div class="col-12">
+              <label class="form-label" for="{{ form.body.id_for_label }}">Review</label>
+              {{ form.body }}
+              {% if form.body.errors %}
+                <div class="invalid-feedback d-block">{{ form.body.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="col-12 d-flex align-items-center review-submit">
+              <button type="submit" class="btn btn-fem me-3">
+                {% if is_edit %}Save changes{% else %}Submit review{% endif %}
+              </button>
+              <a href="{% url 'product_detail' product.pk %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
   </div>
-
-  <!-- Title -->
-  <div class="form-group">
-    {{ form.title.label_tag }}
-    {{ form.title }}
-  </div>
-
-  <!-- Content -->
-  <div class="form-group">
-    {{ form.content.label_tag }}
-    {{ form.content }}
-  </div>
-
-  <button type="submit" class="btn btn-primary">Submit review</button>
-</form>
+</div>
+{% endblock %}

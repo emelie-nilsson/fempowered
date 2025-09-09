@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse, HttpResponseRedirect, HttpResponseForbidden  
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
@@ -19,7 +19,7 @@ from .cart import Cart
 
 # --- Helper: has the user purchased the product? ---
 
-def has_purchased_product(user, product):  
+def has_purchased_product(user, product):
     return product.user_has_purchased(user)
 
 
@@ -99,8 +99,8 @@ def product_detail(request, pk):
             form = ReviewForm()
 
     # --- Reviews list + verified-buyer badge calc ---
-    reviews_qs = product.reviews.select_related("user").all()  
-    reviews = list(reviews_qs)  
+    reviews_qs = product.reviews.select_related("user").all()
+    reviews = list(reviews_qs)
 
     # Build sets of paid buyers (user_ids and emails) for this product
     try:
@@ -133,13 +133,20 @@ def product_detail(request, pk):
     })
 
 
-
 # Reviews (CRUD)
 
 class ReviewCreateView(LoginRequiredMixin, CreateView):
+    """
+    Creates a review. Enforces:
+      - one review per user per product
+      - verified buyer only
+    Renders a consistent form (same look as edit) via shop/review_form.html
+    (even if most users submit from product_detail).
+    """
     model = Review
     form_class = ReviewForm
-    login_url = reverse_lazy("account_login")  
+    login_url = reverse_lazy("account_login")
+    template_name = "shop/review_form.html"
 
     def dispatch(self, request, *args, **kwargs):
         self.product = get_object_or_404(Product, pk=kwargs["pk"])
@@ -149,22 +156,29 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
             messages.info(request, "You have already reviewed this product.")
             return redirect("product_detail", pk=self.product.pk)
 
-        # verified buyer neccessary
-        if not self.product.user_has_purchased(request.user):  
-            messages.error(request, "Only verified buyers can write a review.")  
-            return redirect("product_detail", pk=self.product.pk)                
+        # verified buyer necessary
+        if not self.product.user_has_purchased(request.user):
+            messages.error(request, "Only verified buyers can write a review.")
+            return redirect("product_detail", pk=self.product.pk)
 
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # serverside-skydd (extra)
-        if not self.product.user_has_purchased(self.request.user):  
-            return HttpResponseForbidden("Only verified buyers can review this product.")  
+        # serverside check (defense in depth)
+        if not self.product.user_has_purchased(self.request.user):
+            return HttpResponseForbidden("Only verified buyers can review this product.")
 
         form.instance.product = self.product
         form.instance.user = self.request.user
         messages.success(self.request, "Review created.")
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["product"] = self.product
+        ctx["is_edit"] = False
+        ctx["review"] = None
+        return ctx
 
     def get_success_url(self):
         return reverse("product_detail", kwargs={"pk": self.product.pk})
@@ -176,12 +190,32 @@ class OwnerRequiredMixin(UserPassesTestMixin):
 
 
 class ReviewUpdateView(LoginRequiredMixin, OwnerRequiredMixin, UpdateView):
+    """
+    Edits an existing review using the same form & template as create.
+    """
     model = Review
     form_class = ReviewForm
+    template_name = "shop/review_form.html"
+    login_url = reverse_lazy("account_login")
+
+    # Extra safety: only allow editing own reviews
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.user.is_authenticated:
+            return qs.filter(user=self.request.user)
+        return qs.none()
 
     def form_valid(self, form):
         messages.success(self.request, "Review updated.")
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        review = self.object
+        ctx["product"] = review.product
+        ctx["is_edit"] = True
+        ctx["review"] = review
+        return ctx
 
     def get_success_url(self):
         return reverse("product_detail", kwargs={"pk": self.object.product.pk})
@@ -205,7 +239,7 @@ def cart_detail(request):
     """
     cart = Cart(request)
     cart_items = []
-    for key, item in cart: 
+    for key, item in cart:
         cart_items.append({
             "key": key,
             "product": item["product"],
@@ -307,7 +341,6 @@ def toggle_favorite(request, product_id):
 
 
 # reset cart
-from django.shortcuts import redirect
 
 def cart_reset(request):
     """One-time: clear any broken cart shapes in session."""
