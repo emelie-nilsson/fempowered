@@ -103,10 +103,76 @@
   {% if can_review and form %}
     <hr class="my-4">
     <h3 class="h6 page-subtitle">Write a review</h3>
-    <form method="post" action="{% url 'review_create' pk=product.pk %}">
+
+    {# Lokal CSS för stjärnorna – påverkar bara denna sida #}
+    <style>
+      .stars{display:inline-flex;flex-direction:row-reverse;gap:.25rem}
+      .stars input[type="radio"]{display:none}
+      .stars label{font-size:1.6rem;line-height:1;cursor:pointer;user-select:none;color:#ccc;transition:transform .05s}
+      .stars label:hover,.stars label:hover~label{color:var(--highlight-color);transform:scale(1.05)}
+      .stars input[type="radio"]:checked~label{color:var(--secondary-color)}
+    </style>
+
+    <form method="post" action="{% url 'review_create' pk=product.pk %}" class="row g-3" novalidate>
       {% csrf_token %}
-      {{ form.as_p }}
-      <button class="btn btn-fem">Submit</button>
+
+      {# Visa ev. icke-fältspecifika fel högst upp i formuläret #}
+      {% if form.non_field_errors %}
+        <div class="col-12">
+          <div class="alert alert-danger mb-2">
+            {{ form.non_field_errors }}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Title -->
+      <div class="col-12">
+        <label class="form-label" for="{{ form.title.id_for_label }}">Title</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <div class="invalid-feedback d-block">{{ form.title.errors|join:", " }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Rating (5 stjärnor) -->
+      <div class="col-12">
+        <label class="form-label d-block mb-2">Rating</label>
+        {% with selected=form.data.rating|default_if_none:'' %}
+          <div class="stars" role="radiogroup" aria-label="Betyg 1 till 5">
+            <input type="radio" name="rating" id="star5" value="5" {% if selected == '5' %}checked{% endif %}>
+            <label for="star5" title="5 stars" aria-label="5 stars">★</label>
+
+            <input type="radio" name="rating" id="star4" value="4" {% if selected == '4' %}checked{% endif %}>
+            <label for="star4" title="4 stars" aria-label="4 stars">★</label>
+
+            <input type="radio" name="rating" id="star3" value="3" {% if selected == '3' %}checked{% endif %}>
+            <label for="star3" title="3 stars" aria-label="3 stars">★</label>
+
+            <input type="radio" name="rating" id="star2" value="2" {% if selected == '2' %}checked{% endif %}>
+            <label for="star2" title="2 stars" aria-label="2 stars">★</label>
+
+            <input type="radio" name="rating" id="star1" value="1" {% if selected == '1' %}checked{% endif %}>
+            <label for="star1" title="1 star" aria-label="1 star">★</label>
+          </div>
+        {% endwith %}
+        {% if form.rating.errors %}
+          <div class="invalid-feedback d-block">{{ form.rating.errors|join:", " }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Body -->
+      <div class="col-12">
+        <label class="form-label" for="{{ form.body.id_for_label }}">Review</label>
+        {{ form.body }}
+        {% if form.body.errors %}
+          <div class="invalid-feedback d-block">{{ form.body.errors|join:", " }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Submit -->
+      <div class="col-12">
+        <button class="btn btn-fem">Submit</button>
+      </div>
     </form>
 
   {% elif not request.user.is_authenticated %}

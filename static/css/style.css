@@ -762,3 +762,32 @@ body.error-404 .btn-outline-secondary {
 }
 
 
+/* Review star rating */
+.stars {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  gap: 0.25rem;
+}
+
+.stars input[type="radio"] {
+  display: none;
+}
+
+.stars label {
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  color: #ccc; 
+  transition: transform 0.1s ease-in-out;
+}
+
+.stars label:hover,
+.stars label:hover ~ label {
+  color: var(--highlight-color);
+  transform: scale(1.05);
+}
+
+.stars input[type="radio"]:checked ~ label {
+  color: var(--secondary-color);
+}
