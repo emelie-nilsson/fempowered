@@ -3,10 +3,12 @@
 
 {% block content %}
 <div class="container py-5">
+
+  <!-- Product content -->
   <div class="row">
     <!-- Left: product image -->
     <div class="col-md-6 mb-4">
-      <!-- Prefer image_detail; fallback to image_catalog -->
+      <!-- Prefer detail image; fallback to catalog image -->
       {% if product.image_detail %}
         <img src="/media/{{ product.image_detail }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
       {% elif product.image_catalog %}
@@ -19,7 +21,8 @@
 
     <!-- Right: product info and actions -->
     <div class="col-md-6">
-      <h1 class="h3">{{ product.name }}</h1>
+      <!-- Bigger green heading: size from main-heading, color from page-subtitle -->
+      <h1 class="main-heading page-subtitle mb-2">{{ product.name }}</h1>
 
       {% if product.color %}
         <div class="mb-2 text-muted">Color: {{ product.color }}</div>
@@ -31,32 +34,33 @@
         <p class="lead">{{ product.description }}</p>
       {% endif %}
 
-      <!-- Add to cart -->
-      <form method="post" action="{% url 'add_to_cart' product.id %}">
-        {% csrf_token %}
-        <div class="form-row align-items-end">
-          <div class="col-auto">
-            <label for="qty" class="form-label">Qty</label>
-            <input id="qty" type="number" name="quantity" min="1" value="1" class="form-control" required>
+      <!-- Actions: Add to cart + Add/Remove favorites -->
+      <div class="d-flex flex-wrap align-items-end">
+        <!-- Add to cart -->
+        <form method="post" action="{% url 'add_to_cart' product.id %}" class="mr-2 mb-2">
+          {% csrf_token %}
+          <div class="form-row align-items-end">
+            <div class="col-auto">
+              <label for="qty" class="form-label">Qty</label>
+              <input id="qty" type="number" name="quantity" min="1" value="1" class="form-control" required>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-fem mt-3">Add to cart</button>
+            </div>
           </div>
-          <div class="col-auto">
-            <button class="btn btn-fem mt-3">Add to cart</button>
-          </div>
-        </div>
-      </form>
+        </form>
 
-      <!-- Favorite toggle -->
-      <div class="mt-3">
+        <!-- Add/Remove favorites: same primary button style so hover matches -->
         <form method="post"
               action="{% url 'toggle_favorite' product.id %}?next={{ request.get_full_path|urlencode }}"
-              class="d-inline">
+              class="mb-2">
           {% csrf_token %}
           {% if is_favorite %}
-            <button type="submit" class="btn btn-outline-secondary">
+            <button type="submit" class="btn btn-fem mt-3">
               <i class="fa-solid fa-heart mr-1"></i> Remove from favorites
             </button>
           {% else %}
-            <button type="submit" class="btn btn-outline-secondary">
+            <button type="submit" class="btn btn-fem mt-3">
               <i class="fa-regular fa-heart mr-1"></i> Add to favorites
             </button>
           {% endif %}
@@ -64,5 +68,79 @@
       </div>
     </div>
   </div>
+
+  <!-- Reviews section -->
+  <hr class="my-4">
+  <h2 class="h5 page-subtitle mb-3">Reviews</h2>
+
+  {% if reviews and reviews|length > 0 %}
+    <ul class="list-unstyled">
+      {% for r in reviews %}
+        <li class="mb-3">
+          <strong>{{ r.user }}</strong>
+          {% if r.is_verified %}
+            <span class="badge badge-success">Verified buyer</span>
+          {% endif %}
+          <!-- Render the review text; adjust field name if your model differs -->
+          <div class="mt-1">
+            {{ r.comment|default:r.text|default:r.body|default:"" }}
+          </div>
+
+          <!-- Optional owner actions -->
+          {% if request.user.is_authenticated and r.user_id == request.user.id %}
+            <div class="mt-1">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'review_update' r.pk %}">Edit</a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'review_delete' r.pk %}">Delete</a>
+            </div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <!-- Empty state when there are no reviews -->
+    <p class="text-muted mb-0">No reviews yet.</p>
+  {% endif %}
+
+  <!-- Write a review: shown when allowed by the view -->
+  {% if can_review and form %}
+    <hr class="my-4">
+    <h3 class="h6 page-subtitle">Write a review</h3>
+    <form method="post" action="{% url 'review_create' pk=product.pk %}">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn btn-fem">Submit</button>
+    </form>
+
+  {% elif not request.user.is_authenticated %}
+    <!-- Not logged in: friendly prompt to log in -->
+    <hr class="my-4">
+    <p class="mb-2">
+      <a class="btn btn-outline-secondary" href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">Log in</a>
+      to write a review.
+    </p>
+
+    <!-- Account nudge -->
+    <div class="account-nudge">
+      <h2 class="h6 mb-2">
+        <i class="fa-solid fa-user-check mr-2"></i> Aren’t you a part of Fempowered yet?
+      </h2>
+      <p class="mb-0">
+        Create a free account to enjoy faster checkout, saved favorites and order tracking.
+        <a href="{% url 'account_signup' %}">Sign up</a> or
+        <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">Log in</a>.
+      </p>
+    </div>
+
+  {% elif has_reviewed %}
+    <!-- Already reviewed -->
+    <hr class="my-4">
+    <p class="text-muted mb-0">You have already reviewed this product.</p>
+
+  {% else %}
+    <!-- Logged in but not a verified buyer -->
+    <hr class="my-4">
+    <p class="text-muted mb-0">Only verified buyers can write a review.</p>
+  {% endif %}
+
 </div>
 {% endblock %}
