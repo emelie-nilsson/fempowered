@@ -177,7 +177,11 @@ USE_TZ = True
 # WhiteNoise for static, local filesystem for media (both dev & prod)
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    BASE_DIR / "media",   
+]
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"

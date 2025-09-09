@@ -14,7 +14,7 @@
       <li class="cart-item">
         <!-- Compact thumbnail: use image_catalog -->
         {% if ci.product.image_catalog %}
-          <img class="cart-thumb" src="/media/{{ ci.product.image_catalog }}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
+          <img class="cart-thumb" src="{% static ci.product.image_catalog %}" alt="{{ ci.product.name }}" width="80" height="80" loading="lazy">
         {% else %}
           <!-- Neutral box when no image is available -->
           <div class="cart-thumb bg-light" style="width:80px;height:80px;"></div>

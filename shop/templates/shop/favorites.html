@@ -14,9 +14,9 @@
         <li class="col-6 col-md-4 col-lg-3 mb-4">
           <div class="card h-100 border-0 shadow-sm">
             <a href="{% url 'product_detail' p.id %}" class="text-reset text-decoration-none">
-              <!-- Direct /media/ path from image_catalog -->
+              <!-- Direct static path from image_catalog -->
               {% if p.image_catalog %}
-                <img src="/media/{{ p.image_catalog }}" class="card-img-top" alt="{{ p.name }}" loading="lazy">
+                <img src="{% static p.image_catalog %}" class="card-img-top" alt="{{ p.name }}" loading="lazy">
               {% else %}
                 <!-- Neutral box when no image is available -->
                 <div class="card-img-top bg-light" style="aspect-ratio:1/1;"></div>
