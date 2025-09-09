@@ -8,20 +8,17 @@
   <div class="row">
     <!-- Left: product image -->
     <div class="col-md-6 mb-4">
-      <!-- Prefer detail image; fallback to catalog image -->
       {% if product.image_detail %}
         <img src="{% static product.image_detail.name %}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
       {% elif product.image_catalog %}
         <img src="{% static product.image_catalog.name %}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
       {% else %}
-        <!-- Placeholder (styled in CSS only) -->
         <div class="img-placeholder img-placeholder--portrait rounded shadow-sm"></div>
       {% endif %}
     </div>
 
     <!-- Right: product info and actions -->
     <div class="col-md-6">
-      <!-- Bigger green heading via existing classes -->
       <h1 class="main-heading page-subtitle mb-2">{{ product.name }}</h1>
 
       {% if product.color %}
@@ -34,9 +31,7 @@
         <p class="lead">{{ product.description }}</p>
       {% endif %}
 
-      <!-- Actions: Add to cart + Add/Remove favorites (no layout jump) -->
       <div class="actions">
-        <!-- Add to cart -->
         <form method="post" action="{% url 'add_to_cart' product.id %}">
           {% csrf_token %}
           <div class="form-row align-items-end">
@@ -50,7 +45,6 @@
           </div>
         </form>
 
-        <!-- Favorites: same primary style; text/icon toggled by aria-pressed -->
         <form method="post"
               action="{% url 'toggle_favorite' product.id %}?next={{ request.get_full_path|urlencode }}"
               class="fav-detail-form">
@@ -104,19 +98,9 @@
     <hr class="my-4">
     <h3 class="h6 page-subtitle">Write a review</h3>
 
-    {# Lokal CSS för stjärnorna – påverkar bara denna sida #}
-    <style>
-      .stars{display:inline-flex;flex-direction:row-reverse;gap:.25rem}
-      .stars input[type="radio"]{display:none}
-      .stars label{font-size:1.6rem;line-height:1;cursor:pointer;user-select:none;color:#ccc;transition:transform .05s}
-      .stars label:hover,.stars label:hover~label{color:var(--highlight-color);transform:scale(1.05)}
-      .stars input[type="radio"]:checked~label{color:var(--secondary-color)}
-    </style>
-
-    <form method="post" action="{% url 'review_create' pk=product.pk %}" class="row g-3" novalidate>
+    <form method="post" action="{% url 'review_create' pk=product.pk %}" class="review-form row g-3" novalidate>
       {% csrf_token %}
 
-      {# Visa ev. icke-fältspecifika fel högst upp i formuläret #}
       {% if form.non_field_errors %}
         <div class="col-12">
           <div class="alert alert-danger mb-2">
@@ -170,7 +154,7 @@
       </div>
 
       <!-- Submit -->
-      <div class="col-12">
+      <div class="col-12 review-submit">
         <button class="btn btn-fem">Submit</button>
       </div>
     </form>

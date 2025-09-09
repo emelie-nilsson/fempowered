@@ -761,6 +761,40 @@ body.error-404 .btn-outline-secondary {
   z-index: 1000;
 }
 
+/*Review form*/
+.review-form .stars {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  gap: 0.25rem;
+}
+
+.review-form .stars input[type="radio"] {
+  display: none;
+}
+
+.review-form .stars label {
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.05s ease-in-out;
+  color: #ccc; /* tomma stjärnor */
+}
+
+.review-form .stars label:hover,
+.review-form .stars label:hover ~ label {
+  color: var(--highlight-color);      /* t.ex. #bba667 */
+  transform: scale(1.05);
+}
+
+.review-form .stars input[type="radio"]:checked ~ label {
+  color: var(--secondary-color);     
+}
+
+/* Luft före submit-knappen */
+.review-form .review-submit {
+  margin-top: 1rem; /* öka till 1.5rem / 2rem om du vill ha mer luft */
+}
 
 /* Review star rating */
 .stars {
