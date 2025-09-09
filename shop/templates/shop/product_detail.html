@@ -10,9 +10,9 @@
     <div class="col-md-6 mb-4">
       <!-- Prefer detail image; fallback to catalog image -->
       {% if product.image_detail %}
-        <img src="{% static product.image_detail %}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
+        <img src="{% static product.image_detail.name %}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
       {% elif product.image_catalog %}
-        <img src="{% static product.image_catalog %}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
+        <img src="{% static product.image_catalog.name %}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" loading="lazy">
       {% else %}
         <!-- Placeholder (styled in CSS only) -->
         <div class="img-placeholder img-placeholder--portrait rounded shadow-sm"></div>
