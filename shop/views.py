@@ -86,6 +86,11 @@ def product_detail(request, pk):
     """
     product = get_object_or_404(Product, pk=pk)
 
+    # Favorite state for current user (sync heart on detail page)
+    is_favorite = False
+    if request.user.is_authenticated:
+        is_favorite = Favorite.objects.filter(user=request.user, product=product).exists()
+
     user_review = None
     has_reviewed = False
     can_review = False
@@ -130,6 +135,7 @@ def product_detail(request, pk):
         "form": form,
         "can_review": can_review,
         "has_reviewed": has_reviewed,
+        "is_favorite": is_favorite,  # sync favorite state on detail page
     })
 
 
@@ -240,10 +246,19 @@ def cart_detail(request):
     cart = Cart(request)
     cart_items = []
     for key, item in cart:
+        # Prefer explicit size from the item; if missing, derive from key
+        raw_size = item.get("size")
+        if not raw_size and ":" in str(key):
+            # Example key pattern: "<product_id>:<size>"
+            raw_size = str(key).split(":", 1)[1] or None
+
+        # Normalize "NA"/empty to None so the template won't show a bogus pill
+        size = None if raw_size in (None, "", "NA") else raw_size
+
         cart_items.append({
             "key": key,
             "product": item["product"],
-            "size": item.get("size"),
+            "size": size,
             "quantity": item["quantity"],
             "unit_price": item["price"],        # Decimal
             "line_total": item["total_price"],  # Decimal

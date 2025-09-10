@@ -31,27 +31,35 @@
         <p class="lead">{{ product.description }}</p>
       {% endif %}
 
+      <!-- DEBUG: category value resolved by template -->
+      <!-- DEBUG: category={{ product.category }} -->
+
       <div class="actions">
         <form method="post" action="{% url 'add_to_cart' product.id %}">
           {% csrf_token %}
           <div class="form-row align-items-end">
 
-            <!-- Show size selection only for Clothing products -->
-            {% if product.category.name|lower == "clothing" %}
-              <div class="col-auto">
-                <label for="size" class="form-label">Size</label>
-                <select id="size" name="size" class="form-select" required>
-                  <option value="" selected disabled>Select size</option>
-                  <option value="XS">XS</option>
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                </select>
-              </div>
-            {% endif %}
+            <!-- Show size selection only for Clothing/Clothes products (robust match) -->
+            {% with cat=product.category|stringformat:"s"|lower %}
+              {% if cat == "clothing" or cat == "clothes" %}
+                <div class="col-auto mr-2">
+                  <label for="size" class="form-label">Size</label>
+                  <select id="size" name="size" class="custom-select" required>
+                    <option value="" selected disabled>Select size</option>
+                    <option value="XS">XS</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                  </select>
+                </div>
+              {% else %}
+                <!-- Ensure backend always receives a size value for non-sized products -->
+                <input type="hidden" name="size" value="NA">
+              {% endif %}
+            {% endwith %}
 
-            <div class="col-auto">
+            <div class="col-auto mr-2">
               <label for="qty" class="form-label">Qty</label>
               <input id="qty" type="number" name="quantity" min="1" value="1" class="form-control" required>
             </div>
@@ -61,19 +69,28 @@
           </div>
         </form>
 
-        <form method="post"
-              action="{% url 'toggle_favorite' product.id %}?next={{ request.get_full_path|urlencode }}"
-              class="fav-detail-form">
-          {% csrf_token %}
-          <button type="submit"
-                  class="btn btn-fem fav-detail-btn"
-                  aria-pressed="{{ is_favorite|yesno:'true,false' }}">
-            <i class="fa-regular fa-heart mr-1 fav-icon not-fav"></i>
-            <i class="fa-solid fa-heart mr-1 fav-icon is-fav"></i>
-            <span data-add>Add to favorites</span>
-            <span data-remove>Remove from favorites</span>
-          </button>
-        </form>
+        <!-- Favorites: show real toggle only for authenticated users -->
+        {% if request.user.is_authenticated %}
+          <form method="post"
+                action="{% url 'toggle_favorite' product.id %}?next={{ request.get_full_path|urlencode }}"
+                class="fav-detail-form">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn btn-fem fav-detail-btn"
+                    aria-pressed="{{ is_favorite|yesno:'true,false' }}">
+              <i class="fa-regular fa-heart mr-1 fav-icon not-fav"></i>
+              <i class="fa-solid fa-heart mr-1 fav-icon is-fav"></i>
+              <span data-add>Add to favorites</span>
+              <span data-remove>Remove from favorites</span>
+            </button>
+          </form>
+        {% else %}
+          <!-- Anonymous users see a login CTA instead of a working favorite button -->
+          <a class="btn btn-outline-secondary"
+             href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">
+            <i class="fa-regular fa-heart mr-1"></i> Log in to add to favorites
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
