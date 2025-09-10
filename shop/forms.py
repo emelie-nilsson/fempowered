@@ -6,10 +6,12 @@ RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
 
 
 class ReviewForm(forms.ModelForm):
-    rating = forms.ChoiceField(
+    rating = forms.TypedChoiceField(
         choices=RATING_CHOICES,
-        widget=forms.RadioSelect(attrs={"class": "star-rating"}),  
+        coerce=int,  
+        widget=forms.RadioSelect(attrs={"class": "star-rating"}),
         label="Rating",
+        required=True,
     )
 
     class Meta:
@@ -34,3 +36,7 @@ class ReviewForm(forms.ModelForm):
             "title": "Title",
             "body": "Review",
         }
+
+    def clean_title(self):
+        title = self.cleaned_data.get("title", "")
+        return title.strip() or None  

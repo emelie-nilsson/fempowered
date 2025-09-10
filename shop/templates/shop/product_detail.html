@@ -35,6 +35,22 @@
         <form method="post" action="{% url 'add_to_cart' product.id %}">
           {% csrf_token %}
           <div class="form-row align-items-end">
+
+            <!-- Show size selection only for Clothing products -->
+            {% if product.category.name|lower == "clothing" %}
+              <div class="col-auto">
+                <label for="size" class="form-label">Size</label>
+                <select id="size" name="size" class="form-select" required>
+                  <option value="" selected disabled>Select size</option>
+                  <option value="XS">XS</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                </select>
+              </div>
+            {% endif %}
+
             <div class="col-auto">
               <label for="qty" class="form-label">Qty</label>
               <input id="qty" type="number" name="quantity" min="1" value="1" class="form-control" required>
@@ -118,11 +134,11 @@
         {% endif %}
       </div>
 
-      <!-- Rating (5 stjärnor) -->
+      <!-- Rating -->
       <div class="col-12">
         <label class="form-label d-block mb-2">Rating</label>
         {% with selected=form.data.rating|default_if_none:'' %}
-          <div class="stars" role="radiogroup" aria-label="Betyg 1 till 5">
+          <div class="stars" role="radiogroup" aria-label="Rating 1 to 5">
             <input type="radio" name="rating" id="star5" value="5" {% if selected == '5' %}checked{% endif %}>
             <label for="star5" title="5 stars" aria-label="5 stars">★</label>
 
