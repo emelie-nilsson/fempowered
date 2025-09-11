@@ -18,8 +18,8 @@
 ## Automated Testing
 All automated tests were executed module by module during development, using the Django test runner. Each test file was run individually with commands such as:
 
-`python manage.py test checkout.tests.test_forms -v 2`
-`python manage.py test checkout.tests.test_views -v 2`
+`python manage.py test checkout.tests.test_forms -v 2`   
+`python manage.py test checkout.tests.test_views -v 2`   
 `python manage.py test shop.tests.test_models -v 2`
 
 ### Checkout Form Tests
@@ -56,26 +56,21 @@ All account form tests passed successfully ✔
 
 All other automated tests are summarized in the table below:
 
-
----
 | **Test Category**          | **Location**                                         | **Purpose**                                              | **Result** |
 |----------------------------|------------------------------------------------------|----------------------------------------------------------|------------|
-| Checkout Views             | `checkout/tests/test_views.py`                       | Address page GET/POST, billing requirements, redirects   | ✔ Passed   |
-| Checkout Payment & Success | `checkout/tests/test_payment_views.py`<br>`checkout/tests/test_success_view.py` | Payment page loads, success message/page works           | ✔ Passed   |
-| Checkout Flow (E2E)        | `checkout/tests/test_checkout_flow.py`               | Simulates full checkout flow (address → payment)         | ✔ Passed   |
-| Shop Models                | `shop/tests/test_models.py`                          | Tests `__str__` methods for models                       | ✔ Passed / Skips |
-| Shop Views                 | `shop/tests/test_views.py`<br>`shop/tests/test_product_list_smoke.py` | Product listing, search/filter, pagination               | ✔ Passed   |
-| Cart Views                 | `shop/tests/test_cart_views.py`                      | Cart integration with session                            | ✔ Passed   |
-| Smoke Tests                | `project_tests/test_smoke.py`                        | Key routes (home, shop, cart, checkout, auth)            | ✔ Passed   |
-| URL Resolution             | `project_tests/test_urls.py`                         | All named URLs resolve correctly                         | ✔ Passed   |
-| Authentication Views       | `project_tests/test_auth_views_smoke.py`             | Login, signup, password reset views                      | ✔ Passed   |
-| Password Reset Email       | `project_tests/test_password_reset_email.py`         | Email sent when triggering password reset                | ✔ Passed   |
-| Admin Site                 | `project_tests/test_admin_smoke.py`                  | Admin login + index + model changelists                  | ✔ Passed / Skips |
-| CSRF Tokens                | `project_tests/test_csrf_smoke.py`                   | Confirms CSRF tokens present on key forms                | ✔ Passed   |
-| Error Pages                | `project_tests/test_error_pages.py`                  | Custom 404 + 500 templates render                        | ✔ Passed   |
-
-
-
+| Checkout Views             | `checkout/tests/test_views.py`                       | Address page GET/POST, billing requirements, redirects   | ✅ |
+| Checkout Payment & Success | `checkout/tests/test_payment_views.py`<br>`checkout/tests/test_success_view.py` | Payment page loads, success message/page works           | ✅ |
+| Checkout Flow (E2E)        | `checkout/tests/test_checkout_flow.py`               | Simulates full checkout flow (address → payment)         | ✅ |
+| Shop Models                | `shop/tests/test_models.py`                          | `__str__` methods for Product, Category, Review          | ✅ |
+| Shop Views                 | `shop/tests/test_views.py`<br>`shop/tests/test_product_list_smoke.py` | Product listing, search/filter, pagination               | ✅ |
+| Cart Views                 | `shop/tests/test_cart_views.py`                      | Cart integration with session                            | ✅ |
+| Smoke Tests                | `project_tests/test_smoke.py`                        | Key routes (home, shop, cart, checkout, auth)            | ✅ |
+| URL Resolution             | `project_tests/test_urls.py`                         | All named URLs resolve correctly                         | ✅ |
+| Authentication Views       | `project_tests/test_auth_views_smoke.py`             | Login, signup, password reset views                      | ✅ |
+| Password Reset Email       | `project_tests/test_password_reset_email.py`         | Email sent when triggering password reset                | ✅ |
+| Admin Site                 | `project_tests/test_admin_smoke.py`                  | Admin login + index + model changelists                  | ✅ |
+| CSRF Tokens                | `project_tests/test_csrf_smoke.py`                   | Confirms CSRF tokens present on key forms                | ✅ |
+| Error Pages                | `project_tests/test_error_pages.py`                  | Custom 404 + 500 templates render                        | ✅ |
 
 
 
