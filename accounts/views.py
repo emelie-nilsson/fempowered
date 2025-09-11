@@ -17,8 +17,8 @@ def dashboard(request):
 @login_required
 def orders(request):
     """
-    Display all orders for the logged-in user.
-    Orders are matched either by user foreign key OR by email (for guest checkouts).
+    List all orders for the logged-in user.
+    Match either by FK user or by email for guest checkouts.
     """
     user = request.user
     orders_qs = (
@@ -33,11 +33,15 @@ def orders(request):
 @login_required
 def order_detail(request, order_number):
     """
-    Display a specific order, e.g. FP-000123.
-    Allowed only if the order belongs to the logged-in user OR email matches (guest checkout).
+    Show a specific order (e.g., FP-000123).
+    Permit access if the order belongs to the user or email matches.
     """
+    # Be defensive when parsing "FP-000123" -> 123
+    order_id = None
     try:
-        order_id = int(order_number.split("-")[1])
+        # Split by "-", take the last segment, strip leading zeros
+        tail = order_number.split("-")[-1]
+        order_id = int(tail.lstrip("0") or "0")
     except Exception:
         return render(request, "accounts/order_detail.html", status=404)
 
@@ -55,22 +59,32 @@ def order_detail(request, order_number):
 def addresses(request):
     """
     Display and update the logged-in user's address.
-    Reuse the same OneToOne instance even if soft-deleted (is_active=False),
-    and re-activate on save to avoid unique constraint collisions.
+    Reuse the same OneToOne instance (related_name='address').
+    If billing_same_as_shipping is checked, mirror shipping fields to billing.
+    Reactivate soft-deleted records on save.
     """
-    try:
-        ua = request.user.address  
-    except UserAddress.DoesNotExist:
-        ua = None  
+    # Get existing address instance if present (OneToOne)
+    ua = getattr(request.user, "address", None)
 
     if request.method == "POST":
-        form = UserAddressForm(request.POST, instance=ua)  
+        form = UserAddressForm(request.POST, instance=ua)
+
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.user = request.user
-            obj.is_active = True  # re-activate when saved
-            obj.save()
+            addr = form.save(commit=False)
+            addr.user = request.user
+            addr.is_active = True  # ensure reactivation after soft delete
+
+            # If user ticked "billing_same_as_shipping", copy shipping -> billing
+            if form.cleaned_data.get("billing_same_as_shipping"):
+                addr.billing_address1 = addr.address1 or ""
+                addr.billing_address2 = addr.address2 or ""
+                addr.billing_postal_code = addr.postal_code or ""
+                addr.billing_city = addr.city or ""
+                addr.billing_country = addr.country or ""
+
+            addr.save()
             messages.success(request, "Address saved.")
+            # NOTE: keep your existing URL name. If namespaced, use "accounts:addresses".
             return redirect("addresses")
         else:
             messages.error(request, "Please correct the errors below.")
@@ -78,14 +92,14 @@ def addresses(request):
         if ua:
             form = UserAddressForm(instance=ua)
         else:
+            # Pre-fill sensible defaults for first-time setup
             form = UserAddressForm(initial={
-                "full_name": request.user.get_full_name() or "",
+                "full_name": (request.user.get_full_name() or "").strip(),
                 "email": request.user.email,
-                "country": "SE",
+                "country": "SE",  
                 "billing_same_as_shipping": True,
             })
 
-    # No active, no delete
     return render(request, "accounts/addresses.html", {"form": form, "address": ua})
 
 
@@ -95,7 +109,7 @@ def address_delete(request):
     """
     Soft-delete the saved address for the logged-in user:
     - Set is_active=False
-    - Clear most fields (so it is visibly "deleted" in the UI)
+    - Clear user-visible fields so the UI reflects deletion
     """
     addr = getattr(request.user, "address", None)
 
@@ -105,7 +119,7 @@ def address_delete(request):
 
     addr.is_active = False
 
-    # Clear fields 
+    # Clear primary (shipping) fields
     addr.full_name = ""
     addr.email = ""
     addr.phone = ""
@@ -113,6 +127,9 @@ def address_delete(request):
     addr.address2 = ""
     addr.postal_code = ""
     addr.city = ""
+    addr.country = ""
+
+    # Reset billing
     addr.billing_same_as_shipping = True
     addr.billing_address1 = ""
     addr.billing_address2 = ""
@@ -122,9 +139,10 @@ def address_delete(request):
 
     addr.save(update_fields=[
         "is_active",
-        "full_name", "email", "phone", "address1", "address2",
-        "postal_code", "city",
-        "billing_same_as_shipping", "billing_address1", "billing_address2",
+        "full_name", "email", "phone",
+        "address1", "address2", "postal_code", "city", "country",
+        "billing_same_as_shipping",
+        "billing_address1", "billing_address2",
         "billing_postal_code", "billing_city", "billing_country",
     ])
 

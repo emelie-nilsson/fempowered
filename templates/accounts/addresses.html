@@ -7,6 +7,14 @@
   <form method="post" class="row g-3" novalidate>
     {% csrf_token %}
 
+    {% if form.non_field_errors %}
+      <div class="col-12">
+        <div class="alert alert-danger mb-2">
+          {{ form.non_field_errors }}
+        </div>
+      </div>
+    {% endif %}
+
     <div class="col-12">
       <h2 class="h5">Shipping</h2>
     </div>
@@ -14,42 +22,65 @@
     <div class="col-md-6">
       <label class="form-label" for="{{ form.full_name.id_for_label }}">Full name</label>
       {{ form.full_name }}
-      {{ form.full_name.errors }}
+      {% for error in form.full_name.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-6">
       <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
       {{ form.email }}
-      {{ form.email.errors }}
+      {% for error in form.email.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-6">
       <label class="form-label" for="{{ form.phone.id_for_label }}">Phone</label>
       {{ form.phone }}
-      {{ form.phone.errors }}
+      {% for error in form.phone.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-12">
       <label class="form-label" for="{{ form.address1.id_for_label }}">Address 1</label>
       {{ form.address1 }}
-      {{ form.address1.errors }}
+      {% for error in form.address1.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-12">
       <label class="form-label" for="{{ form.address2.id_for_label }}">Address 2</label>
       {{ form.address2 }}
-      {{ form.address2.errors }}
+      {% for error in form.address2.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-4">
       <label class="form-label" for="{{ form.postal_code.id_for_label }}">Postal code</label>
       {{ form.postal_code }}
-      {{ form.postal_code.errors }}
+      {% for error in form.postal_code.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-5">
       <label class="form-label" for="{{ form.city.id_for_label }}">City</label>
       {{ form.city }}
-      {{ form.city.errors }}
+      {% for error in form.city.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-3">
       <label class="form-label" for="{{ form.country.id_for_label }}">Country</label>
       {{ form.country }}
-      {{ form.country.errors }}
+      {% for error in form.country.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
 
     <div class="col-12 mt-3">
@@ -58,49 +89,68 @@
         <label class="form-check-label" for="{{ form.billing_same_as_shipping.id_for_label }}">
           Billing same as shipping
         </label>
-        {{ form.billing_same_as_shipping.errors }}
+        {% for error in form.billing_same_as_shipping.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
       </div>
     </div>
 
     <div class="col-12">
       <h2 class="h5 mt-2">Billing</h2>
     </div>
+
     <div class="col-12 billing-field">
       <label class="form-label" for="{{ form.billing_address1.id_for_label }}">Address 1</label>
       {{ form.billing_address1 }}
-      {{ form.billing_address1.errors }}
+      {% for error in form.billing_address1.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-12 billing-field">
       <label class="form-label" for="{{ form.billing_address2.id_for_label }}">Address 2</label>
       {{ form.billing_address2 }}
-      {{ form.billing_address2.errors }}
+      {% for error in form.billing_address2.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-4 billing-field">
       <label class="form-label" for="{{ form.billing_postal_code.id_for_label }}">Postal code</label>
       {{ form.billing_postal_code }}
-      {{ form.billing_postal_code.errors }}
+      {% for error in form.billing_postal_code.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-5 billing-field">
       <label class="form-label" for="{{ form.billing_city.id_for_label }}">City</label>
       {{ form.billing_city }}
-      {{ form.billing_city.errors }}
+      {% for error in form.billing_city.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
+
     <div class="col-md-3 billing-field">
       <label class="form-label" for="{{ form.billing_country.id_for_label }}">Country</label>
       {{ form.billing_country }}
-      {{ form.billing_country.errors }}
+      {% for error in form.billing_country.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
     </div>
 
-    <!-- Save/Cancel -->
-  <div class="col-12 mt-3">
-  <div class="d-flex mb-3">
-    <button class="btn btn-fem mr-3 me-3" type="submit">Save</button>
-    <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a>
-  </div>
+    <!-- Save / Cancel -->
+    <div class="col-12 mt-3">
+      <div class="d-flex align-items-center">
+        <button class="btn btn-fem mr-3" type="submit">Save</button>
+        <a href="{% url 'addresses' %}" class="btn btn-fem-outline">Cancel</a>
+      </div>
+    </div>
+  </form>
 
   <!-- Delete -->
   {% if address and address.is_active %}
-    <form method="post" action="{% url 'address_delete' %}" 
+    <form method="post" action="{% url 'address_delete' %}" class="mt-2"
           onsubmit="return confirm('Clear your saved address?');">
       {% csrf_token %}
       <button type="submit" class="btn btn-outline-danger">Delete</button>
@@ -108,16 +158,14 @@
   {% endif %}
 </div>
 
-
-
-
 <script>
   // Toggle billing fields when "Billing same as shipping" is checked
   (function () {
-    const same = document.getElementById('{{ form.billing_same_as_shipping.id_for_label }}');
-    const billingBlocks = document.querySelectorAll('.billing-field');
+    var same = document.getElementById('{{ form.billing_same_as_shipping.id_for_label }}');
+    var billingBlocks = document.querySelectorAll('.billing-field');
+
     function toggleBilling() {
-      const hide = same && same.checked;
+      var hide = same && same.checked;
       billingBlocks.forEach(function (el) {
         if (!el) return;
         el.style.opacity = hide ? '0.6' : '1';
@@ -126,6 +174,7 @@
         });
       });
     }
+
     if (same) {
       same.addEventListener('change', toggleBilling);
       toggleBilling();
