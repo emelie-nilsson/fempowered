@@ -25,3 +25,14 @@ urlpatterns = [
 urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", static_serve, {"document_root": settings.MEDIA_ROOT}),
 ]
+
+# Error handlers
+handler404 = "fempowered.error_handlers.handler404"
+handler500 = "fempowered.error_handlers.handler500"
+
+# Route used by project_tests.test_error_pages (must exist even if DEBUG=False)
+def _boom_500(request):
+    raise RuntimeError("boom")
+
+from django.urls import path  # already imported in your file, keep it
+urlpatterns += [path("boom-500/", _boom_500, name="boom_500")]

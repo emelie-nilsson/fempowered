@@ -40,8 +40,9 @@ TestURLConf = type(
             path("shop/", ShopView.as_view(), name="shop"),
             path("boom-500/", BoomView.as_view(), name="boom_500"),
         ],
-        "handler404": "tests.test_error_pages.simple_404",
-        "handler500": "tests.test_error_pages.simple_500",
+        "handler404": "project_tests.test_error_pages.simple_404",
+        "handler500": "project_tests.test_error_pages.simple_500",
+
     },
 )
 
