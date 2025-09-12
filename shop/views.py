@@ -23,6 +23,68 @@ def has_purchased_product(user, product):
     return product.user_has_purchased(user)
 
 
+# --- Helpers for cart session normalization/dedupe ---
+
+def _norm_size(val):
+    """Normalize size values so None/''/'NA' behandlas som None."""
+    if val is None:
+        return None
+    s = str(val).strip()
+    return None if s == "" or s.upper() == "NA" else s
+
+def _delete_matching_lines_in_session(session, product_id, size):
+    """
+    Ta bort ALLA rader i session-korgen som matchar samma produkt + storlek,
+    oavsett hur nyckeln/strukturen ser ut ("7", "7:M", nested dict, etc.).
+    Returnerar True om något togs bort.
+    """
+    removed_any = False
+    pid = str(product_id)
+    size = _norm_size(size)
+
+    for container_key in ("cart", "bag"):
+        data = session.get(container_key)
+        if not isinstance(data, dict):
+            continue
+
+        to_delete = []
+        for k, v in list(data.items()):
+            ks = str(k)
+
+            # Option 1: nyckeln i sig
+            if ks == pid and size is None:
+                to_delete.append(k)
+                continue
+            if size is not None and ks == f"{pid}:{size}":
+                to_delete.append(k)
+                continue
+            # Vanliga varianter på "ingen storlek" i nyckel
+            if size is None and ks in (f"{pid}:None", f"{pid}:", f"{pid}:NA"):
+                to_delete.append(k)
+                continue
+
+            # Option 2: nested dict innehåll
+            if isinstance(v, dict):
+                v_pid = str(v.get("product_id") or v.get("id") or "").strip()
+                v_size = _norm_size(v.get("size"))
+                if v_pid == pid and v_size == size:
+                    to_delete.append(k)
+                    continue
+
+        if to_delete:
+            for k in to_delete:
+                try:
+                    del data[k]
+                    removed_any = True
+                except KeyError:
+                    pass
+            session[container_key] = data  # write back
+
+    if removed_any:
+        session.modified = True
+    return removed_any
+
+
 # Products
 
 def product_list(request):
@@ -283,7 +345,7 @@ def cart_add(request, product_id):
         qty = 1
     qty = max(qty, 1)
 
-    size = request.POST.get("size") or None
+    size = _norm_size(request.POST.get("size"))
     cart.add(product, quantity=qty, size=size)
     messages.success(request, "Added to cart.")
     return redirect("cart_detail")
@@ -293,6 +355,8 @@ def cart_add(request, product_id):
 def cart_update(request, product_id):
     """
     Update row qty. qty <= 0 means remove.
+    To avoid duplicate lines, we *first* delete any existing line(s) for the same product+size
+    from the raw session, then add with override=True.
     """
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_id)
@@ -300,8 +364,13 @@ def cart_update(request, product_id):
         qty = int(request.POST.get("quantity", 1))
     except (TypeError, ValueError):
         qty = 1
-    size = request.POST.get("size") or None
 
+    size = _norm_size(request.POST.get("size"))
+
+    # 1) städa bort dubbletter i sessionen för samma produkt+storlek
+    _delete_matching_lines_in_session(request.session, product_id, size)
+
+    # 2) utför uppdatering
     if qty <= 0:
         cart.remove(product, size=size)
         messages.info(request, "Item removed.")
@@ -321,7 +390,7 @@ def cart_remove(request):
     Supports both 'cart' and legacy 'bag' session keys.
     """
     product_id = request.POST.get("product_id")
-    size = request.POST.get("size") or None
+    size = _norm_size(request.POST.get("size"))
 
     if not product_id:
         messages.error(request, "Missing product id.")
@@ -338,63 +407,12 @@ def cart_remove(request):
             messages.warning(request, "Removed from cart.")
             return redirect("cart_detail")
     except Exception:
-        # Fall through to session surgery
         pass
 
     # 2) Fallback: mutate raw session dict(s)
-    session = request.session
-    removed_any = False
-
-    # Handle both 'cart' and legacy 'bag'
-    for container_key in ("cart", "bag"):
-        data = session.get(container_key)
-        if not isinstance(data, dict):
-            continue
-
-        to_delete = []
-
-        for k, v in list(data.items()):
-            ks = str(k)
-
-            # Direct key patterns
-            if ks == str(product_id):
-                if size is None:
-                    to_delete.append(k)
-                    continue
-                if isinstance(v, dict) and str(v.get("size") or "").strip() == str(size).strip():
-                    to_delete.append(k)
-                    continue
-
-            if size is not None:
-                if ks == f"{product_id}:{size}":
-                    to_delete.append(k)
-                    continue
-                if ks in (f"{product_id}:None", f"{product_id}:", f"{product_id}:NA"):
-                    if isinstance(v, dict):
-                        vsize = v.get("size")
-                        if (vsize or None) == size:
-                            to_delete.append(k)
-                            continue
-
-            # Nested info
-            if isinstance(v, dict):
-                v_pid = str(v.get("product_id") or v.get("id") or "").strip()
-                v_size = v.get("size")
-                if v_pid == str(product_id) and ((size is None) or (str(v_size or "").strip() == str(size).strip())):
-                    to_delete.append(k)
-                    continue
-
-        if to_delete:
-            for k in to_delete:
-                try:
-                    del data[k]
-                    removed_any = True
-                except KeyError:
-                    pass
-            session[container_key] = data  # write back
+    removed_any = _delete_matching_lines_in_session(request.session, product_id, size)
 
     if removed_any:
-        session.modified = True
         messages.warning(request, "Removed from cart.")
     else:
         messages.info(request, "Item not found in cart (nothing removed).")
