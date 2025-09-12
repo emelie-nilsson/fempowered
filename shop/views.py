@@ -314,21 +314,91 @@ def cart_update(request, product_id):
 @require_POST
 def cart_remove(request):
     """
-    Remove a row (product + optional size) via POST.
-    Expects POST fields: product_id, optional size.
+    Remove a cart line (product + optional size) via POST.
+    Works with multiple possible cart session shapes:
+    - key "product_id:size" or "product_id"
+    - nested dicts per key containing {'product_id': ..., 'size': ...}
+    Supports both 'cart' and legacy 'bag' session keys.
     """
-    cart = Cart(request)
-
     product_id = request.POST.get("product_id")
+    size = request.POST.get("size") or None
+
     if not product_id:
         messages.error(request, "Missing product id.")
         return redirect("cart_detail")
 
-    product = get_object_or_404(Product, pk=product_id)
-    size = request.POST.get("size") or None
+    # 1) Try the Cart class first
+    try:
+        cart = Cart(request)
+        before_keys = [str(k) for (k, _item) in cart]
+        product = get_object_or_404(Product, pk=product_id)
+        cart.remove(product, size=size)
+        after_keys = [str(k) for (k, _item) in cart]
+        if set(before_keys) != set(after_keys):
+            messages.warning(request, "Removed from cart.")
+            return redirect("cart_detail")
+    except Exception:
+        # Fall through to session surgery
+        pass
 
-    cart.remove(product, size=size)
-    messages.warning(request, "Removed from cart.")
+    # 2) Fallback: mutate raw session dict(s)
+    session = request.session
+    removed_any = False
+
+    # Handle both 'cart' and legacy 'bag'
+    for container_key in ("cart", "bag"):
+        data = session.get(container_key)
+        if not isinstance(data, dict):
+            continue
+
+        to_delete = []
+
+        for k, v in list(data.items()):
+            ks = str(k)
+
+            # Direct key patterns
+            if ks == str(product_id):
+                if size is None:
+                    to_delete.append(k)
+                    continue
+                if isinstance(v, dict) and str(v.get("size") or "").strip() == str(size).strip():
+                    to_delete.append(k)
+                    continue
+
+            if size is not None:
+                if ks == f"{product_id}:{size}":
+                    to_delete.append(k)
+                    continue
+                if ks in (f"{product_id}:None", f"{product_id}:", f"{product_id}:NA"):
+                    if isinstance(v, dict):
+                        vsize = v.get("size")
+                        if (vsize or None) == size:
+                            to_delete.append(k)
+                            continue
+
+            # Nested info
+            if isinstance(v, dict):
+                v_pid = str(v.get("product_id") or v.get("id") or "").strip()
+                v_size = v.get("size")
+                if v_pid == str(product_id) and ((size is None) or (str(v_size or "").strip() == str(size).strip())):
+                    to_delete.append(k)
+                    continue
+
+        if to_delete:
+            for k in to_delete:
+                try:
+                    del data[k]
+                    removed_any = True
+                except KeyError:
+                    pass
+            session[container_key] = data  # write back
+
+    if removed_any:
+        session.modified = True
+        messages.warning(request, "Removed from cart.")
+    else:
+        messages.info(request, "Item not found in cart (nothing removed).")
+
     return redirect("cart_detail")
 
 
