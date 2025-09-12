@@ -170,7 +170,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
 | User can log in and log out | Login with valid account, then log out | Login successful, logout ends session | ✅ | ![us7.1](README_media/user_stories/us7.1.png) |
-| Session ends on logout | Logout and try accessing My Account | My Account is not accessible when logged out | ✅ | ![us7.2](README_media/user_stories/us7.2.png) |
+| Session ends on logout | Logout and try accessing My Account | My Account is not accessible when logged out (compare image with **7.3**) | ✅ | ![us7.2](README_media/user_stories/us7.2.png) |
 | Protected pages require login | Access `/accounts/orders/` while logged out | Redirected to login (My Account is not available for logged-out users) | ✅ | ![us7.3](README_media/user_stories/us7.3.png) |
 
 ---
