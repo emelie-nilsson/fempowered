@@ -366,13 +366,14 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Admin pages require staff login | Attempt to access admin as non-staff | Access denied | ✅ | ![us23.1](README_media/user_stories/us23.1.png) |
+| Admin pages require staff login | Attempt to access admin as non-staff | Access denied | ✅ | ![us23.1](README_media/user_stories/us18.2.png) |
 
 
 **Summary:**  
-All 23 user stories were manually tested against their acceptance criteria.  
-Every test passed successfully ✅. Screenshots are included where relevant for visual confirmation.
 
+All user stories were manually tested against their acceptance criteria. All **Must-have** and most **Should-have** stories passed ✅
+
+For **User Story 20**, the acceptance criterion “Categories can be created, edited, and deleted in Admin” is **Deferred (out of MVP scope)**; the MVP behavior—assigning a predefined category to a product and filtering by category, was verified and passed. 
 
 ---
 
