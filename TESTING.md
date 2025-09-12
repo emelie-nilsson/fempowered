@@ -92,7 +92,6 @@ Each story includes acceptance criteria in table format with **Steps to Test**, 
 
 This ensures that every feature was validated from a user’s perspective, complementing the automated test coverage.
 
-
 #### User Story 1  
 **As a Visitor, I want to browse available products so that I can explore what the shop offers without needing an account.**
 
@@ -100,7 +99,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| User can view all products on a products page without logging in | Navigate to Shop | All products display with image, name, price | ✅ | |
+| User can view all products on a products page without logging in | Navigate to Shop | All products display with image, name, price | ✅ | ![us1.1](README_media/user_stories/us1.1.png) |
 
 ---
 
@@ -111,7 +110,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Clicking a product opens a product detail page with image, description, price | In the Shop, click on a product | Product detail page loads and shows correct product data. Each color variant is listed as a separate product. | ✅ | |
+| Clicking a product opens a product detail page with image, description, price | In the Shop, click on a product | Product detail page loads and shows correct product data. Each color variant is listed as a separate product. | ✅ | ![us2.1](README_media/user_stories/us2.1.png) |
 
 ---
 
@@ -122,8 +121,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Search bar returns relevant products | Enter keyword (e.g., "tank") in search bar | Only matching products are displayed | ✅ | |
-| Filters narrow down results by category and color | Use filter dropdowns on product list | Products update dynamically based on filter. Note: size filter is not implemented. | ✅ | |
+| Search bar returns relevant products | Enter keyword (e.g., "tank") in search bar | Only matching products are displayed | ✅ | ![us3.1](README_media/user_stories/us3.1.png) |
+| Filters narrow down results by category and color | Use filter dropdowns on product list | Products update dynamically based on filter. Note: size filter is not implemented. | ✅ | ![us3.2](README_media/user_stories/us3.2.png) |
 
 ---
 
@@ -134,8 +133,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Items remain in cart during session | Add product to cart, reload page | Cart still contains product | ✅ | |
-| Cart icon updates with quantity | Add multiple products | Cart badge increments accordingly | ✅ | |
+| Items remain in cart during session | Add product to cart, reload page | Cart still contains product | ✅ | ![us4.1](README_media/user_stories/us4.1.png) |
+| Cart icon updates with quantity | Add multiple products | Cart badge increments accordingly | ✅ | ![us4.2](README_media/user_stories/us4.2.png) |
 
 ---
 
@@ -146,7 +145,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Customer is encouraged to log in or register | Add product to cart, proceed to checkout while logged out | Checkout works as guest, but login/signup prompts are displayed on product detail, signup, and checkout pages | ✅ | |
+| Customer is encouraged to log in or register | Add product to cart, proceed to checkout while logged out | Checkout works as guest, but login/signup prompts are displayed on product detail, signup, and checkout pages | ✅ | ![us5.1](README_media/user_stories/us5.1.png) |
 
 ---
 
@@ -157,9 +156,9 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Registration form with validation | Navigate to signup page, submit invalid and valid data | Errors shown for invalid, success redirect for valid | ✅ | |
-| Success message shown after registration | Register with valid credentials | Confirmation message appears | ✅ | |
-| User stored in database | Register and check admin panel | User appears in database | ✅ | |
+| Registration form with validation | Navigate to signup page, submit invalid and valid data | Errors shown for invalid, success redirect for valid | ✅ | ![us6.1](README_media/user_stories/us6.1.png) |
+| Success message shown after registration | Register with valid credentials | Confirmation message appears | ✅ | ![us6.2](README_media/user_stories/us6.2.png) |
+| User stored in database | Register and check admin panel | User appears in database | ✅ | ![us6.3](README_media/user_stories/us6.3.png) |
 
 ---
 
@@ -170,9 +169,9 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| User can log in and log out | Login with valid account, then log out | Login successful, logout ends session | ✅ | |
-| Session ends on logout | Logout and try accessing My Account | My Account is not accessible when logged out | ✅ | |
-| Protected pages require login | Access `/accounts/orders/` while logged out | Redirected to login (My Account is not available for logged-out users) | ✅ | |
+| User can log in and log out | Login with valid account, then log out | Login successful, logout ends session | ✅ | ![us7.1](README_media/user_stories/us7.1.png) |
+| Session ends on logout | Logout and try accessing My Account | My Account is not accessible when logged out | ✅ | ![us7.2](README_media/user_stories/us7.2.png) |
+| Protected pages require login | Access `/accounts/orders/` while logged out | Redirected to login (My Account is not available for logged-out users) | ✅ | ![us7.3](README_media/user_stories/us7.3.png) |
 
 ---
 
@@ -183,8 +182,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Orders are linked to user accounts | Place order, then login and check My Account → Orders | Orders displayed under user account | ✅ | |
-| Orders are displayed in profile | View Orders page | Order list with details (number, date, total) displayed correctly | ✅ | |
+| Orders are linked to user accounts | Place order, then login and check My Account → Orders | Orders displayed under user account | ✅ | ![us8.1](README_media/user_stories/us8.1.png) |
+| Orders are displayed in profile | View Orders page | Order list with details (number, date, total) displayed correctly | ✅ | ![us8.2](README_media/user_stories/us8.2.png) |
 
 ---
 
@@ -195,8 +194,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Review form visible to logged-in users | Visit product page as logged-in user | Review form is visible | ✅ | |
-| Reviews stored and displayed under products | Submit review | Review appears under product detail | ✅ | |
+| Review form visible to logged-in users | Visit product page as logged-in user | Review form is visible | ✅ | ![us9.1](README_media/user_stories/us9.1.png) |
+| Reviews stored and displayed under products | Submit review | Review appears under product detail | ✅ | ![us9.2](README_media/user_stories/us9.2.png) |
 
 ---
 
@@ -207,8 +206,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| User can edit or delete only their own reviews | Login as review owner, try edit/delete | Edit/delete allowed | ✅ | |
-| Changes update instantly | Edit review → refresh page | Updated text is displayed | ✅ | |
+| User can edit or delete only their own reviews | Login as review owner, try edit/delete | Edit/delete allowed | ✅ | ![us10.1](README_media/user_stories/us10.1.png) |
+| Changes update instantly | Edit review → refresh page | Updated text is displayed | ✅ | ![us10.2](README_media/user_stories/us10.2.png) |
 
 ---
 
@@ -219,10 +218,10 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| HTTPS enabled | Visit deployed site | Site loads with HTTPS (padlock visible) | ✅ | |
-| Secure password storage | Inspect database (via admin) | Passwords stored as hashes | ✅ | |
-| API keys and secrets are hidden | Check GitHub repo | No secrets visible in code | ✅ | |
-| GDPR compliance | Review site behavior | User data not exposed; only minimal personal data stored | ✅ | |
+| HTTPS enabled | Visit deployed site | Site loads with HTTPS (padlock visible) | ✅ | ![us11.1](README_media/user_stories/us11.1.png) |
+| Secure password storage | Inspect database (via admin) | Passwords stored as hashes | ✅ | ![us11.2](README_media/user_stories/us11.2.png) |
+| API keys and secrets are hidden | Check GitHub repo | No secrets visible in code | ✅ | ![us11.3](README_media/user_stories/us11.3.png) |
+| GDPR compliance | Review site behavior | User data not exposed; only minimal personal data stored | ✅ | ![us11.4](README_media/user_stories/us11.4.png) |
 
 ---
 
@@ -233,7 +232,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Cart updates instantly when items are added/removed | Add/remove product from cart | Cart page updates totals immediately | ✅ | |
+| Cart updates instantly when items are added/removed | Add/remove product from cart | Cart page updates totals immediately | ✅ | ![us12.1](README_media/user_stories/us12.1.png) |
 
 ---
 
@@ -244,7 +243,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Cart page shows product names, quantities, subtotals, and total | Go to Cart page after adding items | Correct products and totals displayed | ✅ | |
+| Cart page shows product names, quantities, subtotals, and total | Go to Cart page after adding items | Correct products and totals displayed | ✅ | ![us13.1](README_media/user_stories/us13.1.png) |
 
 ---
 
@@ -255,8 +254,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Checkout form collects name, address, and contact details | Proceed to checkout, fill form | Form saves valid data | ✅ | |
-| Shipping info saved to order | Place order and check admin/order history | Shipping data saved to order | ✅ | |
+| Checkout form collects name, address, and contact details | Proceed to checkout, fill form | Form saves valid data | ✅ | ![us14.1](README_media/user_stories/us14.1.png) |
+| Shipping info saved to order | Place order and check admin/order history | Shipping data saved to order | ✅ | ![us14.2](README_media/user_stories/us14.2.png) |
 
 ---
 
@@ -267,8 +266,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Stripe integration for secure payments | Complete checkout with test card | Stripe payment succeeds | ✅ | |
-| Payment success/fail handled | Try both valid and declined card | Success message shown or error displayed | ✅ | |
+| Stripe integration for secure payments | Complete checkout with test card | Stripe payment succeeds | ✅ | ![us15.1](README_media/user_stories/us15.1.png) |
+| Payment success/fail handled | Try both valid and declined card | Success message shown or error displayed | ✅ | ![us15.2](README_media/user_stories/us15.2.png) |
 
 ---
 
@@ -279,7 +278,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Success confirmation displayed | Complete order with valid payment | Confirmation message displayed with order details | ✅ | |
+| Success confirmation displayed | Complete order with valid payment | Confirmation message displayed with order details | ✅ | ![us16.1](README_media/user_stories/us16.1.png) |
 
 ---
 
@@ -290,7 +289,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Failed payment message explains the error and offers retry | Use declined Stripe test card | Error message shown with retry option | ✅ | |
+| Failed payment message explains the error and offers retry | Use declined Stripe test card | Error message shown with retry option | ✅ | ![us17.1](README_media/user_stories/us17.1.png) |
 
 ---
 
@@ -301,8 +300,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Admin login page | Navigate to `/admin/` | Admin login form loads | ✅ | |
-| Access restricted to staff accounts | Attempt login with non-staff user | Access denied | ✅ | |
+| Admin login page | Navigate to `/admin/` | Admin login form loads | ✅ | ![us18.1](README_media/user_stories/us18.1.png) |
+| Access restricted to staff accounts | Attempt login with non-staff user | Access denied | ✅ | ![us18.2](README_media/user_stories/us18.2.png) |
 
 ---
 
@@ -313,18 +312,27 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| CRUD operations for products in admin panel | Login as staff → manage products in admin | Products can be added, updated, deleted | ✅ | |
+| CRUD operations for products in admin panel | Login as staff → manage products in admin | Products can be added, updated, deleted | ✅ | ![us19.1](README_media/user_stories/us19.1.png) |
 
 ---
 
 #### User Story 20  
-**As an Admin, I want to manage product categories so that items are well organized.**
+**As an Admin, I want to manage product categories so that items are well organized.** 
 
 **Category:** Should Have  
 
+> **Scope clarification (MVP):** Categories are predefined **choices** on `Product.category`. In Admin, you can **assign** a category to a product and **filter** by category. **Creating, editing, or deleting categories in Admin is not part of this release** and is planned for a later iteration.
+
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
-|----------------------|---------------|------------------|--------|------------|
-| Categories can be created, edited, and deleted in admin | Login as staff → manage categories | Categories created/edited/deleted successfully | ✅ | |
+|---|---|---|---|---|
+| Categories can be created, edited, and deleted in Admin | Admin → (would be) Categories | Categories created/edited/deleted successfully | ⏭ Deferred (out of MVP scope) | – |
+
+---
+
+**MVP Validation**  
+| What is validated | Steps to Test | Expected Outcome | Result | Screenshot |
+|---|---|---|---|---|
+| Assign predefined category to a product and filter by category in Admin | Admin → Products → open a product → choose **Category** (dropdown) → **Save**. Then go to Products list and use **By category** filter | Product saves with the selected category, list filters correctly | ✅  | ![us20.1](README_media/user_stories/us20.1.png)<br>![us20.2](README_media/user_stories/us20.2.png) |
 
 ---
 
@@ -335,8 +343,8 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Orders listed in admin | Login as staff → Orders | Orders displayed with order numbers | ✅ | |
-| Order detail view shows customer/shipping info | Open order in admin | Order details shown | ✅ | |
+| Orders listed in admin | Login as staff → Orders | Orders displayed with order numbers | ✅ | ![us21.1](README_media/user_stories/us21.1.png) |
+| Order detail view shows customer/shipping info | Open order in admin | Order details shown | ✅ | ![us21.2](README_media/user_stories/us21.2.png) |
 
 ---
 
@@ -347,7 +355,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Order status can be updated in admin | Login as staff → update order status | Status updates saved and visible | ✅ | |
+| Order status can be updated in admin | Login as staff → update order status | Status updates saved and visible | ✅ | ![us22.1](README_media/user_stories/us22.1.png) |
 
 ---
 
@@ -358,8 +366,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
-| Admin pages require staff login | Attempt to access admin as non-staff | Access denied | ✅ | |
-
+| Admin pages require staff login | Attempt to access admin as non-staff | Access denied | ✅ | ![us23.1](README_media/user_stories/us23.1.png) |
 
 
 **Summary:**  
