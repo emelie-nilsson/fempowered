@@ -1,19 +1,23 @@
 from django.contrib import admin
-from .models import Product, Category, Review
+from .models import Product, Review, Favorite
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "price", "is_new")
-    list_filter = ("category", "is_new")
+    list_display = ("name", "category", "price", "color", "hex")
+    list_filter = ("category", "color")
     search_fields = ("name", "description")
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
-    prepopulated_fields = {"slug": ("name",)}
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ("product", "user", "rating", "created_on")
-    list_filter = ("rating", "created_on")
-    search_fields = ("body", "user__username", "product__name")
+    list_display = ("product", "user", "rating", "created_at")
+    list_filter = ("rating", "created_at")
+    search_fields = ("product__name", "user__username", "title", "body")
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ("user", "product", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__username", "product__name")
