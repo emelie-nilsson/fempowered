@@ -312,13 +312,21 @@ def cart_update(request, product_id):
 
 
 @require_POST
-def cart_remove(request, product_id):
+def cart_remove(request):
     """
-    Remove a row (product + optional size).
+    Remove a row (product + optional size) via POST.
+    Expects POST fields: product_id, optional size.
     """
     cart = Cart(request)
+
+    product_id = request.POST.get("product_id")
+    if not product_id:
+        messages.error(request, "Missing product id.")
+        return redirect("cart_detail")
+
     product = get_object_or_404(Product, pk=product_id)
     size = request.POST.get("size") or None
+
     cart.remove(product, size=size)
     messages.warning(request, "Removed from cart.")
     return redirect("cart_detail")

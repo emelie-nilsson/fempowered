@@ -44,6 +44,8 @@
             {% if ci.size %}
               <input type="hidden" name="size" value="{{ ci.size }}">
             {% endif %}
+            <!-- Needed for Remove POST endpoint -->
+            <input type="hidden" name="product_id" value="{{ ci.product.id }}">
 
             <div class="qty-row">
               <label class="sr-only" for="q{{ forloop.counter }}">Qty</label>
@@ -52,8 +54,15 @@
             </div>
 
             <div class="btn-row">
-              <button class="btn">Update</button>
-              <button class="btn" formaction="{% url 'cart_remove' ci.product.id %}">Remove</button>
+              <button type="submit" class="btn">Update</button>
+
+              <!-- Remove submits same form, but to cart_remove -->
+              <button type="submit"
+                      class="btn"
+                      formaction="{% url 'cart_remove' %}"
+                      formmethod="post">
+                Remove
+              </button>
             </div>
           </form>
         </div>
