@@ -486,7 +486,7 @@ def cart_remove(request):
 
 
 # Favorites
--
+
 
 class FavoriteListView(LoginRequiredMixin, ListView):
     template_name = "shop/favorites.html"
