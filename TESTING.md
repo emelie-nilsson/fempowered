@@ -444,3 +444,71 @@ All tested scenarios behaved as expected. Both frontend (UI disabling of billing
 
 ---
 ### Bugs and Fixes
+
+#### 1) Wrong product variant in orders & reviews
+- **What I saw:** The order showed a different color than I actually bought, and the review button appeared on the wrong product.
+- **Why:** The cart snapshot sometimes matched products by **name** instead of the exact product **ID**.
+- **Fix:** Always save `OrderItem.product` using the **exact PK**; removed the name fallback.
+- **How I checked:** Bought *Windbreaker / Light Beige*, *Windbreaker Pants / Light Beige*, *Tights / Light Beige*. Admin shows the exact items, the review button appears only on those exact variants.
+
+#### 2) Cart rows sometimes duplicated or not removed
+- **What I saw:** After updating/removing items, old rows could remain.
+- **Why:** The session cart existed in different shapes (`cart`, `bag`, `"id:size"`, nested dict).
+- **Fix:** Normalized cart handling and deduped by `(product_id, size)` before updates.
+- **How I checked:** Added/updated/removed the same item (with/without size). No duplicates, totals correct.
+
+#### 3) 500 Internal Server Error on deploy
+- **What I saw:** The site crashed with a 500.
+- **Why:** A stray `-` character in `shop/views.py`.
+- **Fix:** Removed it; ran `py_compile` and `manage.py check` (both clean).
+- **How I checked:** Site loaded fine; pages worked again.
+
+#### 4) Index page had a small gap on the right (mobile)
+- **What I saw:** On small screens (≤425px), the index page could scroll a few pixels to the right, making the footer appear “short”.
+- **Why:** Bootstrap 4 was used with a Bootstrap 5 class (`g-0`), plus full-width layout caused tiny overflow.
+- **Fix:** Added a `.full-bleed` utility, used `row no-gutters` (BS4), and adjusted the H1 so it doesn’t force overflow.
+- **How I checked:** Opened DevTools and tested different screen sizes (*Disable cache* + *Empty Cache and Hard Reload*). No horizontal scroll and the footer spans the full width of the screen.
+
+
+#### 5) Product thumbnails looked cropped on small screens
+- **What I saw:** Thumbnails were cut off.
+- **Why:** Fixed height (240px) + `object-fit: cover`.
+- **Fix:** Switched to **square thumbnails** with `aspect-ratio: 1/1; height:auto; object-fit: cover`.
+- **How I checked:** Product grid looks consistent on mobile without odd cropping.
+
+
+#### 6) “Nudges” lost their light moss background
+- **What I saw:** Info boxes no longer had the pale moss tint.
+- **Why:** Styles for these boxes were removed during a CSS cleanup.
+- **Fix:** Restored `--moss-tint` and the `.why-account / .account-nudge / .checkout-nudge / .nudge` rules.
+- **How I checked:** Nudges show the light moss background and border again.
+
+
+#### 7) Couldn’t see order items in Admin
+- **What I saw:** The order admin page didn’t list line items.
+- **Why:** No inline registered for `OrderItem`.
+- **Fix:** Added `OrderItemInline` to `OrderAdmin` and displayed product, size, qty, unit price.
+- **How I checked:** Admin → Order shows the correct line items.
+
+#### 8) Review rules / verified-buyer badge not always right
+- **What I saw:** Sometimes the badge or the review form showed on the wrong variant.
+- **Why:** The check didn’t always use the **exact** purchased product ID.
+- **Fix:** Verified-buyer sets now come from **paid `OrderItem`** for that product, and only buyers without an existing review can write one.
+- **How I checked:** After buying one color, I can only review that color. Other colors don’t allow a new review.
+
+
+#### 9) DevTools “first-open” layout glitch during responsive testing
+- **What I saw:** On the first open with DevTools, the layout sometimes looked wrong, after a hard reload it was fine.
+- **Why:** The browser served an old cached CSS and the device emulation changed the viewport.
+- **Fix:** In production, static files are versioned (hashed) via WhiteNoise, so fresh CSS is loaded automatically after deploy. Locally, I test with **Disable cache** + **Empty Cache and Hard Reload** in DevTools.
+- **How I checked:** Opened DevTools and tested different screen sizes with cache disabled. Layout remained correct with no horizontal scroll.
+
+---
+
+#### Test data used for screenshots (not a bug)
+Screenshots of “payment failed” states were taken in Stripe **test mode**, using cards that simulate **insufficient funds** and **generic decline** after submission.  
+Any valid-looking expiry, CVC, and postal code work in test mode.  
+Full examples are available in Stripe’s test card docs (no real cards were used).
+
+
+---
