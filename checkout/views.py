@@ -9,13 +9,13 @@ from django.urls import reverse
 from .forms import CheckoutAddressForm
 from .models import Order, OrderItem, ShippingMethod
 from shop.models import Product
-from accounts.models import UserAddress   
+from accounts.models import UserAddress
 
 
-try:  
-    from .models import OrderStatus  
-except Exception:  
-    class OrderStatus:             
+try:
+    from .models import OrderStatus
+except Exception:
+    class OrderStatus:
         PENDING = "pending"
         PAID = "paid"
         FAILED = "failed"
@@ -25,48 +25,61 @@ import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-# ---------- Cart helpers (normalize multiple formats to one shape) ----------
+# Cart helpers (normalize multiple formats to one shape)
 
 def normalize_cart_items(request):
     """
     Normalize various session cart formats into a list of dicts:
         [{'pid': 123, 'name': 'Name', 'qty': 2, 'price_cent': 5499, 'size': 'M'}, ...]
 
-    Supports:
+    Supported inputs (examples):
       A) {"123": {"name":..., "qty": 2, "price_cent": 5499, "size": "M"}}
       B) {"123": {"name":..., "qty": 2, "price": "54.99"}}  # euros -> cents
       C) Boutique Ado "bag":
          - {"123": 2}
          - {"123": {"items_by_size": {"S":1,"M":2}}}
+      D) Keys that include size: {"123:M": {...}}  -> pid derived from key prefix "123"
 
-    Falls back to DB (shop.Product) for name/price when missing.
+    For price fallback, we query Product to derive cents if not provided.
     """
     raw = request.session.get("cart") or request.session.get("bag") or {}
     items = []
 
     for pid, val in raw.items():
+        # Derive numeric pid even if key looks like '123:M'
+        pid_str = str(pid)
+        pid_key_part = pid_str.split(":", 1)[0]
+        pid_int = None
         try:
-            pid_int = int(pid)
+            pid_int = int(pid_key_part)
         except Exception:
             pid_int = None
 
+        # If value carries product_id/id, prefer that when pid_int is not yet known
+        if isinstance(val, dict):
+            candidate = val.get("product_id") or val.get("id")
+            if candidate and not pid_int:
+                try:
+                    pid_int = int(candidate)
+                except Exception:
+                    pass
+
         def db_info():
-            name, cents = f"Product {pid}", 0
+            """Fallback to DB for name and price if needed."""
+            name, cents = f"Product {pid_key_part}", 0
             if pid_int:
                 try:
                     p = Product.objects.get(pk=pid_int)
                     name = p.name
-                    # p.price expected to be Decimal euros
-                    cents = int(round(float(p.price) * 100))
+                    cents = int(round(float(p.price) * 100))  # Decimal euros -> cents
                 except Exception:
                     pass
             return name, cents
 
-        # Case: dict with flat qty/price fields (non BA)
+        # Case: dict with flat qty/price fields (non Boutique Ado)
         if isinstance(val, dict) and "items_by_size" not in val:
             qty = int(val.get("qty") or val.get("quantity") or 0)
             size = (val.get("size") or "")[:8]
-            # price in cents or euros
             if "price_cent" in val:
                 price_cents = int(val["price_cent"])
             elif "price" in val or "price_eur" in val:
@@ -119,7 +132,7 @@ def describe_cart_for_metadata(request) -> str:
 
 def calc_shipping_cost_cents(method: str, subtotal: int) -> int:
     """
-    Simple example:
+    Example rules:
       - Standard: free over €80, else €5.90
       - Express: €9.90
     """
@@ -128,7 +141,7 @@ def calc_shipping_cost_cents(method: str, subtotal: int) -> int:
     return 0 if subtotal >= 8000 else 590  # €5.90 or free over €80
 
 
-# ---------- STEP 1: Address & shipping ----------
+# STEP 1: Address & shipping 
 
 @require_http_methods(["GET", "POST"])
 def address_view(request):
@@ -137,7 +150,7 @@ def address_view(request):
     if request.user.is_authenticated:
         initial["email"] = request.user.email
         try:
-            ua = request.user.address  
+            ua = request.user.address
         except (AttributeError, UserAddress.DoesNotExist):
             ua = None
         if ua:
@@ -189,30 +202,31 @@ def address_view(request):
                 shipping_cost=shipping_cost,
                 subtotal=subtotal,
                 total=total,
-                status=OrderStatus.PENDING, 
+                status=OrderStatus.PENDING,
             )
 
-            # Snapshot cart into OrderItems
+            # Snapshot cart into OrderItems using the exact product PK (no name fallback)
             for it in items:
-                product_fk = None
                 pid_val = it.get("pid")
-                if pid_val:
-                    product_fk = Product.objects.filter(pk=pid_val).first()
+                if not pid_val:
+                    # Skip lines without a resolvable product id to avoid linking wrong variants
+                    continue
+
+                product_fk = Product.objects.filter(pk=pid_val).first()
                 if not product_fk:
-                    product_fk = (
-                        Product.objects.filter(name__iexact=it["name"]).first()
-                        or Product.objects.filter(name__icontains=it["name"]).first()
-                    )
+                    # Skip if product not found; safer than guessing by name
+                    continue
+
                 OrderItem.objects.create(
                     order=order,
-                    product=product_fk,
-                    product_name=it["name"],
+                    product=product_fk,             # exact variant linkage (color)
+                    product_name=it["name"],        # textual snapshot for convenience
                     unit_price=it["price_cent"],
                     quantity=it["qty"],
                     size=it["size"],
                 )
 
-            # --- Auto-save address back to profile (logged-in users) ---
+            # Auto-save address back to profile (logged-in users)
             if request.user.is_authenticated:
                 ua, _ = UserAddress.objects.get_or_create(user=request.user)
                 # shipping
@@ -239,7 +253,6 @@ def address_view(request):
                     ua.billing_city = data.get("billing_city") or ""
                     ua.billing_country = data.get("billing_country") or ""
                 ua.save()
-            
 
             # Link order in session and continue to payment
             request.session["checkout_order_id"] = order.id
@@ -251,7 +264,7 @@ def address_view(request):
     return render(request, "checkout/checkout_address.html", {"form": form})
 
 
-# ---------- STEP 2: Payment (Stripe) ----------
+# STEP 2: Payment (Stripe) 
 
 @ensure_csrf_cookie  # ensure CSRF cookie is set for subsequent POST to /confirm/
 @require_http_methods(["GET"])
@@ -290,7 +303,7 @@ def payment_view(request):
     return render(request, "checkout/checkout_payment.html", context)
 
 
-# ---------- Confirm (AJAX from payment page AFTER Stripe success) ----------
+# Confirm (AJAX from payment page AFTER Stripe success) 
 
 @require_http_methods(["POST"])
 def confirm_view(request):
@@ -332,12 +345,12 @@ def confirm_view(request):
         # Not critical; lack of receipt link shouldn't block order completion
         pass
 
-    ## 6) Mark order as paid + store receipt + (NEW) attach user if logged in
-    order.status = OrderStatus.PAID                      
+    # 6) Mark order as paid + store receipt + (optional) attach user if logged in
+    order.status = OrderStatus.PAID
     order.stripe_receipt_url = receipt_url
-    if request.user.is_authenticated and order.user is None:  
-        order.user = request.user                               
-        order.save(update_fields=["status", "stripe_receipt_url", "user"])  
+    if request.user.is_authenticated and order.user is None:
+        order.user = request.user
+        order.save(update_fields=["status", "stripe_receipt_url", "user"])
     else:
         order.save(update_fields=["status", "stripe_receipt_url"])
 
@@ -351,7 +364,7 @@ def confirm_view(request):
     return JsonResponse({"ok": True, "redirect_url": redirect_url})
 
 
-# ---------- Success page ----------
+#  Success page 
 
 def success_view(request, order_number: str):
     # order_number like "FP-000123" -> extract numeric id
@@ -363,7 +376,6 @@ def success_view(request, order_number: str):
 
     if request.user.is_authenticated and order.user is None:
         order.user = request.user
-        
         if order.status != OrderStatus.PAID:
             order.status = OrderStatus.PAID
         order.save(update_fields=["user", "status"])
@@ -371,7 +383,7 @@ def success_view(request, order_number: str):
     return render(request, "checkout/success.html", {"order": order})
 
 
-# ---------- Stripe Webhook (server-to-server, optional in dev) ----------
+# Stripe Webhook (server-to-server, optional in dev) 
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -433,4 +445,3 @@ def stripe_webhook(request):
         _update_order_from_pi(obj, paid=False)
 
     return HttpResponse(status=200)
-
