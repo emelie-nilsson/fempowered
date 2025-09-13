@@ -11,6 +11,8 @@
   --light-highlight-color: #e5ded6; /* Light Beige */
 
   --navbar-h: 56px;
+
+  --moss-tint: #e3e7e5; /* Nudges light Moss*/
 }
 
 
@@ -542,3 +544,36 @@ a.btn[aria-disabled="true"] {
 /* Responsive tweaks */
 
 @media (min-width: 992px) { :root { --navbar-h: 72px; } }
+
+
+/* Nudges */
+.why-account,
+.account-nudge,
+.checkout-nudge,
+.nudge {
+  background-color: var(--moss-tint);
+  border: 1px solid var(--secondary-color);
+  border-radius: .5rem;
+  padding: 1rem 1.25rem;
+  color: var(--primary-color);
+}
+
+/* Nudges headings */
+.why-account h2 i,
+.account-nudge h2 i,
+.checkout-nudge h2 i,
+.nudge h2 i {
+  color: var(--secondary-color);
+  font-size: 1.1em;
+  vertical-align: middle;
+}
+
+/* Nudges links */
+.why-account a,
+.account-nudge a,
+.checkout-nudge a,
+.nudge a {
+  color: var(--secondary-color);
+  font-weight: 600;
+  text-decoration: underline;
+}
