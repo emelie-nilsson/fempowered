@@ -299,6 +299,22 @@ a.btn[aria-disabled="true"] {
 .auth .form-control { border-radius: .5rem; }
 .auth .form-check-input { position: relative; top: 1px; }
 
+/* Auth pages mobile polish (≤426px) */
+@media (max-width: 426px) {
+  .auth form { width: 100%; }
+  .auth .form-row { margin-left: 0; margin-right: 0; }
+  .auth .form-row > [class*="col-"] { padding-left: 0; padding-right: 0; }
+  .auth .form-control,
+  .auth .input-group { width: 100%; }
+  .auth .input-group { flex-wrap: wrap; }
+  .auth .btn { width: 100%; }
+  .auth .alert { word-break: break-word; }
+
+  /* Email page */
+  .account-email-page .auth-form { width: 100%; }
+}
+
+
 
 /* Shop */ 
 

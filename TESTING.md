@@ -402,7 +402,8 @@ For **User Story 20**, the acceptance criterion “Categories can be created, ed
 
 ---
 ### Error Handling
-- ✅ Custom 404 page displays for invalid URLs.  
+- ✅ Custom 404 page displays for invalid URLs. 
+  
 
 ---
 ### Authentication
