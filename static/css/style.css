@@ -542,8 +542,39 @@ a.btn[aria-disabled="true"] {
 
 
 /* Responsive tweaks */
+/* Navbar */
 
 @media (min-width: 992px) { :root { --navbar-h: 72px; } }
+
+@media (max-width: 991px) {
+  .navbar-nav .nav-item {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Favorites */
+@media (max-width: 425.98px) {
+  .favorites-grid > li {
+    display: flex;            
+  }
+
+  .favorites-grid .card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .favorites-grid .card > a {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;           
+  }
+   
+  .favorites-grid .card .card-body {
+    margin-top: auto;        
+  }
+}
+
 
 
 /* Nudges */

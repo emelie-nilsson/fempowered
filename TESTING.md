@@ -332,7 +332,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 **MVP Validation**  
 | What is validated | Steps to Test | Expected Outcome | Result | Screenshot |
 |---|---|---|---|---|
-| Assign predefined category to a product and filter by category in Admin | Admin → Products → open a product → choose **Category** (dropdown) → **Save**. Then go to Products list and use **By category** filter | Product saves with the selected category, list filters correctly | ✅  | ![us20.1](README_media/user_stories/us20.1.png)<br>![us20.2](README_media/user_stories/us20.2.png) |
+| Assign predefined category to a product and filter by category in Admin | Admin → Products → open a product → choose **Category** (dropdown) → **Save**. Then go to Products list and use **By category** filter | Product saves with the selected category, list filters correctly | ✅  | ![us20.1](README_media/user_stories/us20.1.png)<br>
 
 ---
 
