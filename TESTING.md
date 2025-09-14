@@ -11,6 +11,7 @@
   - [Authentication](#authentication)
   - [General UX](#general-ux)
   - [Account Address Form](#account-address-form)
+  - [Responsiveness](#responsiveness)
 - [Validation](#validation)
 - [Bugs and Fixes](#bugs-and-fixes)
 ---
@@ -437,6 +438,22 @@ The address form was manually tested to ensure correct validation and behavior.
 
 **Result:**  
 All tested scenarios behaved as expected. Both frontend (UI disabling of billing fields) and backend validation (SE/UK-specific) worked consistently.
+
+
+### Responsiveness
+
+All core pages were tested on **mobile (~375px)** and on **laptop (full HD screen)** to confirm that layouts adapt correctly.  For documentation purposes, the laptop screenshots shown below were resized to 1024px width.
+
+| Page          | Mobile View | Laptop View |
+|---------------|-------------|-------------|
+| Home          | ![mobile.home](README_media/responsive/mobile.home.jpg) | ![laptop.home](README_media/responsive/laptop.home.png) |
+| Shop          | ![mobile.shop](README_media/responsive/mobile.shop.jpg) | ![laptop.shop](README_media/responsive/laptop.shop.png) |
+| Product       | ![mobile.product](README_media/responsive/mobile.product.jpg) | ![laptop.product](README_media/responsive/laptop.product.png) |
+| Bag (Cart)    | ![mobile.bag](README_media/responsive/mobile.bag.jpg) | ![laptop.bag](README_media/responsive/laptop.bag.png) |
+| Login         | ![mobile.login](README_media/responsive/mobile.login.jpg) | ![laptop.login](README_media/responsive/laptop.login.png) |
+| Signup        | ![mobile.signup](README_media/responsive/mobile.signup.jpg) | ![laptop.signup](README_media/responsive/laptop.signup.png) |
+
+Additional pages (About, Contact, Favorites, etc.) were also checked to confirm consistent responsiveness.
 
 
 ---
