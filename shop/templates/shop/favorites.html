@@ -12,7 +12,8 @@
       {% for f in favorites %}
         {% with p=f.product %}
         <li class="col-6 col-md-4 col-lg-3 mb-4">
-          <div class="card h-100 border-0 shadow-sm">
+          <div class="card h-100 border-0 shadow-sm d-flex flex-column"> 
+
             <a href="{% url 'product_detail' p.id %}" class="text-reset text-decoration-none">
               <!-- Direct static path from image_catalog -->
               {% if p.image_catalog %}
@@ -35,7 +36,7 @@
             <!-- Remove from favorites -->
             <form method="post"
                   action="{% url 'toggle_favorite' p.id %}?next={{ request.get_full_path|urlencode }}"
-                  class="p-2 pt-0">
+                  class="p-2 pt-0 mt-auto"> 
               {% csrf_token %}
               <button class="btn btn-sm btn-outline-secondary" aria-label="Remove from favorites">
                 <i class="fa-solid fa-heart mr-1"></i> Remove
