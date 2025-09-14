@@ -8,7 +8,7 @@ from django.http import JsonResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
-from django.views.generic import CreateView, UpdateView, DeleteView, ListView
+from django.views.generic import CreateView, UpdateView, ListView  
 
 from django.conf import settings
 
@@ -24,10 +24,7 @@ except Exception:
     OrderItem = None  # Will fail loudly if used without being present
 
 
-
 # Purchase verification helpers
-
-
 def _paid_statuses():
     """
     Returns a list of statuses considered 'paid/fulfilled'.
@@ -68,8 +65,6 @@ def has_purchased_exact_variant(user, product) -> bool:
 
 
 # Helpers for cart session dedupe
-
-
 def _norm_size(val):
     """Normalize size values so None/''/'NA' are treated as None."""
     if val is None:
@@ -131,10 +126,7 @@ def _delete_matching_lines_in_session(session, product_id, size):
     return removed_any
 
 
-
 # Products
-
-
 def product_list(request):
     """
     Product list with search, filter, sort, pagination.
@@ -262,8 +254,6 @@ def product_detail(request, pk):
 
 
 # Reviews (CRUD)
-
-
 class ReviewCreateView(LoginRequiredMixin, CreateView):
     """
     Creates a review. Enforces:
@@ -350,17 +340,20 @@ class ReviewUpdateView(LoginRequiredMixin, OwnerRequiredMixin, UpdateView):
         return reverse("product_detail", kwargs={"pk": self.object.product.pk})
 
 
-class ReviewDeleteView(LoginRequiredMixin, OwnerRequiredMixin, DeleteView):
-    model = Review
-
-    def get_success_url(self):
-        messages.success(self.request, "Review deleted.")
-        return reverse("product_detail", kwargs={"pk": self.object.product.pk})
+@login_required
+@require_POST
+def review_delete(request, pk):
+    """
+    POST-only delete. Requires owner. Redirects back to the product detail.
+    """
+    review = get_object_or_404(Review, pk=pk, user=request.user)
+    product_id = review.product_id
+    review.delete()
+    messages.success(request, "Review deleted.")
+    return redirect("product_detail", pk=product_id)
 
 
 # Cart
-
-
 def cart_detail(request):
     """
     Context for template:
@@ -373,7 +366,6 @@ def cart_detail(request):
         # Prefer explicit size from the item; if missing, derive from key
         raw_size = item.get("size")
         if not raw_size and ":" in str(key):
-            # Example key pattern: "<product_id>:<size>"
             raw_size = str(key).split(":", 1)[1] or None
 
         # Normalize "NA"/empty to None so the template won't show a bogus pill
@@ -484,10 +476,7 @@ def cart_remove(request):
     return redirect("cart_detail")
 
 
-
 # Favorites
-
-
 class FavoriteListView(LoginRequiredMixin, ListView):
     template_name = "shop/favorites.html"
     context_object_name = "favorites"
@@ -517,10 +506,7 @@ def toggle_favorite(request, product_id):
     return HttpResponseRedirect(next_url)
 
 
-
 # Utilities
-
-
 def cart_reset(request):
     """One-time: clear any broken cart shapes in session."""
     request.session['cart'] = {}

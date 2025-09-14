@@ -116,7 +116,12 @@
           {% if request.user.is_authenticated and r.user_id == request.user.id %}
             <div class="mt-1">
               <a class="btn btn-sm btn-fem" href="{% url 'review_update' r.pk %}">Edit</a>
-              <a class="btn btn-sm btn-outline-danger" href="{% url 'review_delete' r.pk %}">Delete</a>
+
+              <!-- Delete via POST form (matches POST-only view) -->
+              <form method="post" action="{% url 'review_delete' r.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
             </div>
           {% endif %}
         </li>
