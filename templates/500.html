@@ -1,8 +1,14 @@
-<!doctype html>
-<html lang="en">
-  <head><meta charset="utf-8"><title>Server error</title></head>
-  <body>
-    <h1>Something went wrong</h1>
-    <p>Please try again later.</p>
-  </body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container text-center py-5">
+  <img src="{% static 'img/branding/500.webp' %}" 
+       alt="Error illustration" 
+       class="img-fluid mb-4" width="400" height="auto">
+
+  <h1 class="main-heading">500 – Something went wrong</h1>
+  <p class="mb-4">Oops! Something broke on our side. Please try again later.</p>
+  <a href="{% url 'home' %}" class="btn btn-fem">Back to Home</a>
+</div>
+{% endblock %}
