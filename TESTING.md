@@ -12,68 +12,73 @@
   - [General UX](#general-ux)
   - [Account Address Form](#account-address-form)
   - [Responsiveness](#responsiveness)
-- [Validation](#validation)
 - [Bugs and Fixes](#bugs-and-fixes)
+
 ---
 
-## Automated Testing
-All automated tests were executed module by module during development, using the Django test runner. Each test file was run individually with commands such as:
+> Validation results (HTML, CSS) and Lighthouse reports are included in the **README** under the [Validation](README.md#validation) section.
 
-`python manage.py test checkout.tests.test_forms -v 2`   
-`python manage.py test checkout.tests.test_views -v 2`   
-`python manage.py test shop.tests.test_models -v 2`
+## Automated Testing
+All automated tests were executed module by module during development, using the Django test runner.  
+Each test file was run individually with commands such as:
+
+```bash
+python manage.py test checkout.tests.test_forms -v 2
+python manage.py test checkout.tests.test_views -v 2
+python manage.py test shop.tests.test_models -v 2
+```
+
 
 ### Checkout Form Tests
 Unit tests for the `CheckoutAddressForm` are located in `checkout/tests/test_forms.py`.  
 The tests verify that the form enforces key validation rules:
-- **Full name**: must contain both first and last name.
-- **Phone number**: must be sufficiently long and contain only valid characters.
-- **Postal code**: must consist of digits only.
-- **Billing fields**: required when billing address is not the same as shipping.
+- **Full name**: must contain both first and last name
+- **Phone number**: must be sufficiently long and contain only valid characters
+- **Postal code**: must consist of digits only
+- **Billing fields**: required when billing address is not the same as shipping
 
 **Result:**  
-All validation rules worked as expected. The tests passed successfully ✔
+All validation rules worked as expected. The tests passed successfully ✅
 
 ---
+
 ### Account Address Form Tests
 Unit tests for the `UserAddressForm` are located in `accounts/tests/test_forms.py`.  
 These tests cover the account “My Address” page, ensuring that both shipping and billing addresses are validated correctly.
 
 The tests verify that the form enforces:
-- **Full name**: must include both first and last name.  
-- **Phone number**: must contain 7–15 digits (with `+`, spaces, and hyphens allowed).  
+- **Full name**: must include both first and last name  
+- **Phone number**: must contain 7–15 digits (with `+`, spaces, and hyphens allowed)  
 - **Postal codes**:  
-  - **SE (Sweden):** exactly 5 digits (e.g., `21145`).  
-  - **GB/UK:** validated against official postcode formats and normalized (e.g., `SW1A 1AA`).  
-  - **Other countries:** fallback rule of 3–10 digits.  
-- **Billing fields**: required when *billing_same_as_shipping* is unchecked, but optional when it is checked.  
+  - **SE (Sweden):** exactly 5 digits (e.g., `21145`)  
+  - **GB/UK:** validated against official postcode formats and normalized (e.g., `SW1A 1AA`)  
+  - **Other countries:** fallback rule of 3–10 digits  
+- **Billing fields**: required when *billing_same_as_shipping* is unchecked, but optional when it is checked  
 
 **Result:**  
-All account form tests passed successfully ✔
+All account form tests passed successfully ✅
 
 ---
 
 ### Remaining Automated Tests
 
-All other automated tests are summarized in the table below:
-
 | **Test Category**          | **Location**                                         | **Purpose**                                              | **Result** |
-|----------------------------|------------------------------------------------------|----------------------------------------------------------|------------|
-| Checkout Views             | `checkout/tests/test_views.py`                       | Address page GET/POST, billing requirements, redirects   | ✅ |
-| Checkout Payment & Success | `checkout/tests/test_payment_views.py`<br>`checkout/tests/test_success_view.py` | Payment page loads, success message/page works           | ✅ |
-| Checkout Flow (E2E)        | `checkout/tests/test_checkout_flow.py`               | Simulates full checkout flow (address → payment)         | ✅ |
-| Shop Models                | `shop/tests/test_models.py`                          | `__str__` methods for Product, Category, Review          | ✅ |
-| Shop Views                 | `shop/tests/test_views.py`<br>`shop/tests/test_product_list_smoke.py` | Product listing, search/filter, pagination               | ✅ |
-| Cart Views                 | `shop/tests/test_cart_views.py`                      | Cart integration with session                            | ✅ |
-| Smoke Tests                | `project_tests/test_smoke.py`                        | Key routes (home, shop, cart, checkout, auth)            | ✅ |
-| URL Resolution             | `project_tests/test_urls.py`                         | All named URLs resolve correctly                         | ✅ |
-| Authentication Views       | `project_tests/test_auth_views_smoke.py`             | Login, signup, password reset views                      | ✅ |
-| Password Reset Email       | `project_tests/test_password_reset_email.py`         | Email sent when triggering password reset                | ✅ |
-| Admin Site                 | `project_tests/test_admin_smoke.py`                  | Admin login + index + model changelists                  | ✅ |
-| CSRF Tokens                | `project_tests/test_csrf_smoke.py`                   | Confirms CSRF tokens present on key forms                | ✅ |
-| Error Pages                | `project_tests/test_error_pages.py`                  | Custom 404 + 500 templates render                        | ✅ |
+|-----------------------------|------------------------------------------------------|----------------------------------------------------------|------------|
+| Checkout Views              | `checkout/tests/test_views.py`                       | Address page GET/POST, billing requirements, redirects   | ✅ |
+| Checkout Payment & Success  | `checkout/tests/test_payment_views.py`<br>`checkout/tests/test_success_view.py` | Payment page loads, success message/page works           | ✅ |
+| Checkout Flow (E2E)         | `checkout/tests/test_checkout_flow.py`               | Simulates full checkout flow (address → payment)         | ✅ |
+| Shop Models                 | `shop/tests/test_models.py`                          | `__str__` methods for Product, Category, Review          | ✅ |
+| Shop Views                  | `shop/tests/test_views.py`<br>`shop/tests/test_product_list_smoke.py` | Product listing, search/filter, pagination               | ✅ |
+| Cart Views                  | `shop/tests/test_cart_views.py`                      | Cart integration with session                            | ✅ |
+| Smoke Tests                 | `project_tests/test_smoke.py`                        | Key routes (home, shop, cart, checkout, auth)            | ✅ |
+| URL Resolution              | `project_tests/test_urls.py`                         | All named URLs resolve correctly                         | ✅ |
+| Authentication Views        | `project_tests/test_auth_views_smoke.py`             | Login, signup, password reset views                      | ✅ |
+| Password Reset Email        | `project_tests/test_password_reset_email.py`         | Email sent when triggering password reset                | ✅ |
+| Admin Site                  | `project_tests/test_admin_smoke.py`                  | Admin login + index + model changelists                  | ✅ |
+| CSRF Tokens                 | `project_tests/test_csrf_smoke.py`                   | Confirms CSRF tokens present on key forms                | ✅ |
+| Error Pages                 | `project_tests/test_error_pages.py`                  | Custom 404 + 500 templates render                        | ✅ |
 
-
+---
 
 ## Manual Testing
 
@@ -85,7 +90,6 @@ Each section below summarizes the scenarios and expected outcomes. Detailed fiel
 
 ---
 
-
 ### User Stories
 
 All user stories were tested manually in the deployed environment.  
@@ -96,10 +100,10 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 1  
 **As a Visitor, I want to browse available products so that I can explore what the shop offers without needing an account.**
 
-**Category:** Must Have  
+**Category:** Must-have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
-|----------------------|---------------|------------------|--------|------------|
+|---------------------|---------------|------------------|--------|------------|
 | User can view all products on a products page without logging in | Navigate to Shop | All products display with image, name, price | ✅ | ![us1.1](README_media/user_stories/us1.1.png) |
 
 ---
@@ -107,10 +111,10 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 2  
 **As a Visitor, I want to view product details so that I can learn more before deciding to buy.**
 
-**Category:** Must Have  
+**Category:** Must-have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
-|----------------------|---------------|------------------|--------|------------|
+|---------------------|---------------|------------------|--------|------------|
 | Clicking a product opens a product detail page with image, description, price | In the Shop, click on a product | Product detail page loads and shows correct product data. Each color variant is listed as a separate product. | ✅ | ![us2.1](README_media/user_stories/us2.1.png) |
 
 ---
@@ -318,32 +322,35 @@ This ensures that every feature was validated from a user’s perspective, compl
 ---
 
 #### User Story 20  
-**As an Admin, I want to manage product categories so that items are well organized.** 
+**As an Admin, I want to manage product categories so that items are well organized.**  
 
-**Category:** Should Have  
+**Category:** Originally marked as **Must-have** → re-scoped to **Should-have**  
 
-> **Scope clarification (MVP):** Categories are predefined **choices** on `Product.category`. In Admin, you can **assign** a category to a product and **filter** by category. **Creating, editing, or deleting categories in Admin is not part of this release** and is planned for a later iteration.
+> **Scope clarification (MVP):**  
+> Categories are predefined **choices** on `Product.category`. In Admin, you can **assign** a category to a product and **filter** by category.  
+> Creating, editing, or deleting categories in Admin was deemed out of scope for this release, and the story was re-prioritized during development.  
+> It is listed under **Future Features** for potential implementation if the shop expands its product lines.
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
-|---|---|---|---|---|
+|---------------------|---------------|------------------|--------|------------|
 | Categories can be created, edited, and deleted in Admin | Admin → (would be) Categories | Categories created/edited/deleted successfully | ⏭ Deferred (out of MVP scope) | – |
 
 ---
 
 **MVP Validation**  
 | What is validated | Steps to Test | Expected Outcome | Result | Screenshot |
-|---|---|---|---|---|
-| Assign predefined category to a product and filter by category in Admin | Admin → Products → open a product → choose **Category** (dropdown) → **Save**. Then go to Products list and use **By category** filter | Product saves with the selected category, list filters correctly | ✅  | ![us20.1](README_media/user_stories/us20.1.png)<br>
+|-------------------|---------------|------------------|--------|------------|
+| Assign predefined category to a product and filter by category in Admin | Admin → Products → open a product → choose **Category** (dropdown) → **Save**. Then go to Products list and use **By category** filter | Product saves with the selected category, list filters correctly | ✅ | ![us20.1](README_media/user_stories/us20.1.png) |
 
 ---
 
 #### User Story 21  
 **As an Admin, I want to view incoming orders and their details so that I can fulfill them efficiently.**
 
-**Category:** Must Have  
+**Category:** Must-have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
-|----------------------|---------------|------------------|--------|------------|
+|---------------------|---------------|------------------|--------|------------|
 | Orders listed in admin | Login as staff → Orders | Orders displayed with order numbers | ✅ | ![us21.1](README_media/user_stories/us21.1.png) |
 | Order detail view shows customer/shipping info | Open order in admin | Order details shown | ✅ | ![us21.2](README_media/user_stories/us21.2.png) |
 
@@ -352,10 +359,10 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 22  
 **As an Admin, I want to mark orders as fulfilled or shipped so that customers stay informed.**
 
-**Category:** Must Have  
+**Category:** Must-have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
-|----------------------|---------------|------------------|--------|------------|
+|---------------------|---------------|------------------|--------|------------|
 | Order status can be updated in admin | Login as staff → update order status | Status updates saved and visible | ✅ | ![us22.1](README_media/user_stories/us22.1.png) |
 
 ---
@@ -363,61 +370,65 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 23  
 **As an Admin, I want to restrict access to admin-only features so that only authorized staff can manage content.**
 
-**Category:** Must Have  
+**Category:** Must-have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
-|----------------------|---------------|------------------|--------|------------|
-| Admin pages require staff login | Attempt to access admin as non-staff | Access denied | ✅ | ![us23.1](README_media/user_stories/us18.2.png) |
-
-
-**Summary:**  
-
-All user stories were manually tested against their acceptance criteria. All **Must-have** and most **Should-have** stories passed ✅
-
-For **User Story 20**, the acceptance criterion “Categories can be created, edited, and deleted in Admin” is **Deferred (out of MVP scope)**; the MVP behavior—assigning a predefined category to a product and filtering by category, was verified and passed. 
+|---------------------|---------------|------------------|--------|------------|
+| Admin pages require staff login | Attempt to access admin as non-staff | Access denied | ✅ | ![us23.1](README_media/user_stories/us18.2.png) *(same screenshot as US18.2)* |
 
 ---
 
+**Summary:**  
+All user stories were manually tested against their acceptance criteria. All **Must-have** and most **Should-have** stories passed ✅  
 
+For **User Story 20**, the acceptance criterion “Categories can be created, edited, and deleted in Admin” is **Deferred (out of MVP scope)**.  
+The MVP outcome (assigning a predefined category and filtering by category) was verified and passed. 
+
+---
 
 ### Navigation and Links
-- ✅ Navbar links (Home, Shop, Cart, Account, Contact) all lead to the correct page.  
-- ✅ Footer links navigate correctly.  
-- ✅ Logo is clickable and returns to the homepage. 
+- ✅ Navbar links (Home, Shop, Cart, Account, Contact) all lead to the correct page  
+- ✅ Footer links navigate correctly  
+- ✅ Logo is clickable and returns to the homepage  
+
 ---
 
 ### Buttons
-- ✅ Add to Cart works and updates the cart counter.  
-- ✅ Update Cart adjusts product quantities correctly.  
-- ✅ Checkout button leads to the address step.  
-- ✅ Favorite/like heart requires login (redirects to login page if not authenticated).  
-- ✅ Login/Logout buttons show the correct state depending on authentication. 
+- ✅ Add to Cart works and updates the cart counter  
+- ✅ Update Cart adjusts product quantities correctly  
+- ✅ Checkout button leads to the address step  
+- ✅ Favorite/like heart requires login (redirects to login page if not authenticated)  
+- ✅ Login/Logout buttons show the correct state depending on authentication  
 
 ---
+
 ### Forms
-- ✅ Contact form validates fields and can be submitted successfully.  
-- ✅ Search/filter in Shop displays correct product results.  
-- ✅ Review form requires login and validates rating + body input.  
-- ✅ Checkout form validates required fields and billing rules.  
-- ✅ Account Address form tested separately (see section above).
+- ✅ Contact form validates fields and can be submitted successfully  
+- ✅ Search/filter in Shop displays correct product results  
+- ✅ Review form requires login and validates rating + body input  
+- ✅ Checkout form validates required fields and billing rules  
+- ✅ Account Address form tested separately (see section above)  
 
 ---
+
 ### Error Handling
-- ✅ Custom 404 page displays for invalid URLs. 
-  
+- ✅ Custom 404 page displays for invalid URLs  
+- ✅ Custom 500 page renders correctly (tested during forced error in development)  
 
 ---
+
 ### Authentication
-- ✅ Signup works with email verification.  
-- ✅ Login works with valid credentials.  
-- ✅ Logout logs the user out and displays a confirmation message.  
-- ✅ Password reset flow sends an email and accepts new password. 
+- ✅ Signup works with email verification  
+- ✅ Login works with valid credentials  
+- ✅ Logout logs the user out and displays a confirmation message  
+- ✅ Password reset flow sends an email and accepts new password  
 
 ---
+
 ### General UX
-- ✅ Site is responsive on mobile, tablet, and desktop.  
-- ✅ CSRF token present in all forms.  
-- ✅ Django messages appear consistently (e.g., on login, logout, save, delete). 
+- ✅ Site is responsive on mobile, tablet, and desktop  
+- ✅ CSRF token present in all forms  
+- ✅ Django messages appear consistently (e.g., on login, logout, save, delete)  
 
 ---
 
@@ -426,107 +437,189 @@ For **User Story 20**, the acceptance criterion “Categories can be created, ed
 The address form was manually tested to ensure correct validation and behavior.
 
 | Scenario | Steps to Test | Expected Outcome | Result |
-|---|---|---|---|
-| SE valid | Enter Country=`SE`, Postal=`21145`, fill other required fields | Saved successfully, postal normalized to `21145`. | ✅ |
+|----------|---------------|------------------|--------|
+| SE valid | Enter Country=`SE`, Postal=`21145`, fill other required fields | Saved successfully, postal normalized to `21145` | ✅ |
 | SE invalid | Enter Country=`SE`, Postal=`123` | Error: “Swedish postal code must be exactly 5 digits.” | ✅ |
-| UK valid | Enter Country=`GB`, Postal=`SW1A1AA` | Saved successfully, normalized to `SW1A 1AA`. | ✅ |
+| UK valid | Enter Country=`GB`, Postal=`SW1A1AA` | Saved successfully, normalized to `SW1A 1AA` | ✅ |
 | UK invalid | Enter Country=`GB`, Postal=`12345` | Error: “Enter a valid UK postcode.” | ✅ |
-| Fallback valid | Enter Country=`DE`, Postal=`12345` | Accepted (fallback 3–10 digits). | ✅ |
-| Billing required | Uncheck *same as shipping*, leave billing empty | Errors on billing fields. | ✅ |
-| Billing valid | Uncheck *same as shipping*, fill billing address | Saved successfully. | ✅ |
-| Delete flow | Click **Delete** on saved address | Address soft-deleted, form cleared. | ✅ |
+| Fallback valid | Enter Country=`DE`, Postal=`12345` | Accepted (fallback 3–10 digits) | ✅ |
+| Billing required | Uncheck *same as shipping*, leave billing empty | Errors on billing fields | ✅ |
+| Billing valid | Uncheck *same as shipping*, fill billing address | Saved successfully | ✅ |
+| Delete flow | Click **Delete** on saved address | Address soft-deleted, form cleared | ✅ |
 
 **Result:**  
 All tested scenarios behaved as expected. Both frontend (UI disabling of billing fields) and backend validation (SE/UK-specific) worked consistently.
 
+---
 
 ### Responsiveness
 
-All core pages were tested on **mobile (~375px)** and on **laptop (full HD screen)** to confirm that layouts adapt correctly.  For documentation purposes, the laptop screenshots shown below were resized to 1024px width.
+All core pages were tested on **mobile (~375px)**, **tablet (~768–1024px height)**, and **laptop (resized to 1024px width)** to confirm that layouts adapt correctly.  
 
-| Page          | Mobile View | Laptop View |
-|---------------|-------------|-------------|
-| Home          | ![mobile.home](README_media/responsive/mobile.home.jpg) | ![laptop.home](README_media/responsive/laptop.home.png) |
-| Shop          | ![mobile.shop](README_media/responsive/mobile.shop.jpg) | ![laptop.shop](README_media/responsive/laptop.shop.png) |
-| Product       | ![mobile.product](README_media/responsive/mobile.product.jpg) | ![laptop.product](README_media/responsive/laptop.product.png) |
-| Bag (Cart)    | ![mobile.bag](README_media/responsive/mobile.bag.jpg) | ![laptop.bag](README_media/responsive/laptop.bag.png) |
-| Login         | ![mobile.login](README_media/responsive/mobile.login.jpg) | ![laptop.login](README_media/responsive/laptop.login.png) |
-| Signup        | ![mobile.signup](README_media/responsive/mobile.signup.jpg) | ![laptop.signup](README_media/responsive/laptop.signup.png) |
+| Page    | Mobile View | Tablet View | Laptop View |
+|---------|-------------|-------------|-------------|
+| Home    | ![Mobile view – Home page](README_media/responsive/mobile.home.jpg) | ![Tablet view – Home page](README_media/responsive/tablet.home.jpg) | ![Laptop view – Home page](README_media/responsive/laptop.home.png) |
+| Shop    | ![Mobile view – Shop page](README_media/responsive/mobile.shop.jpg) | ![Tablet view – Shop page](README_media/responsive/tablet.shop.jpg) | ![Laptop view – Shop page](README_media/responsive/laptop.shop.png) |
+| Product | ![Mobile view – Product page](README_media/responsive/mobile.product.jpg) | ![Tablet view – Product page](README_media/responsive/tablet.product.jpg) | ![Laptop view – Product page](README_media/responsive/laptop.product.png) |
+| Bag (Cart) | ![Mobile view – Bag page](README_media/responsive/mobile.bag.jpg) | ![Tablet view – Bag page](README_media/responsive/tablet.bag.jpg) | ![Laptop view – Bag page](README_media/responsive/laptop.bag.png) |
+| Login   | ![Mobile view – Login page](README_media/responsive/mobile.login.jpg) | ![Tablet view – Login page](README_media/responsive/tablet.login.jpg) | ![Laptop view – Login page](README_media/responsive/laptop.login.png) |
+| Signup  | ![Mobile view – Signup page](README_media/responsive/mobile.signup.jpg) | ![Tablet view – Signup page](README_media/responsive/tablet.signup.jpg) | ![Laptop view – Signup page](README_media/responsive/laptop.signup.png) |
 
 Additional pages (About, Contact, Favorites, etc.) were also checked to confirm consistent responsiveness.
 
-
 ---
-### Validation
 
-
----
 ### Bugs and Fixes
 
+Below is a summary of the main bugs I ran into and how I fixed them during development.
+
+---
+
 #### 1) Wrong product variant in orders & reviews
-- **What I saw:** The order showed a different color than I actually bought, and the review button appeared on the wrong product.
-- **Why:** The cart snapshot sometimes matched products by **name** instead of the exact product **ID**.
-- **Fix:** Always save `OrderItem.product` using the **exact PK**; removed the name fallback.
-- **How I checked:** Bought *Windbreaker / Light Beige*, *Windbreaker Pants / Light Beige*, *Tights / Light Beige*. Admin shows the exact items, the review button appears only on those exact variants.
+- **What I saw:** The order showed a different color than I actually bought, and the review button appeared on the wrong product.  
+- **Why:** The cart snapshot sometimes matched products by **name** instead of the exact product **ID**.  
+- **Fix:** Always save `OrderItem.product` using the **exact PK** and removed the name fallback.  
+- **How I checked:** Bought *Windbreaker / Light Beige*, *Windbreaker Pants / Light Beige*, *Tights / Light Beige*. Admin shows the exact items, the review button appears only on those exact variants.  
+
+---
 
 #### 2) Cart rows sometimes duplicated or not removed
-- **What I saw:** After updating/removing items, old rows could remain.
-- **Why:** The session cart existed in different shapes (`cart`, `bag`, `"id:size"`, nested dict).
-- **Fix:** Normalized cart handling and deduped by `(product_id, size)` before updates.
-- **How I checked:** Added/updated/removed the same item (with/without size). No duplicates, totals correct.
+- **What I saw:** After updating quantity from 1 → 2, the cart created two rows of the same product (one with qty=1, one with qty=2).  
+- **Why:** The session cart existed in different shapes (`cart`, `bag`, `"id:size"`, nested dict).  
+- **Fix:** Normalized cart handling and deduped by `(product_id, size)` before updates.  
+- **How I checked:** Added, updated, and removed the same item (with and without size). No duplicates and totals correct.  
+
+Screenshot:  
+![Cart duplication bug](README_media/bugs/bug_cart_duplicate.png)  
+
+---
 
 #### 3) 500 Internal Server Error on deploy
-- **What I saw:** The site crashed with a 500.
-- **Why:** A stray `-` character in `shop/views.py`.
-- **Fix:** Removed it; ran `py_compile` and `manage.py check` (both clean).
-- **How I checked:** Site loaded fine; pages worked again.
+- **What I saw:** The site crashed with a 500 error page. At that point, the 500 template was also missing its image, so the error page only showed plain text.  
+- **Why:** A stray `-` character in `shop/views.py`. The missing image was a separate template issue.  
+- **Fix:** Removed the character and ran `py_compile` and `manage.py check` (both clean). Also updated the 500 template to include the error illustration.  
+- **How I checked:** Site loaded fine, pages worked again and the 500 error page now shows the correct image.  
+
+Screenshot (taken before adding the missing image in the template):  
+![500 error page](README_media/bugs/bug_500.png)  
+
+---
 
 #### 4) Index page had a small gap on the right (mobile)
-- **What I saw:** On small screens (≤425px), the index page could scroll a few pixels to the right, making the footer appear “short”.
-- **Why:** Bootstrap 4 was used with a Bootstrap 5 class (`g-0`), plus full-width layout caused tiny overflow.
-- **Fix:** Added a `.full-bleed` utility, used `row no-gutters` (BS4), and adjusted the H1 so it doesn’t force overflow.
-- **How I checked:** Opened DevTools and tested different screen sizes (*Disable cache* + *Empty Cache and Hard Reload*). No horizontal scroll and the footer spans the full width of the screen.
+- **What I saw:** On small screens (≤425px), the index page could scroll a few pixels to the right, making the footer appear short.  
+- **Why:** Bootstrap 4 was used with a Bootstrap 5 class (`g-0`) and full-width layout caused tiny overflow.  
+- **Fix:** Added a `.full-bleed` utility, used `row no-gutters` (BS4), and adjusted the H1 so it does not force overflow.  
+- **How I checked:** Opened DevTools and tested different screen sizes with cache disabled and hard reload. No horizontal scroll and the footer spans the full width of the screen.  
 
+---
 
 #### 5) Product thumbnails looked cropped on small screens
-- **What I saw:** Thumbnails were cut off.
-- **Why:** Fixed height (240px) + `object-fit: cover`.
-- **Fix:** Switched to **square thumbnails** with `aspect-ratio: 1/1; height:auto; object-fit: cover`.
-- **How I checked:** Product grid looks consistent on mobile without odd cropping.
+- **What I saw:** Thumbnails were cut off.  
+- **Why:** Fixed height (240px) with `object-fit: cover`.  
+- **Fix:** Switched to **square thumbnails** with `aspect-ratio: 1/1; height:auto; object-fit: cover`.  
+- **How I checked:** Product grid looks consistent on mobile without odd cropping.  
 
+---
 
 #### 6) “Nudges” lost their light moss background
-- **What I saw:** Info boxes no longer had the pale moss tint.
-- **Why:** Styles for these boxes were removed during a CSS cleanup.
-- **Fix:** Restored `--moss-tint` and the `.why-account / .account-nudge / .checkout-nudge / .nudge` rules.
-- **How I checked:** Nudges show the light moss background and border again.
+- **What I saw:** Info boxes no longer had the pale moss tint.  
+- **Why:** Styles for these boxes were removed during a CSS cleanup.  
+- **Fix:** Restored `--moss-tint` and the `.why-account / .account-nudge / .checkout-nudge / .nudge` rules.  
+- **How I checked:** Nudges show the light moss background and border again.  
 
+---
 
 #### 7) Couldn’t see order items in Admin
-- **What I saw:** The order admin page didn’t list line items.
-- **Why:** No inline registered for `OrderItem`.
-- **Fix:** Added `OrderItemInline` to `OrderAdmin` and displayed product, size, qty, unit price.
-- **How I checked:** Admin → Order shows the correct line items.
+- **What I saw:** The order admin page did not list line items.  
+- **Why:** No inline registered for `OrderItem`.  
+- **Fix:** Added `OrderItemInline` to `OrderAdmin` and displayed product, size, qty, and unit price.  
+- **How I checked:** Admin → Order shows the correct line items.  
+
+---
 
 #### 8) Review rules / verified-buyer badge not always right
-- **What I saw:** Sometimes the badge or the review form showed on the wrong variant.
-- **Why:** The check didn’t always use the **exact** purchased product ID.
-- **Fix:** Verified-buyer sets now come from **paid `OrderItem`** for that product, and only buyers without an existing review can write one.
-- **How I checked:** After buying one color, I can only review that color. Other colors don’t allow a new review.
+- **What I saw:** Sometimes the badge or the review form showed on the wrong variant.  
+- **Why:** The check did not always use the **exact** purchased product ID.  
+- **Fix:** Verified-buyer sets now come from **paid `OrderItem`** for that product, and only buyers without an existing review can write one.  
+- **How I checked:** After buying one color, I can only review that color. Other colors do not allow a new review.  
 
+---
 
 #### 9) DevTools “first-open” layout glitch during responsive testing
-- **What I saw:** On the first open with DevTools, the layout sometimes looked wrong, after a hard reload it was fine.
-- **Why:** The browser served an old cached CSS and the device emulation changed the viewport.
-- **Fix:** In production, static files are versioned (hashed) via WhiteNoise, so fresh CSS is loaded automatically after deploy. Locally, I test with **Disable cache** + **Empty Cache and Hard Reload** in DevTools.
-- **How I checked:** Opened DevTools and tested different screen sizes with cache disabled. Layout remained correct with no horizontal scroll.
+- **What I saw:** On the first open with DevTools, the layout sometimes looked wrong. After a hard reload it was fine.  
+- **Why:** The browser served an old cached CSS and the device emulation changed the viewport.  
+- **Fix:** In production, static files are versioned (hashed) via WhiteNoise, so fresh CSS is loaded automatically after deploy. Locally, I test with cache disabled and hard reload.  
+- **How I checked:** Opened DevTools and tested different screen sizes with cache disabled. Layout remained correct with no horizontal scroll.  
+
+---
+
+#### 10) Flake8 / lint warnings
+- **What I saw:** Warnings for long lines, trailing spaces, and redundant backslashes.  
+- **Why:** Auto-formatting was inconsistent during development.  
+- **Fix:** Ran Black (line length 100) and Ruff `--fix`, cleaned up whitespace, and broke long lines. Updated `.flake8` with per-file ignores for tests, scripts, and management commands.  
+- **How I checked:** `flake8 . --config=.flake8` runs clean with no errors or warnings.  
+
+---
+
+#### 11) CSRF Trusted Origins / ALLOWED_HOSTS
+- **What I saw:** 403 errors when submitting forms on Heroku.  
+- **Why:** Wrong formatting of `CSRF_TRUSTED_ORIGINS` and hosts in `settings.py`.  
+- **Fix:** Switched to `env_list` with a proper list (no backslashes) and added `.herokuapp.com`.  
+- **How I checked:** Forms submit correctly in production and `manage.py check` passes with no issues.  
+
+---
+
+#### 12) Cloudinary leftovers after uninstall
+- **What I saw:** Errors and unused code pointing to Cloudinary, even after the package was removed.  
+- **Why:** Old management command files and settings were still in the repo.  
+- **Fix:** Deleted `upload_media_to_cloudinary.py` and removed all Cloudinary references from settings and requirements.  
+- **How I checked:** `manage.py check` passes and media and static files load fine using WhiteNoise.  
+
+---
+
+#### 13) Static files not loading (404) after deploy
+- **What I saw:** CSS and JS gave 404 errors on Heroku after deployment.  
+- **Why:** `collectstatic` was not configured/run properly and WhiteNoise was not fully set up.  
+- **Fix:** Enabled WhiteNoise, set `STATIC_ROOT`, and ran `python manage.py collectstatic`.  
+- **How I checked:** The site loads with full styling and no 404s in DevTools network logs.  
+
+---
+
+#### 14) Responsiveness: unwanted horizontal scroll
+- **What I saw:** On very small screens (≤425px), there was a small horizontal scroll and the footer looked cut off.  
+- **Why:** Bootstrap 4 was mixed with a Bootstrap 5 class and a full-width element caused overflow.  
+- **Fix:** Added a `.full-bleed` helper, switched to `row no-gutters` (BS4), and adjusted the H1 and product grid.  
+- **How I checked:** Tested with Chrome DevTools (cache disabled and hard reload). No more horizontal scroll.  
+
+---
+
+#### 15) Review form caused errors when fields were missing
+- **What I saw:** Submitting the review form without a title, rating, or text gave a server error.  
+- **Why:** The form validation was not properly handled, so missing fields crashed the page.  
+- **Fix:** Added correct `forms.py` validation and template error messages so users see inline feedback instead of an error page.  
+- **How I checked:** Tried submitting with missing fields → form shows clear error messages and does not crash.  
+
+---
+
+#### 16) Reviews could not be deleted
+- **What I saw:** Clicking “Delete” on a review did not work.  
+- **Why:** The view/template setup was incomplete, so the delete action was not connected.  
+- **Fix:** Added the delete view, URL, and template confirmation page.  
+- **How I checked:** Created a review, deleted it, and confirmed it was removed from both the database and the product page.  
+
+---
+
+#### 17) Favorites heart not synced with product detail page
+- **What I saw:** On the product listing, the heart icon could add and remove favorites. But when opening the product detail page, it still showed “Add to favorites” even if it was already in favorites.  
+- **Why:** The templates did not share the same favorite-check logic.  
+- **Fix:** Updated context and template tags so both views use the same logic to check if a product is in favorites.  
+- **How I checked:** Favorited a product from the list → detail page now correctly shows “Remove from favorites”.  
 
 ---
 
 #### Test data used for screenshots (not a bug)
 Screenshots of “payment failed” states were taken in Stripe **test mode**, using cards that simulate **insufficient funds** and **generic decline** after submission.  
 Any valid-looking expiry, CVC, and postal code work in test mode.  
-Full examples are available in Stripe’s test card docs (no real cards were used).
-
+Full examples are available in Stripe’s test card docs (no real cards were used).  
 
 ---
