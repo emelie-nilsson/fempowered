@@ -8,6 +8,7 @@ from django.views.generic.edit import FormView
 
 from .forms import ContactForm
 
+
 class ContactView(FormView):
     template_name = "contact/contact.html"
     form_class = ContactForm
@@ -29,7 +30,7 @@ class ContactView(FormView):
         }
         body_txt = render_to_string("contact/email/contact_email.txt", ctx)
 
-        # Reply to 
+        # Reply to
         mail = EmailMessage(
             subject=f"[Fempowered] {subject}",
             body=body_txt,

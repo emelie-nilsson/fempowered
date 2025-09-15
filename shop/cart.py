@@ -35,9 +35,8 @@ class Cart:
             self.save()
         self.cart = cart
 
-    
     # Public API
-    
+
     def add(self, product, quantity=1, size=None, override=False):
         """
         Add a product to the cart or update its quantity.
@@ -142,9 +141,8 @@ class Cart:
         """Mark session as modified so it gets persisted."""
         self.session.modified = True
 
-   
     # Internal helpers
-    
+
     def _valid_items(self):
         """Return a list of well-formed dict items from the session cart."""
         items = []

@@ -13,7 +13,7 @@ class UserAddressFormTests(TestCase):
             "address2": "",
             "postal_code": "21145",  # SE: exactly 5 digits
             "city": "Malmö",
-            "country": "SE",         # ISO code (max_length=2)
+            "country": "SE",  # ISO code (max_length=2)
             "billing_same_as_shipping": True,  # billing not required when True
             "billing_address1": "",
             "billing_address2": "",
@@ -27,7 +27,7 @@ class UserAddressFormTests(TestCase):
         form = UserAddressForm(data=self.valid_data())
         self.assertTrue(form.is_valid(), msg=form.errors.as_json())
 
-    # negative: name 
+    # negative: name
     def test_full_name_requires_two_parts(self):
         data = self.valid_data()
         data["full_name"] = "Emelie"
@@ -35,7 +35,7 @@ class UserAddressFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("full_name", form.errors)
 
-    # negative: phone 
+    # negative: phone
     def test_phone_requires_7_to_15_digits(self):
         data = self.valid_data()
         data["phone"] = "12-34-56"  # only 6 digits
@@ -43,7 +43,7 @@ class UserAddressFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("phone", form.errors)
 
-    # country-specific: SE 
+    # country-specific: SE
     def test_sweden_postcode_requires_5_digits(self):
         data = self.valid_data()
         data["country"] = "SE"
@@ -52,7 +52,7 @@ class UserAddressFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("postal_code", form.errors)
 
-    # country-specific: UK/GB 
+    # country-specific: UK/GB
     def test_uk_postcode_valid_and_normalizes(self):
         data = self.valid_data()
         data["country"] = "GB"
@@ -69,7 +69,7 @@ class UserAddressFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("postal_code", form.errors)
 
-    #  billing rules 
+    #  billing rules
     def test_billing_fields_required_when_not_same(self):
         data = self.valid_data()
         data["billing_same_as_shipping"] = False

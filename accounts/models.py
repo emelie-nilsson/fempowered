@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.db import models
 
-class UserAddress(models.Model):  
+
+class UserAddress(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -10,7 +11,7 @@ class UserAddress(models.Model):
 
     # Shipping/contact
     full_name = models.CharField(max_length=120, blank=True, default="")
-    email = models.EmailField(blank=True, default="")     
+    email = models.EmailField(blank=True, default="")
     phone = models.CharField(max_length=40, blank=True, default="")
     address1 = models.CharField(max_length=255, blank=True, default="")
     address2 = models.CharField(max_length=255, blank=True, default="")
@@ -27,9 +28,8 @@ class UserAddress(models.Model):
     billing_country = models.CharField(max_length=2, blank=True, default="")
 
     # Management
-    is_active = models.BooleanField(default=True)  
+    is_active = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     def __str__(self):
         return f"Address for {self.user.email}"

@@ -45,13 +45,15 @@ class CheckoutAddressFormTests(SimpleTestCase):
         self.assertIn("full_name", form.errors)
 
     def test_billing_required_when_not_same_as_shipping(self):
-        form = CheckoutAddressForm(data=self.valid_payload(
-            billing_same_as_shipping=False,
-            billing_address1="",
-            billing_postal_code="",
-            billing_city="",
-            billing_country="",
-        ))
+        form = CheckoutAddressForm(
+            data=self.valid_payload(
+                billing_same_as_shipping=False,
+                billing_address1="",
+                billing_postal_code="",
+                billing_city="",
+                billing_country="",
+            )
+        )
         self.assertFalse(form.is_valid())
         for field in ("billing_address1", "billing_postal_code", "billing_city", "billing_country"):
             self.assertIn(field, form.errors)

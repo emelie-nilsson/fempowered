@@ -15,17 +15,21 @@ from accounts.models import UserAddress
 try:
     from .models import OrderStatus
 except Exception:
+
     class OrderStatus:
         PENDING = "pending"
         PAID = "paid"
         FAILED = "failed"
         CANCELLED = "cancelled"
 
+
 import stripe
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 # Cart helpers (normalize multiple formats to one shape)
+
 
 def normalize_cart_items(request):
     """
@@ -89,10 +93,15 @@ def normalize_cart_items(request):
                 _, price_cents = db_info()
             name = val.get("name") or db_info()[0]
             if qty > 0:
-                items.append({
-                    "pid": pid_int, "name": name, "qty": qty,
-                    "price_cent": price_cents, "size": size
-                })
+                items.append(
+                    {
+                        "pid": pid_int,
+                        "name": name,
+                        "qty": qty,
+                        "price_cent": price_cents,
+                        "size": size,
+                    }
+                )
             continue
 
         # Case: Boutique Ado style (no sizes)
@@ -100,10 +109,15 @@ def normalize_cart_items(request):
             qty = int(val)
             name, price_cents = db_info()
             if qty > 0:
-                items.append({
-                    "pid": pid_int, "name": name, "qty": qty,
-                    "price_cent": price_cents, "size": ""
-                })
+                items.append(
+                    {
+                        "pid": pid_int,
+                        "name": name,
+                        "qty": qty,
+                        "price_cent": price_cents,
+                        "size": "",
+                    }
+                )
             continue
 
         # Case: Boutique Ado style with items_by_size
@@ -112,10 +126,15 @@ def normalize_cart_items(request):
             for size, qty in (val.get("items_by_size") or {}).items():
                 qty = int(qty)
                 if qty > 0:
-                    items.append({
-                        "pid": pid_int, "name": name, "qty": qty,
-                        "price_cent": price_cents, "size": (size or "")[:8]
-                    })
+                    items.append(
+                        {
+                            "pid": pid_int,
+                            "name": name,
+                            "qty": qty,
+                            "price_cent": price_cents,
+                            "size": (size or "")[:8],
+                        }
+                    )
             continue
 
     return items
@@ -137,11 +156,12 @@ def calc_shipping_cost_cents(method: str, subtotal: int) -> int:
       - Express: €9.90
     """
     if method == ShippingMethod.EXPRESS:
-        return 990   # €9.90
+        return 990  # €9.90
     return 0 if subtotal >= 8000 else 590  # €5.90 or free over €80
 
 
-# STEP 1: Address & shipping 
+# STEP 1: Address & shipping
+
 
 @require_http_methods(["GET", "POST"])
 def address_view(request):
@@ -154,21 +174,23 @@ def address_view(request):
         except (AttributeError, UserAddress.DoesNotExist):
             ua = None
         if ua:
-            initial.update({
-                "full_name": ua.full_name or (request.user.get_full_name() or ""),
-                "phone": ua.phone or "",
-                "address1": ua.address1 or "",
-                "address2": ua.address2 or "",
-                "postal_code": ua.postal_code or "",
-                "city": ua.city or "",
-                "country": ua.country or "SE",
-                "billing_same_as_shipping": ua.billing_same_as_shipping,
-                "billing_address1": ua.billing_address1 or "",
-                "billing_address2": ua.billing_address2 or "",
-                "billing_postal_code": ua.billing_postal_code or "",
-                "billing_city": ua.billing_city or "",
-                "billing_country": ua.billing_country or "",
-            })
+            initial.update(
+                {
+                    "full_name": ua.full_name or (request.user.get_full_name() or ""),
+                    "phone": ua.phone or "",
+                    "address1": ua.address1 or "",
+                    "address2": ua.address2 or "",
+                    "postal_code": ua.postal_code or "",
+                    "city": ua.city or "",
+                    "country": ua.country or "SE",
+                    "billing_same_as_shipping": ua.billing_same_as_shipping,
+                    "billing_address1": ua.billing_address1 or "",
+                    "billing_address2": ua.billing_address2 or "",
+                    "billing_postal_code": ua.billing_postal_code or "",
+                    "billing_city": ua.billing_city or "",
+                    "billing_country": ua.billing_country or "",
+                }
+            )
 
     if request.method == "POST":
         form = CheckoutAddressForm(request.POST)
@@ -219,8 +241,8 @@ def address_view(request):
 
                 OrderItem.objects.create(
                     order=order,
-                    product=product_fk,             # exact variant linkage (color)
-                    product_name=it["name"],        # textual snapshot for convenience
+                    product=product_fk,  # exact variant linkage (color)
+                    product_name=it["name"],  # textual snapshot for convenience
                     unit_price=it["price_cent"],
                     quantity=it["qty"],
                     size=it["size"],
@@ -264,7 +286,8 @@ def address_view(request):
     return render(request, "checkout/checkout_address.html", {"form": form})
 
 
-# STEP 2: Payment (Stripe) 
+# STEP 2: Payment (Stripe)
+
 
 @ensure_csrf_cookie  # ensure CSRF cookie is set for subsequent POST to /confirm/
 @require_http_methods(["GET"])
@@ -278,7 +301,7 @@ def payment_view(request):
     # Create or retrieve PaymentIntent
     if not order.payment_intent_id:
         intent = stripe.PaymentIntent.create(
-            amount=order.total,             # euro cents
+            amount=order.total,  # euro cents
             currency="eur",
             receipt_email=order.email,
             metadata={
@@ -303,7 +326,8 @@ def payment_view(request):
     return render(request, "checkout/checkout_payment.html", context)
 
 
-# Confirm (AJAX from payment page AFTER Stripe success) 
+# Confirm (AJAX from payment page AFTER Stripe success)
+
 
 @require_http_methods(["POST"])
 def confirm_view(request):
@@ -340,7 +364,9 @@ def confirm_view(request):
         latest_charge_id = getattr(pi, "latest_charge", None)
         if latest_charge_id:
             ch = stripe.Charge.retrieve(latest_charge_id)
-            receipt_url = getattr(ch, "receipt_url", "") or (ch.get("receipt_url") if hasattr(ch, "get") else "")
+            receipt_url = getattr(ch, "receipt_url", "") or (
+                ch.get("receipt_url") if hasattr(ch, "get") else ""
+            )
     except Exception:
         # Not critical; lack of receipt link shouldn't block order completion
         pass
@@ -364,7 +390,8 @@ def confirm_view(request):
     return JsonResponse({"ok": True, "redirect_url": redirect_url})
 
 
-#  Success page 
+#  Success page
+
 
 def success_view(request, order_number: str):
     # order_number like "FP-000123" -> extract numeric id
@@ -383,7 +410,8 @@ def success_view(request, order_number: str):
     return render(request, "checkout/success.html", {"order": order})
 
 
-# Stripe Webhook (server-to-server, optional in dev) 
+# Stripe Webhook (server-to-server, optional in dev)
+
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -424,10 +452,16 @@ def stripe_webhook(request):
         if paid and order.status != OrderStatus.PAID:
             receipt_url = ""
             try:
-                latest_charge_id = (pi.get("latest_charge") if isinstance(pi, dict) else getattr(pi, "latest_charge", None))
+                latest_charge_id = (
+                    pi.get("latest_charge")
+                    if isinstance(pi, dict)
+                    else getattr(pi, "latest_charge", None)
+                )
                 if latest_charge_id:
                     ch = stripe.Charge.retrieve(latest_charge_id)
-                    receipt_url = getattr(ch, "receipt_url", "") or (ch.get("receipt_url") if hasattr(ch, "get") else "")
+                    receipt_url = getattr(ch, "receipt_url", "") or (
+                        ch.get("receipt_url") if hasattr(ch, "get") else ""
+                    )
             except Exception:
                 pass
 

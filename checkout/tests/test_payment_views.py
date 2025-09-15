@@ -45,7 +45,9 @@ class CheckoutPaymentViewsSmokeTests(TestCase):
             self.skipTest("No reverseable URL found for checkout payment view")
             return
         resp = self.client.get(url)
-        self.assertIn(resp.status_code, self.OK_GET, f"{name} unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code, self.OK_GET, f"{name} unexpected {resp.status_code} at {url}"
+        )
 
     def test_payment_post_does_not_crash(self):
         url, name = self._find_payment_url()
@@ -53,4 +55,6 @@ class CheckoutPaymentViewsSmokeTests(TestCase):
             self.skipTest("No reverseable URL found for checkout payment view")
             return
         resp = self.client.post(url, data={"nonce": "test", "agree_terms": "on"})
-        self.assertIn(resp.status_code, self.OK_POST, f"{name} POST unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code, self.OK_POST, f"{name} POST unexpected {resp.status_code} at {url}"
+        )

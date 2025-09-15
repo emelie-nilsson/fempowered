@@ -29,10 +29,7 @@ class AuthViewsSmokeTests(TestCase):
         return None, None
 
     def _assert_ok(self, resp, label, url):
-        self.assertIn(
-            resp.status_code, self.OK,
-            f"{label} unexpected {resp.status_code} at {url}"
-        )
+        self.assertIn(resp.status_code, self.OK, f"{label} unexpected {resp.status_code} at {url}")
 
     def test_login_get(self):
         url, label = self._reverse_or_path(

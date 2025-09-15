@@ -6,16 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('shop', '0002_auto_20250811_1634'),
+        ("shop", "0002_auto_20250811_1634"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='product',
-            constraint=models.UniqueConstraint(condition=models.Q(('color__isnull', False)), fields=('name', 'color'), name='uq_product_name_color_when_color_not_null'),
+            model_name="product",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("color__isnull", False)),
+                fields=("name", "color"),
+                name="uq_product_name_color_when_color_not_null",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='product',
-            constraint=models.UniqueConstraint(condition=models.Q(('color__isnull', True)), fields=('name',), name='uq_product_name_when_color_is_null'),
+            model_name="product",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("color__isnull", True)),
+                fields=("name",),
+                name="uq_product_name_when_color_is_null",
+            ),
         ),
     ]

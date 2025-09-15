@@ -1,0 +1,25 @@
+[flake8]
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    build,
+    dist,
+    node_modules,
+    */migrations/*,
+    */static/*,
+    */media/*
+
+
+max-line-length = 100
+
+extend-ignore = E203, W503
+
+per-file-ignores =
+    */migrations/*.py: E501
+    */tests/*.py: E501
+    project_tests/*.py: E501
+    */scripts/*.py: E501
+    */management/commands/*.py: E501

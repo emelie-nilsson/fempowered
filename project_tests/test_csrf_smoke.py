@@ -15,6 +15,7 @@ class CsrfPresenceSmokeTests(TestCase):
     Verify CSRF-token in GET-rendern.
     Adapt to different URLs.
     """
+
     def _reverse_first(self, candidates):
         for name in candidates:
             try:
@@ -29,7 +30,9 @@ class CsrfPresenceSmokeTests(TestCase):
         self.assertIn("csrfmiddlewaretoken", content.lower(), f"{label} should include CSRF token")
 
     def test_checkout_address_has_csrf(self):
-        url, name = self._reverse_first(("checkout:address", "checkout_address", "checkout:start", "checkout_start"))
+        url, name = self._reverse_first(
+            ("checkout:address", "checkout_address", "checkout:start", "checkout_start")
+        )
         if not url:
             self.skipTest("No checkout address URL found")
             return
@@ -39,7 +42,7 @@ class CsrfPresenceSmokeTests(TestCase):
     def test_login_has_csrf(self):
         url, name = self._reverse_first(("account_login", "login"))
         if not url:
-            # fallback-paths 
+            # fallback-paths
             for p in ("/accounts/login/", "/login/"):
                 resp = self.client.get(p)
                 if resp.status_code in (200,):

@@ -26,7 +26,9 @@ class ProductListSmokeTests(TestCase):
         return None, None
 
     def test_product_list_base(self):
-        url, name = self._reverse_first(("shop:product_list", "product_list", "shop:index", "shop_home"))
+        url, name = self._reverse_first(
+            ("shop:product_list", "product_list", "shop:index", "shop_home")
+        )
         if not url:
             self.skipTest("No reverseable URL for product list")
             return
@@ -39,7 +41,9 @@ class ProductListSmokeTests(TestCase):
             self.skipTest("No reverseable URL for product list with query")
             return
         resp = self.client.get(url, {"q": "test"})
-        self.assertIn(resp.status_code, self.OK, f"{name} with ?q= unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code, self.OK, f"{name} with ?q= unexpected {resp.status_code} at {url}"
+        )
 
     def test_product_list_with_category_filter(self):
         url, name = self._reverse_first(("shop:product_list", "product_list"))
@@ -48,4 +52,8 @@ class ProductListSmokeTests(TestCase):
             return
         # Use a dummy slug; page should still handle gracefully.
         resp = self.client.get(url, {"category": "non-existent"})
-        self.assertIn(resp.status_code, self.OK, f"{name} with ?category= unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code,
+            self.OK,
+            f"{name} with ?category= unexpected {resp.status_code} at {url}",
+        )

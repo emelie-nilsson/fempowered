@@ -8,6 +8,7 @@ from .models import UserAddress
 # Validators (reusable)
 # ---------------------------
 
+
 def validate_full_name(value: str) -> None:
     """
     Require at least two name parts (first + last).
@@ -69,11 +70,11 @@ def validate_postcode_by_country(value: str, country: str) -> str:
 
         uk_pattern = re.compile(
             r"^([Gg][Ii][Rr] 0[Aa]{2})|"  # GIR 0AA (special)
-            r"((([A-Za-z][0-9]{1,2})|"    # A9 / A99
+            r"((([A-Za-z][0-9]{1,2})|"  # A9 / A99
             r"(([A-Za-z][A-HJ-Ya-hj-y][0-9]{1,2})|"  # AA9 / AA99
             r"(([A-Za-z][0-9][A-Za-z])|"  # A9A
             r"([A-Za-z][A-HJ-Ya-hj-y][0-9]?[A-Za-z]?))))"  # AA9A / AA9
-            r"\s?[0-9][A-Za-z]{2})$"      # space (optional) + 9AA
+            r"\s?[0-9][A-Za-z]{2})$"  # space (optional) + 9AA
         )
         if not uk_pattern.match(normalized):
             raise ValidationError("Enter a valid UK postcode (e.g., SW1A 1AA).")
@@ -88,6 +89,7 @@ def validate_postcode_by_country(value: str, country: str) -> str:
 # Form
 # ---------------------------
 
+
 class UserAddressForm(forms.ModelForm):
     """
     ModelForm for UserAddress.
@@ -99,30 +101,59 @@ class UserAddressForm(forms.ModelForm):
     class Meta:
         model = UserAddress
         fields = [
-            "full_name", "email", "phone",
-            "address1", "address2",
-            "country",        # <- moved before postal_code
+            "full_name",
+            "email",
+            "phone",
+            "address1",
+            "address2",
+            "country",  # <- moved before postal_code
             "postal_code",
             "city",
             "billing_same_as_shipping",
-            "billing_address1", "billing_address2",
-            "billing_country",    # <- moved before billing_postal_code
+            "billing_address1",
+            "billing_address2",
+            "billing_country",  # <- moved before billing_postal_code
             "billing_postal_code",
             "billing_city",
         ]
         widgets = {
-            "full_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "First and last name", "required": True}),
-            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "name@example.com", "required": True}),
-            "phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "+46 70 123 45 67", "inputmode": "tel", "required": True}),
+            "full_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "First and last name",
+                    "required": True,
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "form-control", "placeholder": "name@example.com", "required": True}
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "+46 70 123 45 67",
+                    "inputmode": "tel",
+                    "required": True,
+                }
+            ),
             "address1": forms.TextInput(attrs={"class": "form-control", "required": True}),
             "address2": forms.TextInput(attrs={"class": "form-control"}),
-            "country": forms.TextInput(attrs={"class": "form-control", "placeholder": "SE / GB", "required": True}),
-            "postal_code": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., 21145 / SW1A 1AA", "required": True}),
+            "country": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "SE / GB", "required": True}
+            ),
+            "postal_code": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "e.g., 21145 / SW1A 1AA",
+                    "required": True,
+                }
+            ),
             "city": forms.TextInput(attrs={"class": "form-control", "required": True}),
             "billing_same_as_shipping": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "billing_address1": forms.TextInput(attrs={"class": "form-control"}),
             "billing_address2": forms.TextInput(attrs={"class": "form-control"}),
-            "billing_country": forms.TextInput(attrs={"class": "form-control", "placeholder": "SE / GB"}),
+            "billing_country": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "SE / GB"}
+            ),
             "billing_postal_code": forms.TextInput(attrs={"class": "form-control"}),
             "billing_city": forms.TextInput(attrs={"class": "form-control"}),
         }
@@ -133,17 +164,19 @@ class UserAddressForm(forms.ModelForm):
         """
         Robustly obtain shipping country, even if field cleaning order changes.
         """
-        return (self.cleaned_data.get("country")
-                or self.data.get(self.add_prefix("country"))
-                or "").strip()
+        return (
+            self.cleaned_data.get("country") or self.data.get(self.add_prefix("country")) or ""
+        ).strip()
 
     def _get_billing_country_value(self) -> str:
         """
         Robustly obtain billing country, even if field cleaning order changes.
         """
-        return (self.cleaned_data.get("billing_country")
-                or self.data.get(self.add_prefix("billing_country"))
-                or "").strip()
+        return (
+            self.cleaned_data.get("billing_country")
+            or self.data.get(self.add_prefix("billing_country"))
+            or ""
+        ).strip()
 
     def clean_full_name(self):
         v = (self.cleaned_data.get("full_name") or "").strip()

@@ -49,9 +49,9 @@ def current_rel(val: Optional[str]) -> Optional[str]:
         return None
     s = str(val).strip().replace("\\", "/")
     if s.startswith("/media/"):
-        return s[len("/media/"):]
+        return s[len("/media/") :]
     if s.startswith("media/"):
-        return s[len("media/"):]
+        return s[len("media/") :]
     if s.startswith("catalog/") or s.startswith("details/"):
         return s
     return None
@@ -113,15 +113,21 @@ class Command(BaseCommand):
         missing_catalog = 0
         missing_details = 0
 
-        self.stdout.write(self.style.NOTICE(f"Scanning {total} products (apply={apply_changes})..."))
+        self.stdout.write(
+            self.style.NOTICE(f"Scanning {total} products (apply={apply_changes})...")
+        )
 
         # Determine which real fields we can write to
         # Adjust candidates if your model uses different names
         catalog_field_candidates = ["image_catalog"]
         detail_field_candidates = ["image_detail"]
 
-        write_catalog_field = next((f for f in catalog_field_candidates if has_model_field(Product, f)), None)
-        write_detail_field = next((f for f in detail_field_candidates if has_model_field(Product, f)), None)
+        write_catalog_field = next(
+            (f for f in catalog_field_candidates if has_model_field(Product, f)), None
+        )
+        write_detail_field = next(
+            (f for f in detail_field_candidates if has_model_field(Product, f)), None
+        )
 
         if not write_catalog_field and not write_detail_field:
             self.stderr.write(
@@ -136,18 +142,32 @@ class Command(BaseCommand):
         with transaction.atomic():
             for p in qs:
                 # Gather all potential raw values (stringified)
-                raw_catalog_url = getattr(p, "catalog_image_url", None)  # property (read-only), ignore on write
-                raw_detail_url = getattr(p, "detail_image_url", None)    # property (read-only), ignore on write
-                raw_image_catalog = get_field_value(p, "image_catalog") if write_catalog_field else None
-                raw_image_detail = get_field_value(p, "image_detail") if write_detail_field else None
+                raw_catalog_url = getattr(
+                    p, "catalog_image_url", None
+                )  # property (read-only), ignore on write
+                raw_detail_url = getattr(
+                    p, "detail_image_url", None
+                )  # property (read-only), ignore on write
+                raw_image_catalog = (
+                    get_field_value(p, "image_catalog") if write_catalog_field else None
+                )
+                raw_image_detail = (
+                    get_field_value(p, "image_detail") if write_detail_field else None
+                )
 
                 # Resolve existing relative paths if already correct
-                rel_catalog = current_rel(str(raw_catalog_url) if raw_catalog_url else None) or current_rel(raw_image_catalog)
-                rel_details = current_rel(str(raw_detail_url) if raw_detail_url else None) or current_rel(raw_image_detail)
+                rel_catalog = current_rel(
+                    str(raw_catalog_url) if raw_catalog_url else None
+                ) or current_rel(raw_image_catalog)
+                rel_details = current_rel(
+                    str(raw_detail_url) if raw_detail_url else None
+                ) or current_rel(raw_image_detail)
 
                 # If missing, try by filename search
                 if not rel_catalog and write_catalog_field:
-                    fname = pick_filename(str(raw_catalog_url) if raw_catalog_url else None, raw_image_catalog)
+                    fname = pick_filename(
+                        str(raw_catalog_url) if raw_catalog_url else None, raw_image_catalog
+                    )
                     if fname:
                         found = find_file("catalog", fname)
                         if found:
@@ -155,8 +175,11 @@ class Command(BaseCommand):
 
                 if not rel_details and write_detail_field:
                     # Try detail filename first; fall back to catalog filename if needed
-                    fname_d = pick_filename(str(raw_detail_url) if raw_detail_url else None, raw_image_detail) \
-                              or pick_filename(str(raw_catalog_url) if raw_catalog_url else None, raw_image_catalog)
+                    fname_d = pick_filename(
+                        str(raw_detail_url) if raw_detail_url else None, raw_image_detail
+                    ) or pick_filename(
+                        str(raw_catalog_url) if raw_catalog_url else None, raw_image_catalog
+                    )
                     if fname_d:
                         found_d = find_file("details", fname_d)
                         if found_d:
@@ -196,12 +219,16 @@ class Command(BaseCommand):
 
             # Rollback in dry-run mode
             if not apply_changes:
-                self.stdout.write(self.style.WARNING("Dry-run complete (no DB changes were committed)."))
+                self.stdout.write(
+                    self.style.WARNING("Dry-run complete (no DB changes were committed).")
+                )
                 transaction.set_rollback(True)
 
         self.stdout.write(self.style.MIGRATE_HEADING("Summary"))
         self.stdout.write(f"  Products scanned : {total}")
-        self.stdout.write(f"  Updated records  : {changed}{' (saved)' if apply_changes else ' (dry-run)'}")
+        self.stdout.write(
+            f"  Updated records  : {changed}{' (saved)' if apply_changes else ' (dry-run)'}"
+        )
         if write_catalog_field:
             self.stdout.write(f"  Missing catalog  : {missing_catalog}")
         if write_detail_field:

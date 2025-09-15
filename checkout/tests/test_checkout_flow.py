@@ -38,21 +38,25 @@ class CheckoutEndToEndTests(TestCase):
         return None, None
 
     def _address_url(self):
-        return self._reverse_first([
-            ("checkout:address", None),
-            ("checkout_address", None),
-            ("checkout:start", None),
-            ("checkout_start", None),
-        ])
+        return self._reverse_first(
+            [
+                ("checkout:address", None),
+                ("checkout_address", None),
+                ("checkout:start", None),
+                ("checkout_start", None),
+            ]
+        )
 
     def _payment_url(self):
-        return self._reverse_first([
-            ("checkout:payment", None),
-            ("checkout_payment", None),
-            ("payment", None),
-            ("checkout:payment_step", None),
-            ("checkout_pay", None),
-        ])
+        return self._reverse_first(
+            [
+                ("checkout:payment", None),
+                ("checkout_payment", None),
+                ("payment", None),
+                ("checkout:payment_step", None),
+                ("checkout_pay", None),
+            ]
+        )
 
     def _valid_payload(self, **overrides):
         """
@@ -88,7 +92,9 @@ class CheckoutEndToEndTests(TestCase):
             self.skipTest("No reverseable URL for checkout address view")
             return
         resp = self.client.get(url)
-        self.assertIn(resp.status_code, self.OK, f"{name} GET unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code, self.OK, f"{name} GET unexpected {resp.status_code} at {url}"
+        )
 
     def test_02_post_address_then_payment_get(self):
         # 1) Post address (valid)
@@ -100,8 +106,9 @@ class CheckoutEndToEndTests(TestCase):
         # follow=True to capture redirect chain (if any)
         post_resp = self.client.post(address_url, data=payload, follow=True)
         self.assertIn(
-            post_resp.status_code, self.OK,
-            f"{addr_name} POST unexpected {post_resp.status_code} at {address_url}"
+            post_resp.status_code,
+            self.OK,
+            f"{addr_name} POST unexpected {post_resp.status_code} at {address_url}",
         )
 
         # 2) Try to load payment page after address step
@@ -111,6 +118,7 @@ class CheckoutEndToEndTests(TestCase):
             return
         pay_resp = self.client.get(payment_url)
         self.assertIn(
-            pay_resp.status_code, self.OK,
-            f"{pay_name} GET unexpected {pay_resp.status_code} at {payment_url}"
+            pay_resp.status_code,
+            self.OK,
+            f"{pay_name} GET unexpected {pay_resp.status_code} at {payment_url}",
         )

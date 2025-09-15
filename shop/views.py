@@ -8,7 +8,7 @@ from django.http import JsonResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
-from django.views.generic import CreateView, UpdateView, ListView  
+from django.views.generic import CreateView, UpdateView, ListView
 
 from django.conf import settings
 
@@ -175,8 +175,9 @@ def product_list(request):
     favorite_ids = set()
     if request.user.is_authenticated:
         favorite_ids = set(
-            Favorite.objects.filter(user=request.user, product__in=qs)
-            .values_list("product_id", flat=True)
+            Favorite.objects.filter(user=request.user, product__in=qs).values_list(
+                "product_id", flat=True
+            )
         )
 
     ctx = {
@@ -217,7 +218,7 @@ def product_detail(request, pk):
         if can_review:
             form = ReviewForm()
 
-    # Reviews list + verified-buyer badge calc 
+    # Reviews list + verified-buyer badge calc
     reviews_qs = product.reviews.select_related("user").all()
     reviews = list(reviews_qs)
 
@@ -243,7 +244,7 @@ def product_detail(request, pk):
         "shop/product_detail.html",
         {
             "product": product,
-            "reviews": reviews,        # list with is_verified set
+            "reviews": reviews,  # list with is_verified set
             "user_review": user_review,
             "form": form,
             "can_review": can_review,
@@ -262,6 +263,7 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
     Renders a consistent form (same look as edit) via shop/review_form.html
     (even if most users submit from product_detail).
     """
+
     model = Review
     form_class = ReviewForm
     login_url = reverse_lazy("account_login")
@@ -312,6 +314,7 @@ class ReviewUpdateView(LoginRequiredMixin, OwnerRequiredMixin, UpdateView):
     """
     Edits an existing review using the same form & template as create.
     """
+
     model = Review
     form_class = ReviewForm
     template_name = "shop/review_form.html"
@@ -371,14 +374,16 @@ def cart_detail(request):
         # Normalize "NA"/empty to None so the template won't show a bogus pill
         size = None if raw_size in (None, "", "NA") else raw_size
 
-        cart_items.append({
-            "key": key,
-            "product": item["product"],
-            "size": size,
-            "quantity": item["quantity"],
-            "unit_price": item["price"],        # Decimal
-            "line_total": item["total_price"],  # Decimal
-        })
+        cart_items.append(
+            {
+                "key": key,
+                "product": item["product"],
+                "size": size,
+                "quantity": item["quantity"],
+                "unit_price": item["price"],  # Decimal
+                "line_total": item["total_price"],  # Decimal
+            }
+        )
     context = {
         "cart_items": cart_items,
         "cart_total": cart.total(),
@@ -509,8 +514,8 @@ def toggle_favorite(request, product_id):
 # Utilities
 def cart_reset(request):
     """One-time: clear any broken cart shapes in session."""
-    request.session['cart'] = {}
-    if 'bag' in request.session:
-        request.session['bag'] = {}
+    request.session["cart"] = {}
+    if "bag" in request.session:
+        request.session["bag"] = {}
     request.session.modified = True
-    return redirect('cart_detail')
+    return redirect("cart_detail")

@@ -6,14 +6,15 @@ from django.templatetags.static import static
 from django.db.models import Avg, Q
 from django.utils import timezone
 
+
 class Product(models.Model):
     # Choices matching fixtures
     CATEGORY_CHOICES = [
-        ('Clothing', 'Clothing'),
-        ('Clothes', 'Clothes'),              # kan rensas senare
-        ('Accessories', 'Accessories'),
-        ('Equipment', 'Equipment'),
-        ('Strength Equipment', 'Strength Equipment'),
+        ("Clothing", "Clothing"),
+        ("Clothes", "Clothes"),  # kan rensas senare
+        ("Accessories", "Accessories"),
+        ("Equipment", "Equipment"),
+        ("Strength Equipment", "Strength Equipment"),
     ]
 
     name = models.CharField(max_length=255)
@@ -23,12 +24,12 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, blank=True, null=True)
 
-    image_catalog = models.ImageField(upload_to='catalog/', blank=True, null=True)
-    image_details = models.ImageField(upload_to='details/', blank=True, null=True)
+    image_catalog = models.ImageField(upload_to="catalog/", blank=True, null=True)
+    image_details = models.ImageField(upload_to="details/", blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.color})" if self.color else self.name
-    
+
     def is_favorited_by(self, user):
         return user.is_authenticated and self.favorited_by.filter(user=user).exists()
 
@@ -81,27 +82,31 @@ class Product(models.Model):
         if not getattr(user, "is_authenticated", False):
             return False
         try:
-            
-            from checkout.models import OrderItem, OrderStatus  
+
+            from checkout.models import OrderItem, OrderStatus
+
             paid_status = getattr(OrderStatus, "PAID", "paid")
         except Exception:
-            from checkout.models import OrderItem  
+            from checkout.models import OrderItem
+
             paid_status = "paid"
 
-        return OrderItem.objects.filter(
-            product=self,
-            order__status=paid_status,
-        ).filter(
-            Q(order__user=user) | Q(order__email=user.email)
-        ).exists()
+        return (
+            OrderItem.objects.filter(
+                product=self,
+                order__status=paid_status,
+            )
+            .filter(Q(order__user=user) | Q(order__email=user.email))
+            .exists()
+        )
 
-    def has_user_reviewed(self, user) -> bool:  
+    def has_user_reviewed(self, user) -> bool:
         """True om användaren redan har lämnat en review för denna produkt."""
         if not getattr(user, "is_authenticated", False):
             return False
         return self.reviews.filter(user=user).exists()
 
-    def user_can_review(self, user) -> bool:  
+    def user_can_review(self, user) -> bool:
         """True om inloggad, verifierad köpare och ännu inte recenserat."""
         return self.user_has_purchased(user) and not self.has_user_reviewed(user)
 
@@ -123,15 +128,19 @@ class Product(models.Model):
 
 class Review(models.Model):
     product = models.ForeignKey(Product, related_name="reviews", on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="reviews", on_delete=models.CASCADE)
-    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="reviews", on_delete=models.CASCADE
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     title = models.CharField(max_length=120, blank=True)
     body = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("product", "user")   # one review per user and product
+        unique_together = ("product", "user")  # one review per user and product
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -140,9 +149,14 @@ class Review(models.Model):
 
 # Favorites
 
+
 class Favorite(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites")
-    product = models.ForeignKey("shop.Product", on_delete=models.CASCADE, related_name="favorited_by")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites"
+    )
+    product = models.ForeignKey(
+        "shop.Product", on_delete=models.CASCADE, related_name="favorited_by"
+    )
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:

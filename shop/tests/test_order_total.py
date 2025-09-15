@@ -147,4 +147,6 @@ class OrderTotalSmokeTests(TestCase):
             self.assertGreater(total, 0, "Order total should be > 0 after adding an item")
         else:
             self.assertIsInstance(total, Decimal, "Order total should be a Decimal or numeric")
-            self.assertGreater(total, Decimal("0"), "Order total should be > 0 after adding an item")
+            self.assertGreater(
+                total, Decimal("0"), "Order total should be > 0 after adding an item"
+            )

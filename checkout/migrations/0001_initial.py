@@ -11,41 +11,97 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('shop', '0004_favorite'),
+        ("shop", "0004_favorite"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Order',
+            name="Order",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_number', models.CharField(editable=False, max_length=32, unique=True)),
-                ('full_name', models.CharField(max_length=80)),
-                ('email', models.EmailField(max_length=254)),
-                ('phone_number', models.CharField(blank=True, max_length=32)),
-                ('date', models.DateTimeField(default=django.utils.timezone.now)),
-                ('order_total', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('delivery_cost', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('grand_total', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('stripe_pid', models.CharField(blank=True, help_text='Stripe PaymentIntent ID', max_length=255)),
-                ('original_cart', models.TextField(blank=True, help_text='Snapshot of the cart at the time of purchase (JSON string).')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='orders', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("order_number", models.CharField(editable=False, max_length=32, unique=True)),
+                ("full_name", models.CharField(max_length=80)),
+                ("email", models.EmailField(max_length=254)),
+                ("phone_number", models.CharField(blank=True, max_length=32)),
+                ("date", models.DateTimeField(default=django.utils.timezone.now)),
+                ("order_total", models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                ("delivery_cost", models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                ("grand_total", models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                (
+                    "stripe_pid",
+                    models.CharField(
+                        blank=True, help_text="Stripe PaymentIntent ID", max_length=255
+                    ),
+                ),
+                (
+                    "original_cart",
+                    models.TextField(
+                        blank=True,
+                        help_text="Snapshot of the cart at the time of purchase (JSON string).",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="orders",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-date'],
+                "ordering": ["-date"],
             },
         ),
         migrations.CreateModel(
-            name='OrderItem',
+            name="OrderItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('size', models.CharField(blank=True, choices=[('XS', 'XS'), ('S', 'S'), ('M', 'M'), ('L', 'L'), ('XL', 'XL')], help_text='Empty if product has no size.', max_length=4, null=True)),
-                ('quantity', models.PositiveIntegerField(default=1)),
-                ('unit_price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('lineitem_total', models.DecimalField(decimal_places=2, editable=False, max_digits=10)),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='checkout.order')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='order_items', to='shop.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "size",
+                    models.CharField(
+                        blank=True,
+                        choices=[("XS", "XS"), ("S", "S"), ("M", "M"), ("L", "L"), ("XL", "XL")],
+                        help_text="Empty if product has no size.",
+                        max_length=4,
+                        null=True,
+                    ),
+                ),
+                ("quantity", models.PositiveIntegerField(default=1)),
+                ("unit_price", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "lineitem_total",
+                    models.DecimalField(decimal_places=2, editable=False, max_digits=10),
+                ),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="checkout.order",
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="order_items",
+                        to="shop.product",
+                    ),
+                ),
             ],
         ),
     ]

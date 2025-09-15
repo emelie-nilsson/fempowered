@@ -27,12 +27,14 @@ class CheckoutSuccessViewSmokeTests(TestCase):
         return None, None
 
     def test_success_page_without_id(self):
-        url, name = self._reverse_first([
-            ("checkout:success", None),
-            ("checkout_success", None),
-            ("checkout:confirmation", None),
-            ("checkout_confirmation", None),
-        ])
+        url, name = self._reverse_first(
+            [
+                ("checkout:success", None),
+                ("checkout_success", None),
+                ("checkout:confirmation", None),
+                ("checkout_confirmation", None),
+            ]
+        )
         if not url:
             self.skipTest("No reverseable URL for success page without id")
             return
@@ -40,14 +42,18 @@ class CheckoutSuccessViewSmokeTests(TestCase):
         self.assertIn(resp.status_code, self.OK, f"{name} unexpected {resp.status_code} at {url}")
 
     def test_success_page_with_dummy_id(self):
-        url, name = self._reverse_first([
-            ("checkout:success", {"order_id": "TEST123"}),
-            ("checkout_success", {"order_id": "TEST123"}),
-            ("checkout:confirmation", {"order_id": "TEST123"}),
-            ("checkout_confirmation", {"order_id": "TEST123"}),
-        ])
+        url, name = self._reverse_first(
+            [
+                ("checkout:success", {"order_id": "TEST123"}),
+                ("checkout_success", {"order_id": "TEST123"}),
+                ("checkout:confirmation", {"order_id": "TEST123"}),
+                ("checkout_confirmation", {"order_id": "TEST123"}),
+            ]
+        )
         if not url:
             self.skipTest("No reverseable URL for success page with order_id")
             return
         resp = self.client.get(url)
-        self.assertIn(resp.status_code, self.OK_OR_404, f"{name} unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code, self.OK_OR_404, f"{name} unexpected {resp.status_code} at {url}"
+        )

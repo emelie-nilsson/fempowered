@@ -49,9 +49,7 @@ class CheckoutAddressForm(forms.Form):
     billing_postal_code = forms.CharField(
         max_length=20, required=False, widget=TEXT, label="Billing postal code"
     )
-    billing_city = forms.CharField(
-        max_length=80, required=False, widget=TEXT, label="Billing city"
-    )
+    billing_city = forms.CharField(max_length=80, required=False, widget=TEXT, label="Billing city")
     billing_country = forms.CharField(
         max_length=2, required=False, widget=TEXT, label="Billing country"
     )
@@ -94,7 +92,12 @@ class CheckoutAddressForm(forms.Form):
         same = data.get("billing_same_as_shipping")
         # If billing is different, require billing fields
         if not same:
-            required = ("billing_address1", "billing_postal_code", "billing_city", "billing_country")
+            required = (
+                "billing_address1",
+                "billing_postal_code",
+                "billing_city",
+                "billing_country",
+            )
             for field in required:
                 if not (data.get(field) or "").strip():
                     self.add_error(field, "This field is required when billing address differs.")

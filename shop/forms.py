@@ -3,6 +3,7 @@ from .models import Review
 
 RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
 
+
 class ReviewForm(forms.ModelForm):
     # Rating
     rating = forms.TypedChoiceField(
@@ -49,7 +50,6 @@ class ReviewForm(forms.ModelForm):
             raise forms.ValidationError("Please write a short review.")
         return body
 
-    
     def clean_rating(self):
         rating = self.cleaned_data.get("rating")
         if rating not in [1, 2, 3, 4, 5]:

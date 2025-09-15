@@ -6,23 +6,37 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('checkout', '0002_alter_order_options_alter_orderitem_options_and_more'),
+        ("checkout", "0002_alter_order_options_alter_orderitem_options_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='order',
-            name='email',
-            field=models.EmailField(blank=True, db_index=True, default='', max_length=254),
+            model_name="order",
+            name="email",
+            field=models.EmailField(blank=True, db_index=True, default="", max_length=254),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='shipping_method',
-            field=models.CharField(choices=[('standard', 'Standard (2–4 days)'), ('express', 'Express (1–2 days)')], default='standard', max_length=20),
+            model_name="order",
+            name="shipping_method",
+            field=models.CharField(
+                choices=[("standard", "Standard (2–4 days)"), ("express", "Express (1–2 days)")],
+                default="standard",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='status',
-            field=models.CharField(choices=[('pending', 'Pending'), ('paid', 'Paid'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], db_index=True, default='pending', max_length=20),
+            model_name="order",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "Pending"),
+                    ("paid", "Paid"),
+                    ("failed", "Failed"),
+                    ("cancelled", "Cancelled"),
+                ],
+                db_index=True,
+                default="pending",
+                max_length=20,
+            ),
         ),
     ]

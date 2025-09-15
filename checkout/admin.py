@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Order, OrderItem
 
 
-# Helper functions 
+# Helper functions
 def format_eur(cents: int) -> str:
     """Convert an integer amount in cents to a formatted Euro string."""
     if cents is None:
@@ -13,7 +13,7 @@ def format_eur(cents: int) -> str:
         return "€0.00"
 
 
-# Inline for order items 
+# Inline for order items
 class OrderItemInline(admin.TabularInline):
     """
     Displays order items directly on the Order page in the admin.
@@ -24,6 +24,7 @@ class OrderItemInline(admin.TabularInline):
       - line_total: total for the line (field name may vary)
     If your field names differ, adjust the methods below accordingly.
     """
+
     model = OrderItem
     extra = 0
     can_delete = False
@@ -56,17 +57,20 @@ class OrderItemInline(admin.TabularInline):
     def unit_price_eur(self, obj):
         """Formatted unit price in Euro."""
         return format_eur(self._unit_price_cents(obj))
+
     unit_price_eur.short_description = "Unit price (€)"
 
     def line_total_eur(self, obj):
         """Formatted line total in Euro."""
         return format_eur(self._line_total_cents(obj))
+
     line_total_eur.short_description = "Line total (€)"
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     """Admin configuration for the Order model."""
+
     list_display = ("order_number", "email", "status", "total_eur", "created_at")
     list_filter = ("status", "created_at")
     search_fields = ("order_number", "email", "full_name", "id")
@@ -86,39 +90,43 @@ class OrderAdmin(admin.ModelAdmin):
     )
 
     fieldsets = (
-        ("Order", {
-            "fields": ("id", "order_number", "status", "created_at")
-        }),
-        ("Customer", {
-            "fields": ("full_name", "email", "phone")
-        }),
-        ("Shipping address", {
-            "fields": ("address1", "address2", "postal_code", "city", "country")
-        }),
-        ("Billing address", {
-            "fields": (
-                "billing_same_as_shipping",
-                "billing_address1", "billing_address2",
-                "billing_postal_code", "billing_city", "billing_country",
-            )
-        }),
-        ("Shipping & totals", {
-            "fields": ("shipping_method", "shipping_cost", "subtotal", "total")
-        }),
-        ("Stripe", {
-            "fields": ("payment_intent_id", "stripe_receipt_url")
-        }),
+        ("Order", {"fields": ("id", "order_number", "status", "created_at")}),
+        ("Customer", {"fields": ("full_name", "email", "phone")}),
+        (
+            "Shipping address",
+            {"fields": ("address1", "address2", "postal_code", "city", "country")},
+        ),
+        (
+            "Billing address",
+            {
+                "fields": (
+                    "billing_same_as_shipping",
+                    "billing_address1",
+                    "billing_address2",
+                    "billing_postal_code",
+                    "billing_city",
+                    "billing_country",
+                )
+            },
+        ),
+        (
+            "Shipping & totals",
+            {"fields": ("shipping_method", "shipping_cost", "subtotal", "total")},
+        ),
+        ("Stripe", {"fields": ("payment_intent_id", "stripe_receipt_url")}),
     )
 
     def total_eur(self, obj):
         """Formatted order total in Euro."""
         return format_eur(obj.total)
+
     total_eur.short_description = "Total (€)"
 
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     """Admin configuration for the OrderItem model (optional, for overview)."""
+
     list_display = ("order", "product", "quantity")
     search_fields = ("order__order_number", "product__name")
     list_select_related = ("order", "product")

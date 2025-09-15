@@ -87,6 +87,7 @@ def match_by_filename(base_dir: Path, stem_hint: str, subdir_hint: Optional[str]
       3) prefix match (file.stem startswith stem_hint) within subdir_hint,
       4) relaxed prefix (strip trailing _<random> or -<random>) anywhere.
     """
+
     # If we have a suggested subdir, try there first
     def in_subdir(p: Path) -> bool:
         if not subdir_hint:
@@ -168,8 +169,12 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--apply", action="store_true", help="Persist changes (default: dry-run).")
-        parser.add_argument("--limit", type=int, default=None, help="Only process first N products.")
+        parser.add_argument(
+            "--apply", action="store_true", help="Persist changes (default: dry-run)."
+        )
+        parser.add_argument(
+            "--limit", type=int, default=None, help="Only process first N products."
+        )
 
     def handle(self, *args, **opts):
         apply_changes = opts["apply"]
@@ -179,7 +184,11 @@ class Command(BaseCommand):
         can_write_catalog = is_model_field(Product, "image_catalog")
         can_write_detail = is_model_field(Product, "image_detail")
         if not (can_write_catalog or can_write_detail):
-            self.stderr.write(self.style.ERROR("No writable image fields (image_catalog/image_detail) on Product."))
+            self.stderr.write(
+                self.style.ERROR(
+                    "No writable image fields (image_catalog/image_detail) on Product."
+                )
+            )
             return
 
         qs = Product.objects.all().order_by("id")
@@ -187,15 +196,21 @@ class Command(BaseCommand):
             qs = qs[:limit]
         total = qs.count()
 
-        self.stdout.write(self.style.NOTICE(f"Scanning {total} products (apply={apply_changes})..."))
+        self.stdout.write(
+            self.style.NOTICE(f"Scanning {total} products (apply={apply_changes})...")
+        )
 
         updated = 0
         missing_after = 0
 
         with transaction.atomic():
             for p in qs:
-                before_cat = stringify(getattr(p, "image_catalog", None)) if can_write_catalog else None
-                before_det = stringify(getattr(p, "image_detail", None)) if can_write_detail else None
+                before_cat = (
+                    stringify(getattr(p, "image_catalog", None)) if can_write_catalog else None
+                )
+                before_det = (
+                    stringify(getattr(p, "image_detail", None)) if can_write_detail else None
+                )
 
                 after_cat = None
                 after_det = None
@@ -204,7 +219,9 @@ class Command(BaseCommand):
                 if can_write_catalog:
                     if before_cat:
                         norm = norm_rel_path(before_cat)
-                        fixed = ensure_ext_or_find("catalog", norm) or norm  # keep norm even if not found (best-effort)
+                        fixed = (
+                            ensure_ext_or_find("catalog", norm) or norm
+                        )  # keep norm even if not found (best-effort)
                         after_cat = fixed
                     else:
                         # Attempt to derive from any readable property (optional)
@@ -229,8 +246,14 @@ class Command(BaseCommand):
                                 # Fallback: use catalog stem to find a details image with same stem
                                 base_for_stem = after_cat or before_cat
                                 stem = Path(norm_rel_path(base_for_stem)).stem
-                                fixed = match_by_filename(Path(settings.MEDIA_ROOT) / "details", stem, None)
-                                fixed = fixed.relative_to(settings.MEDIA_ROOT).as_posix() if fixed else None
+                                fixed = match_by_filename(
+                                    Path(settings.MEDIA_ROOT) / "details", stem, None
+                                )
+                                fixed = (
+                                    fixed.relative_to(settings.MEDIA_ROOT).as_posix()
+                                    if fixed
+                                    else None
+                                )
                             after_det = fixed or norm_rel_path(prop)
 
                 # Decide updates
@@ -250,25 +273,31 @@ class Command(BaseCommand):
 
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f"#{p.pk} {p.name}: " +
-                            ", ".join(f"{f}='{getattr(p, f)}'" for f in fields_to_update)
+                            f"#{p.pk} {p.name}: "
+                            + ", ".join(f"{f}='{getattr(p, f)}'" for f in fields_to_update)
                         )
                     )
                 else:
                     self.stdout.write(f"#{p.pk} {p.name}: no changes")
 
                 # Track unresolved images
-                final_cat = stringify(getattr(p, "image_catalog", None)) if can_write_catalog else None
+                final_cat = (
+                    stringify(getattr(p, "image_catalog", None)) if can_write_catalog else None
+                )
                 if can_write_catalog and final_cat:
-                    abs_cat = (Path(settings.MEDIA_ROOT) / norm_rel_path(final_cat))
+                    abs_cat = Path(settings.MEDIA_ROOT) / norm_rel_path(final_cat)
                     if not (abs_cat.exists() and abs_cat.is_file()):
                         missing_after += 1
 
             if not apply_changes:
-                self.stdout.write(self.style.WARNING("Dry-run complete (no DB changes were committed)."))
+                self.stdout.write(
+                    self.style.WARNING("Dry-run complete (no DB changes were committed).")
+                )
                 transaction.set_rollback(True)
 
         self.stdout.write(self.style.MIGRATE_HEADING("Summary"))
         self.stdout.write(f"  Products scanned : {total}")
-        self.stdout.write(f"  Updated records  : {updated}{' (saved)' if apply_changes else ' (dry-run)'}")
+        self.stdout.write(
+            f"  Updated records  : {updated}{' (saved)' if apply_changes else ' (dry-run)'}"
+        )
         self.stdout.write(f"  Unresolved files : {missing_after}")

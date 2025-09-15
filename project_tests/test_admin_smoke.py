@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 @override_settings(
     STORAGES={
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -31,7 +32,11 @@ class AdminSmokeTests(TestCase):
             self.skipTest(f"{app}.{model} not registered in admin")
             return
         resp = self.client.get(url)
-        self.assertIn(resp.status_code, self.OK, f"{app}.{model} changelist unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code,
+            self.OK,
+            f"{app}.{model} changelist unexpected {resp.status_code} at {url}",
+        )
 
     def test_shop_product_in_admin(self):
         self._try_model_changelist("shop", "product")

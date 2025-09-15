@@ -21,8 +21,7 @@ def orders(request):
     """
     user = request.user
     orders_qs = (
-        Order.objects
-        .filter(Q(user=user) | Q(email=user.email))
+        Order.objects.filter(Q(user=user) | Q(email=user.email))
         .order_by("-created_at")
         .prefetch_related("items")
     )
@@ -44,9 +43,7 @@ def order_detail(request, order_number):
     except Exception:
         return render(request, "accounts/order_detail.html", status=404)
 
-    order = get_object_or_404(
-        Order.objects.prefetch_related("items__product"), id=order_id
-    )
+    order = get_object_or_404(Order.objects.prefetch_related("items__product"), id=order_id)
 
     if not (order.user_id == request.user.id or order.email == request.user.email):
         return render(request, "accounts/order_detail.html", status=404)
@@ -92,12 +89,14 @@ def addresses(request):
             form = UserAddressForm(instance=ua)
         else:
             # Pre-fill sensible defaults for first-time setup
-            form = UserAddressForm(initial={
-                "full_name": (request.user.get_full_name() or "").strip(),
-                "email": request.user.email,
-                "country": "SE",  
-                "billing_same_as_shipping": True,
-            })
+            form = UserAddressForm(
+                initial={
+                    "full_name": (request.user.get_full_name() or "").strip(),
+                    "email": request.user.email,
+                    "country": "SE",
+                    "billing_same_as_shipping": True,
+                }
+            )
 
     return render(request, "accounts/addresses.html", {"form": form, "address": ua})
 
@@ -136,14 +135,25 @@ def address_delete(request):
     addr.billing_city = ""
     addr.billing_country = ""
 
-    addr.save(update_fields=[
-        "is_active",
-        "full_name", "email", "phone",
-        "address1", "address2", "postal_code", "city", "country",
-        "billing_same_as_shipping",
-        "billing_address1", "billing_address2",
-        "billing_postal_code", "billing_city", "billing_country",
-    ])
+    addr.save(
+        update_fields=[
+            "is_active",
+            "full_name",
+            "email",
+            "phone",
+            "address1",
+            "address2",
+            "postal_code",
+            "city",
+            "country",
+            "billing_same_as_shipping",
+            "billing_address1",
+            "billing_address2",
+            "billing_postal_code",
+            "billing_city",
+            "billing_country",
+        ]
+    )
 
     messages.success(request, "Your address was deleted.")
     return redirect("addresses")

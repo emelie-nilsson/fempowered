@@ -1,6 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 from django.test import SimpleTestCase
 
+
 def _import_or_none(path):
     try:
         mod_path, name = path.rsplit(".", 1)
@@ -9,8 +10,10 @@ def _import_or_none(path):
     except Exception:
         return None
 
+
 def _get_field_names(model):
     return {f.name for f in model._meta.fields}
+
 
 def _get_price_field(fields):
     # Prefer 'unit_price' if finns, annars 'price'
@@ -20,11 +23,13 @@ def _get_price_field(fields):
         return "price"
     return None
 
+
 class OrderItemMathTests(SimpleTestCase):
     """
     Validates that OrderItem calculates line totals correctly with Decimal math.
     Adapts to different field/method names and skips cleanly if unsupported.
     """
+
     OrderItem = _import_or_none("shop.models.OrderItem")
 
     def setUp(self):
@@ -67,7 +72,9 @@ class OrderItemMathTests(SimpleTestCase):
             return
 
         # 2) Annars beräkna direkt från fälten och verifiera Decimal-precisionen
-        from_fields = (getattr(item, self.price_field) * Decimal(item.quantity)).quantize(Decimal("0.01"))
+        from_fields = (getattr(item, self.price_field) * Decimal(item.quantity)).quantize(
+            Decimal("0.01")
+        )
         self.assertEqual(from_fields, expected)
 
     def test_decimal_precision_half_up_rounding(self):
@@ -80,5 +87,7 @@ class OrderItemMathTests(SimpleTestCase):
             self.assertEqual(Decimal(via_method), expected)
             return
 
-        from_fields = (getattr(item, self.price_field) * Decimal(item.quantity)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        from_fields = (getattr(item, self.price_field) * Decimal(item.quantity)).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
         self.assertEqual(from_fields, expected)

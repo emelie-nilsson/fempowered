@@ -46,8 +46,8 @@ class UrlResolutionTests(TestCase):
             ("checkout_address", [None]),
         ],
         "auth_login": [
-            ("account_login", [None]),   # django-allauth
-            ("login", [None]),           # contrib.auth
+            ("account_login", [None]),  # django-allauth
+            ("login", [None]),  # contrib.auth
         ],
         "auth_signup": [
             ("account_signup", [None]),  # django-allauth
@@ -60,7 +60,7 @@ class UrlResolutionTests(TestCase):
 
     def _reverse_first(self, name, kwargs_candidates):
         last_exc = None
-        for kw in (kwargs_candidates or [None]):
+        for kw in kwargs_candidates or [None]:
             try:
                 if kw:
                     return reverse(name, kwargs=kw)
@@ -90,4 +90,6 @@ class UrlResolutionTests(TestCase):
                         last_error = e
                         continue
                 if not resolved:
-                    self.skipTest(f"No matching URL name found for '{label}'. Last error: {last_error}")
+                    self.skipTest(
+                        f"No matching URL name found for '{label}'. Last error: {last_error}"
+                    )

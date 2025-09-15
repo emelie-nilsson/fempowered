@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     STORAGES={
@@ -40,6 +41,8 @@ class PasswordResetEmailTests(TestCase):
         resp = self.client.post(url, {"email": "anna@example.com"}, follow=True)
 
         # Assert
-        self.assertIn(resp.status_code, self.OK, f"{label} POST unexpected {resp.status_code} at {url}")
+        self.assertIn(
+            resp.status_code, self.OK, f"{label} POST unexpected {resp.status_code} at {url}"
+        )
         self.assertGreaterEqual(len(mail.outbox), 1, "Expected at least one email to be sent")
         self.assertIn("anna@example.com", mail.outbox[0].to, "Email should be sent to the user")

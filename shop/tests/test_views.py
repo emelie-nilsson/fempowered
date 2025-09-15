@@ -67,7 +67,9 @@ class ShopViewsSmokeTests(TestCase):
             url = self._reverse_or_none(name)
             if not url:
                 continue
-            resp = self.client.get(url, {"q": "starter", "category": "accessories", "page": 1, "sort": "price"})
+            resp = self.client.get(
+                url, {"q": "starter", "category": "accessories", "page": 1, "sort": "price"}
+            )
             self.assertIn(
                 resp.status_code,
                 (200, 302, 303, 400, 403),

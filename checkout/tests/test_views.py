@@ -157,8 +157,15 @@ class CheckoutViewsTests(TestCase):
 
         if resp.status_code == 200:
             forms = self._extract_checkout_forms(resp)
-            self.assertTrue(forms, "Could not find CheckoutAddressForm in context when billing required")
+            self.assertTrue(
+                forms, "Could not find CheckoutAddressForm in context when billing required"
+            )
             form = forms[0]
             self.assertFalse(form.is_valid())
-            for field in ("billing_address1", "billing_postal_code", "billing_city", "billing_country"):
+            for field in (
+                "billing_address1",
+                "billing_postal_code",
+                "billing_city",
+                "billing_country",
+            ):
                 self.assertIn(field, form.errors, f"Expected validation error for {field}")

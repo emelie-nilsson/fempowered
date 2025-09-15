@@ -16,11 +16,13 @@ mimetypes.add_type("image/webp", ".webp", True)
 mimetypes.add_type("image/svg+xml", ".svg", True)
 
 
-# Core security & env 
+# Core security & env
+
 
 def env_list(name: str, default: str = "") -> list[str]:
     raw = os.getenv(name, default)
     return [x.strip() for x in raw.split(",") if x.strip()]
+
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-change-me")
 
@@ -37,7 +39,11 @@ if not DEBUG:
 # CSRF
 CSRF_TRUSTED_ORIGINS = env_list(
     "CSRF_TRUSTED_ORIGINS",
-    "http://127.0.0.1:8000,http://localhost:8000,https://127.0.0.1:8000,https://localhost:8000,https://*.herokuapp.com"
+    "http://127.0.0.1:8000,"
+    "http://localhost:8000,"
+    "https://127.0.0.1:8000,"
+    "https://localhost:8000,"
+    "https://*.herokuapp.com",
 )
 
 # Optional explicit Heroku app domain (e.g. fempowered-12345.herokuapp.com)
@@ -48,7 +54,7 @@ if HEROKU_APP_DOMAIN:
         CSRF_TRUSTED_ORIGINS.append(origin)
 
 
-# Stripe 
+# Stripe
 
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
@@ -59,7 +65,7 @@ STRIPE_CURRENCY = os.getenv("STRIPE_CURRENCY", "eur")
 TEST_ALLOW_REVIEW_WITHOUT_PURCHASE = DEBUG  # allow in dev, off in prod
 
 
-# Django apps 
+# Django apps
 
 INSTALLED_APPS = [
     # Django
@@ -70,20 +76,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-
     # 3rd party apps
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "whitenoise.runserver_nostatic",
-
     # Apps
     "home",
     "shop",
     "accounts",
     "checkout",
     "contact",
-
     # Dev-tools (optional)
     "django_extensions",
 ]
@@ -141,7 +144,7 @@ LOGIN_REDIRECT_URL = "/"
 WSGI_APPLICATION = "fempowered.wsgi.application"
 
 
-# Database 
+# Database
 
 DATABASES = {
     "default": {
@@ -155,7 +158,7 @@ if os.environ.get("DATABASE_URL"):
     DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 
-#  Password validation 
+#  Password validation
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -165,7 +168,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization / Timezone 
+# Internationalization / Timezone
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Europe/Stockholm"
@@ -173,13 +176,13 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static & Media 
+# Static & Media
 # WhiteNoise for static, local filesystem for media (both dev & prod)
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    BASE_DIR / "media",   
+    BASE_DIR / "media",
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -202,7 +205,7 @@ STORAGES = {
 WHITENOISE_MANIFEST_STRICT = False
 
 
-# Email 
+# Email
 
 CONTACT_RECIPIENTS = env_list("CONTACT_RECIPIENTS", "info@fempowered.com")
 
@@ -225,7 +228,7 @@ else:
     ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
 
 
-# Security dev vs prod 
+# Security dev vs prod
 
 # Harden common defaults
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -256,7 +259,7 @@ else:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 
-# Logging 
+# Logging
 
 LOGGING = {
     "version": 1,
