@@ -1,8 +1,7 @@
 from __future__ import annotations
-import os
 import re
 from pathlib import Path
-from typing import Optional, Iterable
+from typing import Optional
 
 from django.core.management.base import BaseCommand
 from django.conf import settings

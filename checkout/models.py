@@ -93,8 +93,6 @@ class Order(models.Model):
     def is_paid(self) -> bool:
         return self.status == OrderStatus.PAID
 
-    def __str__(self) -> str:
-        return f"{self.order_number()} — {self.email}"
 
 
 class OrderItem(models.Model):

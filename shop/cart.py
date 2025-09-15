@@ -1,5 +1,4 @@
 from decimal import Decimal, InvalidOperation
-from django.conf import settings
 from shop.models import Product
 
 CART_SESSION_ID = "cart"

@@ -1,7 +1,6 @@
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse, NoReverseMatch
-from django.conf import settings
 
 # Import your real form + enums to build a valid payload
 from checkout.forms import CheckoutAddressForm

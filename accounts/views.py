@@ -6,7 +6,6 @@ from django.views.decorators.http import require_POST
 
 from checkout.models import Order
 from .forms import UserAddressForm
-from .models import UserAddress
 
 
 @login_required

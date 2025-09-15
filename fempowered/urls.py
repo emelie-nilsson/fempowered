@@ -4,6 +4,10 @@ from django.urls import path, include, re_path
 from django.views.static import serve as static_serve
 from home import views
 
+# Route used by project_tests.test_error_pages (must exist even if DEBUG=False)
+def _boom_500(request):
+    raise RuntimeError("boom")
+
 urlpatterns = [
     path("admin/", admin.site.urls),
 
@@ -19,6 +23,9 @@ urlpatterns = [
 
     # Allauth
     path("accounts/", include("allauth.urls")),
+
+    # Error test route
+    path("boom-500/", _boom_500, name="boom_500"),
 ]
 
 # Serve media files from MEDIA_ROOT at /media/ (works even with DEBUG=False)
@@ -30,9 +37,3 @@ urlpatterns += [
 handler404 = "fempowered.error_handlers.handler404"
 handler500 = "fempowered.error_handlers.handler500"
 
-# Route used by project_tests.test_error_pages (must exist even if DEBUG=False)
-def _boom_500(request):
-    raise RuntimeError("boom")
-
-from django.urls import path  # already imported in your file, keep it
-urlpatterns += [path("boom-500/", _boom_500, name="boom_500")]
