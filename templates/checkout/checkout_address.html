@@ -76,6 +76,10 @@
           <div class="col-md-3 form-group">
             <label for="id_country">Country</label>
             {{ form.country }}
+            <small id="id_country_helptext" class="form-text text-muted">
+              Enter your 2-letter country code (e.g., SE, US, DE).
+            </small>
+
           </div>
         </div>
       </div>
@@ -117,6 +121,10 @@
             <div class="col-md-3 form-group">
               <label for="id_billing_country">Country</label>
               {{ form.billing_country }}
+              <small id="id_billing_country_helptext" class="form-text text-muted">
+                Enter your 2-letter country code (e.g., SE, US, DE).
+              </small>
+
             </div>
           </div>
         </div>
