@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const clientSecretInput = document.getElementById("id_client_secret");
   const clientSecret = clientSecretInput.value;
 
-  // --- Money formatting (EUR from cents) ---
+  //  Money formatting (EUR from cents) 
   function formatEUR(cents) {
     try { return new Intl.NumberFormat('sv-SE',{style:'currency',currency:'EUR'}).format((Number(cents)||0)/100); }
     catch(e) { return '€' + ((Number(cents)||0)/100).toFixed(2); }
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setMoneyText('shipping-amount');
   setMoneyText('total-amount');
 
-  // --- Helpers ---
+  //  Helpers 
   function setLoading(isLoading) {
     payBtn.disabled = !!isLoading;
     payBtn.setAttribute("aria-disabled", isLoading ? "true" : "false");
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const res = await fetch("{% url 'checkout_confirm' %}", {
           method: "POST",
-          credentials: "same-origin",               // send cookies (CSRF)
+          credentials: "same-origin",               
           headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": csrftoken,

@@ -4,9 +4,9 @@ import re
 from .models import UserAddress
 
 
-# ---------------------------
+
 # Validators (reusable)
-# ---------------------------
+
 
 
 def validate_full_name(value: str) -> None:
@@ -85,9 +85,9 @@ def validate_postcode_by_country(value: str, country: str) -> str:
     return raw
 
 
-# ---------------------------
+
 # Form
-# ---------------------------
+
 
 
 class UserAddressForm(forms.ModelForm):
@@ -106,13 +106,13 @@ class UserAddressForm(forms.ModelForm):
             "phone",
             "address1",
             "address2",
-            "country",  # <- moved before postal_code
+            "country",  
             "postal_code",
             "city",
             "billing_same_as_shipping",
             "billing_address1",
             "billing_address2",
-            "billing_country",  # <- moved before billing_postal_code
+            "billing_country",  
             "billing_postal_code",
             "billing_city",
         ]
@@ -158,7 +158,7 @@ class UserAddressForm(forms.ModelForm):
             "billing_city": forms.TextInput(attrs={"class": "form-control"}),
         }
 
-    # -------- field-level clean_* --------
+    # field-level clean_* 
 
     def _get_country_value(self) -> str:
         """
@@ -200,7 +200,7 @@ class UserAddressForm(forms.ModelForm):
         country = self._get_billing_country_value()
         return validate_postcode_by_country(code, country)
 
-    # -------- form-level clean() --------
+    # form-level clean() 
 
     def clean(self):
         """

@@ -31,8 +31,7 @@
         <p class="lead">{{ product.description }}</p>
       {% endif %}
 
-      <!-- DEBUG: category value resolved by template -->
-      <!-- DEBUG: category={{ product.category }} -->
+     
 
       <div class="actions">
         <form method="post" action="{% url 'add_to_cart' product.id %}">

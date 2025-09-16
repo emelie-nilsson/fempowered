@@ -5,7 +5,7 @@ from django.views.static import serve as static_serve
 from home import views
 
 
-# Route used by project_tests.test_error_pages (must exist even if DEBUG=False)
+# Route used by project_tests.test_error_pages
 def _boom_500(request):
     raise RuntimeError("boom")
 
@@ -26,7 +26,7 @@ urlpatterns = [
     path("boom-500/", _boom_500, name="boom_500"),
 ]
 
-# Serve media files from MEDIA_ROOT at /media/ (works even with DEBUG=False)
+# Serve media files from MEDIA_ROOT at /media/ 
 urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", static_serve, {"document_root": settings.MEDIA_ROOT}),
 ]

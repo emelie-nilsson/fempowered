@@ -18,10 +18,9 @@ from .cart import Cart
 
 # Import OrderItem to verify exact variant purchases
 try:
-    # If you have a dedicated OrderStatus enum, you can adapt here
     from checkout.models import OrderItem
 except Exception:
-    OrderItem = None  # Will fail loudly if used without being present
+    OrderItem = None  
 
 
 # Purchase verification helpers
@@ -52,7 +51,7 @@ def has_purchased_exact_variant(user, product) -> bool:
         ).exists():
             return True
 
-        # Optional: fallback by email for guest checkout matched to this user's email
+        # Fallback by email for guest checkout matched to this user's email
         if user.email:
             if OrderItem.objects.filter(
                 order__email__iexact=user.email,
@@ -119,7 +118,7 @@ def _delete_matching_lines_in_session(session, product_id, size):
                     removed_any = True
                 except KeyError:
                     pass
-            session[container_key] = data  # write back
+            session[container_key] = data  
 
     if removed_any:
         session.modified = True
@@ -244,7 +243,7 @@ def product_detail(request, pk):
         "shop/product_detail.html",
         {
             "product": product,
-            "reviews": reviews,  # list with is_verified set
+            "reviews": reviews,  
             "user_review": user_review,
             "form": form,
             "can_review": can_review,
@@ -373,7 +372,7 @@ def cart_detail(request):
     cart = Cart(request)
     cart_items = []
     for key, item in cart:
-        # Prefer explicit size from the item; if missing, derive from key
+        # Prefer explicit size from the item, if missing, derive from key
         raw_size = item.get("size")
         if not raw_size and ":" in str(key):
             raw_size = str(key).split(":", 1)[1] or None

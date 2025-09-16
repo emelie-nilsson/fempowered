@@ -11,7 +11,7 @@ class Product(models.Model):
     # Choices matching fixtures
     CATEGORY_CHOICES = [
         ("Clothing", "Clothing"),
-        ("Clothes", "Clothes"),  # kan rensas senare
+        ("Clothes", "Clothes"),  
         ("Accessories", "Accessories"),
         ("Equipment", "Equipment"),
         ("Strength Equipment", "Strength Equipment"),
@@ -72,8 +72,8 @@ class Product(models.Model):
     def average_rating(self):
         return self.reviews.aggregate(avg=Avg("rating"))["avg"] or 0
 
-    # ---------- REVIEWS / VERIFIED BUYER HELPERS ----------
-    def user_has_purchased(self, user) -> bool:  # NEW
+    # Reviews / Verified buyer helpers 
+    def user_has_purchased(self, user) -> bool:  
         """
         Return True om användaren är inloggad och har minst en *paid* orderrad
         för denna produkt – antingen via Order.user eller via samma e-post

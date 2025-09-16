@@ -513,7 +513,6 @@ a:hover { color: var(--middle-color); }
 
 /* Product detail layout */
 
-/* Desktop/Tablet: image left, info right, reviews under image, write under reviews */
 .product-grid {
   display: grid;
   gap: 2rem;
