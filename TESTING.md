@@ -100,7 +100,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 1  
 **As a Visitor, I want to browse available products so that I can explore what the shop offers without needing an account.**
 
-**Category:** Must-have  
+**Category:** Must have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |---------------------|---------------|------------------|--------|------------|
@@ -195,7 +195,11 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 9  
 **As a Registered User, I want to leave product reviews so that I can share feedback with others.**
 
-**Category:** Should Have  
+**Category:** Must Have  
+
+> **Priority clarification:**  
+> Originally marked as **Could have** in GitHub planning, but re-scoped to **Must have** during development.  
+> Implemented to ensure CRUD functionality was fully covered, as required by assessment criteria.
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
@@ -207,7 +211,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 10  
 **As a Registered User, I want to edit or delete my own reviews so that I can manage my contributions.**
 
-**Category:** Should Have  
+**Category:** Must Have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
@@ -219,7 +223,11 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 11  
 **As a Registered User, I want to trust that my personal data is handled securely so that I feel safe using the platform.**
 
-**Category:** Could Have  
+**Category:** Must Have  
+
+> **Priority clarification:**  
+> Originally marked as **Should have** in GitHub planning, but re-scoped to **Must have**.  
+> Security was treated as mandatory (HTTPS, password hashing, hidden API keys) to meet project requirements.
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
@@ -290,7 +298,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 17  
 **As a Customer, I want to see helpful error messages on failed payments so that I know how to fix issues.**
 
-**Category:** Could Have  
+**Category:** Should Have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |----------------------|---------------|------------------|--------|------------|
@@ -324,12 +332,13 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 20  
 **As an Admin, I want to manage product categories so that items are well organized.**  
 
-**Category:** Originally marked as **Must-have** → re-scoped to **Should-have**  
+**Category:** Out of scope  
 
-> **Scope clarification (MVP):**  
+> **Priority clarification:**  
+> Originally marked as **Must have**, then re-scoped to **Should have**, and finally moved **Out of scope** during development.  
 > Categories are predefined **choices** on `Product.category`. In Admin, you can **assign** a category to a product and **filter** by category.  
-> Creating, editing, or deleting categories in Admin was deemed out of scope for this release, and the story was re-prioritized during development.  
-> It is listed under **Future Features** for potential implementation if the shop expands its product lines.
+> Creating, editing, or deleting categories in Admin was deemed out of scope for this release.  
+> It is listed under **Future Features** for potential implementation if the shop expands its product lines.  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |---------------------|---------------|------------------|--------|------------|
@@ -347,7 +356,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 21  
 **As an Admin, I want to view incoming orders and their details so that I can fulfill them efficiently.**
 
-**Category:** Must-have  
+**Category:** Must have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |---------------------|---------------|------------------|--------|------------|
@@ -359,7 +368,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 22  
 **As an Admin, I want to mark orders as fulfilled or shipped so that customers stay informed.**
 
-**Category:** Must-have  
+**Category:** Must have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |---------------------|---------------|------------------|--------|------------|
@@ -370,7 +379,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 #### User Story 23  
 **As an Admin, I want to restrict access to admin-only features so that only authorized staff can manage content.**
 
-**Category:** Must-have  
+**Category:** Must have  
 
 | Acceptance Criteria | Steps to Test | Expected Outcome | Result | Screenshot |
 |---------------------|---------------|------------------|--------|------------|
@@ -379,7 +388,7 @@ This ensures that every feature was validated from a user’s perspective, compl
 ---
 
 **Summary:**  
-All user stories were manually tested against their acceptance criteria. All **Must-have** and most **Should-have** stories passed ✅  
+All user stories were manually tested against their acceptance criteria. All **Must have** and most **Should have** stories passed ✅  
 
 For **User Story 20**, the acceptance criterion “Categories can be created, edited, and deleted in Admin” is **Deferred (out of MVP scope)**.  
 The MVP outcome (assigning a predefined category and filtering by category) was verified and passed. 
