@@ -374,6 +374,9 @@ This ensures that every feature was validated from a user’s perspective, compl
 |---------------------|---------------|------------------|--------|------------|
 | Order status can be updated in admin | Login as staff → update order status | Status updates saved and visible | ✅ | ![us22.1](README_media/user_stories/us22.1.png) |
 
+
+Note: Extended order statuses (e.g., Preparing, Shipped, Delivered) were considered for future development but are not part of the tested MVP scope.
+
 ---
 
 #### User Story 23  
@@ -391,7 +394,10 @@ This ensures that every feature was validated from a user’s perspective, compl
 All user stories were manually tested against their acceptance criteria. All **Must have** and most **Should have** stories passed ✅  
 
 For **User Story 20**, the acceptance criterion “Categories can be created, edited, and deleted in Admin” is **Deferred (out of MVP scope)**.  
-The MVP outcome (assigning a predefined category and filtering by category) was verified and passed. 
+The MVP outcome (assigning a predefined category and filtering by category) was verified and passed.  
+
+For **User Story 22**, the acceptance criterion mentions marking orders as fulfilled or shipped.  In the MVP, orders can be updated with the statuses **Pending**, **Paid**, and **Cancelled**, which covers the required admin workflow.  
+Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Future Features* for potential implementation.  
 
 ---
 
