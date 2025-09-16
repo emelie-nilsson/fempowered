@@ -85,7 +85,7 @@ All account form tests passed successfully ✅
 In addition to automated unit tests, all key features of the site were manually tested in the deployed environment.  
 The goal was to confirm that navigation, forms, authentication flows, and error handling work as expected from a user’s perspective.  
 
-Testing was performed on both desktop and mobile devices, using Chrome and Microsoft Edge.  
+Testing was performed on both desktop and mobile devices, using Chrome, Microsoft Edge, Safari and Firefox.  
 Each section below summarizes the scenarios and expected outcomes. Detailed field-level validation (e.g., for the Account Address form) is included separately where relevant.
 
 ---

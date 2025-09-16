@@ -1,14 +1,13 @@
 from django import forms
 from .models import Review
 
-RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+RATING_CHOICES = [(i, str(i)) for i in range(1, 6)] # (value, label)
 
 
 class ReviewForm(forms.ModelForm):
-    # Rating
     rating = forms.TypedChoiceField(
         choices=RATING_CHOICES,
-        coerce=int,
+        coerce=int,  # konverterar "3" -> 3
         widget=forms.RadioSelect(attrs={"class": "star-rating"}),
         label="Rating",
         required=True,

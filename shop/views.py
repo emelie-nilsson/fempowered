@@ -294,6 +294,12 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, "Review created.")
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        # Show errors nicely instead of 500 page
+        messages.error(self.request, "Please fix the errors below.")
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["product"] = self.product
@@ -303,6 +309,7 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse("product_detail", kwargs={"pk": self.product.pk})
+
 
 
 class OwnerRequiredMixin(UserPassesTestMixin):

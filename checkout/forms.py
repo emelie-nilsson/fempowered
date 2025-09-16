@@ -54,7 +54,7 @@ class CheckoutAddressForm(forms.Form):
         max_length=2, required=False, widget=TEXT, label="Billing country"
     )
 
-    # --- Custom validators / normalizers ---
+    # Custom validators / normalizers
 
     def clean_full_name(self):
         name = (self.cleaned_data.get("full_name") or "").strip()

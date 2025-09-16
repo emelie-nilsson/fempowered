@@ -36,31 +36,32 @@
               {% endif %}
             </div>
 
-            <!-- Rating (5 stars) -->
+            <!-- Rating -->
             <div class="col-12">
-              <label class="form-label d-block mb-2">Your rating</label>
-              {% with selected=form.data.rating|default:form.initial.rating|default:form.instance.rating|default:'' %}
-                <div class="stars" role="radiogroup" aria-label="Betyg 1 till 5">
-                  <input type="radio" name="rating" id="star5" value="5" {% if selected|stringformat:"s" == "5" %}checked{% endif %}>
+              {% with selected=form.rating.value|stringformat:"s" %}
+                <div class="stars" role="radiogroup" aria-label="Rating 1 to 5">
+                  <input type="radio" name="rating" id="star5" value="5" {% if selected == '5' %}checked{% endif %} required>
                   <label for="star5" title="5 stars" aria-label="5 stars">★</label>
 
-                  <input type="radio" name="rating" id="star4" value="4" {% if selected|stringformat:"s" == "4" %}checked{% endif %}>
+                  <input type="radio" name="rating" id="star4" value="4" {% if selected == '4' %}checked{% endif %}>
                   <label for="star4" title="4 stars" aria-label="4 stars">★</label>
 
-                  <input type="radio" name="rating" id="star3" value="3" {% if selected|stringformat:"s" == "3" %}checked{% endif %}>
+                  <input type="radio" name="rating" id="star3" value="3" {% if selected == '3' %}checked{% endif %}>
                   <label for="star3" title="3 stars" aria-label="3 stars">★</label>
 
-                  <input type="radio" name="rating" id="star2" value="2" {% if selected|stringformat:"s" == "2" %}checked{% endif %}>
+                  <input type="radio" name="rating" id="star2" value="2" {% if selected == '2' %}checked{% endif %}>
                   <label for="star2" title="2 stars" aria-label="2 stars">★</label>
 
-                  <input type="radio" name="rating" id="star1" value="1" {% if selected|stringformat:"s" == "1" %}checked{% endif %}>
+                  <input type="radio" name="rating" id="star1" value="1" {% if selected == '1' %}checked{% endif %}>
                   <label for="star1" title="1 star" aria-label="1 star">★</label>
                 </div>
               {% endwith %}
+
               {% if form.rating.errors %}
-                <div class="invalid-feedback d-block">{{ form.rating.errors|join:", " }}</div>
+                <div class="invalid-feedback d-block mt-1">{{ form.rating.errors|join:", " }}</div>
               {% endif %}
             </div>
+
 
             <!-- Body -->
             <div class="col-12">
