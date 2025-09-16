@@ -624,6 +624,16 @@ Screenshot (taken before adding the missing image in the template):
 - **Fix:** Updated context and template tags so both views use the same logic to check if a product is in favorites.  
 - **How I checked:** Favorited a product from the list → detail page now correctly shows “Remove from favorites”.  
 
+#### 18) Missing rating caused 500 error instead of validation message
+- **What I saw:** When submitting a review without selecting a rating, the site crashed and displayed a 500 error page.  
+- **Why:** The form did not validate the absence of a rating, leading to a template variable error.  
+- **Fix:** Added proper form validation and error handling so the user now sees a clear warning message if rating is left empty.  
+- **How I checked:** Tried submitting a review without rating → received inline error message instead of server crash.  
+
+> **Note:** The screenshot of the 500 page was taken before the error page image was centered.
+
+![500 error (before centering)](README_media/bugs/500-before-center.png) 
+
 ---
 
 #### Test data used for screenshots (not a bug)
