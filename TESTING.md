@@ -32,13 +32,17 @@ python manage.py test shop.tests.test_models -v 2
 ### Checkout Form Tests
 Unit tests for the `CheckoutAddressForm` are located in `checkout/tests/test_forms.py`.  
 The tests verify that the form enforces key validation rules:
-- **Full name**: must contain both first and last name
-- **Phone number**: must be sufficiently long and contain only valid characters
-- **Postal code**: must consist of digits only
-- **Billing fields**: required when billing address is not the same as shipping
+- **Full name**: must contain both first and last name  
+- **Phone number**: must be sufficiently long and contain only valid characters  
+- **Postal code**: validated according to country code  
+  - `SE`: must follow Swedish format (NNN NN)  
+  - `GB` / `UK`: must follow UK postal code format  
+  - Other countries: fallback rule of 3–10 digits 
+- **Billing fields**: required when billing address is not the same as shipping  
 
 **Result:**  
-All validation rules worked as expected. The tests passed successfully ✅
+All validation rules worked as expected. The tests passed successfully ✅  
+
 
 ---
 
@@ -85,7 +89,7 @@ All account form tests passed successfully ✅
 In addition to automated unit tests, all key features of the site were manually tested in the deployed environment.  
 The goal was to confirm that navigation, forms, authentication flows, and error handling work as expected from a user’s perspective.  
 
-Testing was performed on both desktop and mobile devices, using Chrome, Microsoft Edge, Safari and Firefox.  
+Testing was performed on both desktop, tablets and mobile devices, using Chrome, Microsoft Edge, Safari and Firefox.  
 Each section below summarizes the scenarios and expected outcomes. Detailed field-level validation (e.g., for the Account Address form) is included separately where relevant.
 
 ---
@@ -403,17 +407,49 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 
 ### Navigation and Links
 - ✅ Navbar links (Home, Shop, Cart, Account, Contact) all lead to the correct page  
-- ✅ Footer links navigate correctly  
+- ✅ Footer links navigate correctly:  
+  - Social media icons link to **Instagram**, **Facebook**, and **TikTok**  
+  - Mail icon opens the default email client (mailto link)  
+  - *Contact us here* link leads to the contact form  
+  - *info@fempowered.com* opens email client, prompting which app to use  
 - ✅ Logo is clickable and returns to the homepage  
+- ✅ Order detail page: *View Stripe receipt* link opens external receipt correctly  
 
 ---
 
 ### Buttons
+
+**Shop & Cart**  
 - ✅ Add to Cart works and updates the cart counter  
 - ✅ Update Cart adjusts product quantities correctly  
+- ✅ Remove from Cart deletes products from the cart  
+- ✅ Continue Shopping button returns to the shop  
+
+**Checkout**  
 - ✅ Checkout button leads to the address step  
+- ✅ Place Order / Pay button processes Stripe payments correctly  
+
+**Favorites**  
 - ✅ Favorite/like heart requires login (redirects to login page if not authenticated)  
+- ✅ Remove from Favorites button updates the favorites list  
+
+**Reviews**  
+- ✅ Submit Review button creates a new review (only for logged-in users)  
+- ✅ Edit/Delete Review buttons only appear for the review owner and work as expected  
+
+**Authentication & Account**  
+- ✅ Register / Sign up button successfully creates a new account  
 - ✅ Login/Logout buttons show the correct state depending on authentication  
+- ✅ Logout confirmation includes *Yes, log me out* and *Cancel*  
+- ✅ Addresses form: *Save*, *Cancel*, *Delete* all work correctly  
+- ✅ Email management: *Add email*, *Re-send verification*, *Make primary*, *Remove* all work correctly  
+- ✅ Change password: *Change password* saves successfully  
+
+**Orders & Error pages**  
+- ✅ Back to orders button returns to order history  
+- ✅ 404 page includes navigation options: *Go to Homepage*, *Visit the shop*, *About us*, *Go back*  
+- ✅ 500 page includes *Go back Home* button to return to homepage  
+
 
 ---
 
@@ -421,13 +457,13 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 - ✅ Contact form validates fields and can be submitted successfully  
 - ✅ Search/filter in Shop displays correct product results  
 - ✅ Review form requires login and validates rating + body input  
-- ✅ Checkout form validates required fields and billing rules  
+- ✅ Checkout form validates required fields and billing rules (including country-specific postal code validation)  
 - ✅ Account Address form tested separately (see section above)  
 
 ---
 
 ### Error Handling
-- ✅ Custom 404 page displays for invalid URLs  
+- ✅ Custom 404 page displays for invalid URLs (with working navigation links)  
 - ✅ Custom 500 page renders correctly (tested during forced error in development)  
 
 ---
@@ -445,7 +481,6 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 - ✅ CSRF token present in all forms  
 - ✅ Django messages appear consistently (e.g., on login, logout, save, delete)  
 
----
 
 ### Account Address Form
 
@@ -520,11 +555,12 @@ Screenshot (taken before adding the missing image in the template):
 
 ---
 
-#### 4) Index page had a small gap on the right (mobile)
-- **What I saw:** On small screens (≤425px), the index page could scroll a few pixels to the right, making the footer appear short.  
-- **Why:** Bootstrap 4 was used with a Bootstrap 5 class (`g-0`) and full-width layout caused tiny overflow.  
-- **Fix:** Added a `.full-bleed` utility, used `row no-gutters` (BS4), and adjusted the H1 so it does not force overflow.  
-- **How I checked:** Opened DevTools and tested different screen sizes with cache disabled and hard reload. No horizontal scroll and the footer spans the full width of the screen.  
+#### 4) Horizontal overflow on small screens (≤425px)
+- **What I saw:** Small horizontal scroll / right-side gap; footer såg “avklippt” ut på index och produktlistan.
+- **Why:** Bootstrap 4 layout blandades med en BS5-klass (`g-0`), och ett fullbreddselement (inkl. H1) orsakade overflow.
+- **Fix:** La till `.full-bleed` helper, bytte till `row no-gutters` (BS4), och justerade H1 + produktgrid så de inte forcerar overflow.
+- **How I checked:** Chrome DevTools med cache disabled + hard reload på flera breakpoints. Ingen horisontell scroll; footern fyller hela bredden.
+ 
 
 ---
 
@@ -600,15 +636,7 @@ Screenshot (taken before adding the missing image in the template):
 
 ---
 
-#### 14) Responsiveness: unwanted horizontal scroll
-- **What I saw:** On very small screens (≤425px), there was a small horizontal scroll and the footer looked cut off.  
-- **Why:** Bootstrap 4 was mixed with a Bootstrap 5 class and a full-width element caused overflow.  
-- **Fix:** Added a `.full-bleed` helper, switched to `row no-gutters` (BS4), and adjusted the H1 and product grid.  
-- **How I checked:** Tested with Chrome DevTools (cache disabled and hard reload). No more horizontal scroll.  
-
----
-
-#### 15) Review form caused errors when fields were missing
+#### 14) Review form caused errors when fields were missing
 - **What I saw:** Submitting the review form without a title, rating, or text gave a server error.  
 - **Why:** The form validation was not properly handled, so missing fields crashed the page.  
 - **Fix:** Added correct `forms.py` validation and template error messages so users see inline feedback instead of an error page.  
@@ -616,7 +644,7 @@ Screenshot (taken before adding the missing image in the template):
 
 ---
 
-#### 16) Reviews could not be deleted
+#### 15) Reviews could not be deleted
 - **What I saw:** Clicking “Delete” on a review did not work.  
 - **Why:** The view/template setup was incomplete, so the delete action was not connected.  
 - **Fix:** Added the delete view, URL, and template confirmation page.  
@@ -624,13 +652,14 @@ Screenshot (taken before adding the missing image in the template):
 
 ---
 
-#### 17) Favorites heart not synced with product detail page
+#### 16) Favorites heart not synced with product detail page
 - **What I saw:** On the product listing, the heart icon could add and remove favorites. But when opening the product detail page, it still showed “Add to favorites” even if it was already in favorites.  
 - **Why:** The templates did not share the same favorite-check logic.  
 - **Fix:** Updated context and template tags so both views use the same logic to check if a product is in favorites.  
 - **How I checked:** Favorited a product from the list → detail page now correctly shows “Remove from favorites”.  
 
-#### 18) Missing rating caused 500 error instead of validation message
+---
+#### 17) Missing rating caused 500 error instead of validation message
 - **What I saw:** When submitting a review without selecting a rating, the site crashed and displayed a 500 error page.  
 - **Why:** The form did not validate the absence of a rating, leading to a template variable error.  
 - **Fix:** Added proper form validation and error handling so the user now sees a clear warning message if rating is left empty.  
