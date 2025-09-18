@@ -25,7 +25,7 @@ class CheckoutEndToEndTests(TestCase):
 
     OK = (200, 302, 303, 400, 403)
 
-    # ---------- helpers ----------
+    #  helpers 
     def _reverse_first(self, candidates):
         """
         Try reverse a list of (name, kwargs) and return (url, name) for the first that resolves.
@@ -85,7 +85,7 @@ class CheckoutEndToEndTests(TestCase):
         assert form.is_valid(), f"Test payload invalid: {form.errors.as_json()}"
         return data
 
-    # ---------- tests ----------
+    #  tests 
     def test_01_address_get_renders(self):
         url, name = self._address_url()
         if not url:

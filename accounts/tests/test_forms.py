@@ -22,7 +22,7 @@ class UserAddressFormTests(TestCase):
             "billing_country": "",
         }
 
-    # ---- happy path ----
+    # happy path 
     def test_valid_form_passes(self):
         form = UserAddressForm(data=self.valid_data())
         self.assertTrue(form.is_valid(), msg=form.errors.as_json())

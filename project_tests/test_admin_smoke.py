@@ -42,7 +42,7 @@ class AdminSmokeTests(TestCase):
         self._try_model_changelist("shop", "product")
 
     def test_checkout_order_in_admin(self):
-        # Anpassa om din ordermodell ligger i annat app-label
+        # If Order model is located in another app
         for candidate in [("checkout", "order"), ("shop", "order"), ("orders", "order")]:
             try:
                 return self._try_model_changelist(*candidate)

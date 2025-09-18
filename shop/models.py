@@ -75,9 +75,9 @@ class Product(models.Model):
     # Reviews / Verified buyer helpers 
     def user_has_purchased(self, user) -> bool:  
         """
-        Return True om användaren är inloggad och har minst en *paid* orderrad
-        för denna produkt – antingen via Order.user eller via samma e-post
-        (om köpet gjordes som gäst).
+        Return True if the user is logged in and has at least one *paid* 
+        order line for this product – either via Order.user or via the same email 
+        (if the purchase was made as a guest).
         """
         if not getattr(user, "is_authenticated", False):
             return False
@@ -101,13 +101,13 @@ class Product(models.Model):
         )
 
     def has_user_reviewed(self, user) -> bool:
-        """True om användaren redan har lämnat en review för denna produkt."""
+        """ True if the user has already submitted a review for this product."""
         if not getattr(user, "is_authenticated", False):
             return False
         return self.reviews.filter(user=user).exists()
 
     def user_can_review(self, user) -> bool:
-        """True om inloggad, verifierad köpare och ännu inte recenserat."""
+        """True if logged in, verified buyer, and has not yet submitted a review"""
         return self.user_has_purchased(user) and not self.has_user_reviewed(user)
 
     class Meta:

@@ -36,7 +36,7 @@ class CheckoutViewsTests(TestCase):
                 "Adjust candidates or ensure the route exists."
             )
 
-    # ---------- helpers ----------
+    #  helpers 
     def valid_payload(self, **overrides):
         """Return a valid payload for CheckoutAddressForm, with optional overrides."""
         data = {
@@ -99,7 +99,7 @@ class CheckoutViewsTests(TestCase):
 
         return forms
 
-    # ---------- tests ----------
+    #  tests 
     def test_checkout_address_page_renders_ok(self):
         """Checkout address page should render successfully (status 200) or harmlessly redirect (302)."""
         resp = self.client.get(self.address_url)

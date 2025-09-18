@@ -18,7 +18,7 @@
               {% if order.get_status_display %}{{ order.get_status_display }}{% else %}{{ order.status }}{% endif %}
             </span>
           — {{ order.total|eur }}
-          — {{ order.items.all|length }} rader
+          — {{ order.items.all|length }} Order items
         </li>
       {% endfor %}
     </ul>

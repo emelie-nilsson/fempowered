@@ -16,7 +16,7 @@ def _get_field_names(model):
 
 
 def _get_price_field(fields):
-    # Prefer 'unit_price' if finns, annars 'price'
+    # Prefer 'unit_price' if available, otherwise fall back to 'price'
     if "unit_price" in fields:
         return "unit_price"
     if "price" in fields:
@@ -43,18 +43,18 @@ class OrderItemMathTests(SimpleTestCase):
 
     def _make_item(self, price, qty):
         kwargs = {self.price_field: Decimal(price), "quantity": qty}
-        # fallback om modellen har 'currency' eller liknande obligatoriska fält
+        # Fallback if the model has 'currency' or similar required fields
         for extra in ("currency",):
             if extra in self.fields and extra not in kwargs:
                 kwargs[extra] = "SEK"
         return self.OrderItem(**kwargs)
 
     def _expected_total(self, price, qty):
-        # Standard e-handelsavrundning: två decimaler, HALF_UP
+        # Standard e-commerce rounding: two decimals, HALF_UP
         return (Decimal(price) * Decimal(qty)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def _calc_via_method_if_any(self, item):
-        # Vanliga namn för rad-totalmetoder
+        # Common names for line total methods
         for attr in ("line_total", "total_price", "get_total", "total", "amount"):
             if hasattr(item, attr):
                 m = getattr(item, attr)
@@ -65,20 +65,20 @@ class OrderItemMathTests(SimpleTestCase):
         item = self._make_item("99.50", 2)
         expected = self._expected_total("99.50", 2)
 
-        # 1) Om modellen har egen metod/egenskap – använd den
+        # 1) If the model has its own method/property – use that
         via_method = self._calc_via_method_if_any(item)
         if via_method is not None:
             self.assertEqual(Decimal(via_method), expected)
             return
 
-        # 2) Annars beräkna direkt från fälten och verifiera Decimal-precisionen
+        # 2) Otherwise calculate directly from the fields and verify Decimal precision
         from_fields = (getattr(item, self.price_field) * Decimal(item.quantity)).quantize(
             Decimal("0.01")
         )
         self.assertEqual(from_fields, expected)
 
     def test_decimal_precision_half_up_rounding(self):
-        # Testar “knepigt” case där avrundning spelar roll (3 * 33.335 = 100.005 → 100.01)
+        # Testing a tricky case where rounding matters (3 * 33.335 = 100.005 → 100.01)
         item = self._make_item("33.335", 3)
         expected = self._expected_total("33.335", 3)
 
