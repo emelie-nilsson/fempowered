@@ -31,8 +31,6 @@
         <p class="lead">{{ product.description }}</p>
       {% endif %}
 
-     
-
       <div class="actions">
         <form method="post" action="{% url 'add_to_cart' product.id %}">
           {% csrf_token %}
@@ -102,21 +100,37 @@
     <ul class="list-unstyled">
       {% for r in reviews %}
         <li class="mb-3">
-          <strong>{{ r.user }}</strong>
 
-          {% if r.is_verified %}
-            <span class="pill pill-verified">
-              <i class="fa-solid fa-check icon"></i> Verified buyer
-            </span>
+          <!-- Username + verified -->
+          <div>
+            <strong>{{ r.user }}</strong>
+            {% if r.is_verified %}
+              <span class="pill pill-verified">
+                <i class="fa-solid fa-check icon"></i> Verified buyer
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Title -->
+          {% if r.title %}
+            <div class="mb-1"><strong>{{ r.title }}</strong></div>
           {% endif %}
 
+          <!-- Stars -->
+          {% with rate=r.rating|default:0 %}
+            <div class="stars" aria-label="{{ rate }} out of 5">
+              {% for i in "12345"|make_list %}
+                <span class="star">{% if forloop.counter <= rate %}&#9733;{% else %}&#9734;{% endif %}</span>
+              {% endfor %}
+            </div>
+          {% endwith %}
+
+          <!-- Review body -->
           <div class="mt-1">{% firstof r.comment r.body r.text "" %}</div>
 
           {% if request.user.is_authenticated and r.user_id == request.user.id %}
             <div class="mt-1">
               <a class="btn btn-sm btn-fem" href="{% url 'review_update' r.pk %}">Edit</a>
-
-              <!-- Delete via POST form (matches POST-only view) -->
               <form method="post" action="{% url 'review_delete' r.pk %}" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
@@ -179,7 +193,6 @@
           <div class="invalid-feedback d-block mt-1">{{ form.rating.errors|join:", " }}</div>
         {% endif %}
       </div>
-
 
       <!-- Body -->
       <div class="col-12">

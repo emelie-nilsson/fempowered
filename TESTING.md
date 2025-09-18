@@ -445,7 +445,6 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 - ✅ Login/Logout buttons show the correct state depending on authentication  
 - ✅ Logout confirmation includes *Yes, log me out* and *Cancel*  
 - ✅ Addresses form: *Save*, *Cancel*, *Delete* all work correctly  
-- ✅ Email management: *Add email*, *Make primary*, *Remove* all work correctly  
 - ✅ Change password: *Change password* saves successfully  
 
 **Orders & Error pages**  
