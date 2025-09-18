@@ -142,6 +142,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 
+
 WSGI_APPLICATION = "fempowered.wsgi.application"
 
 

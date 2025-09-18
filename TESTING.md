@@ -424,6 +424,8 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 - ✅ Update Cart adjusts product quantities correctly  
 - ✅ Remove from Cart deletes products from the cart  
 - ✅ Continue Shopping button returns to the shop  
+- ✅ Apply button in filters updates the product list correctly  
+- ✅ Clear filter button resets filters and restores full product list 
 
 **Checkout**  
 - ✅ Checkout button leads to the address step  
@@ -432,6 +434,7 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 **Favorites**  
 - ✅ Favorite/like heart requires login (redirects to login page if not authenticated)  
 - ✅ Remove from Favorites button updates the favorites list  
+- ✅ Browse the shop button redirects back to the Shop page 
 
 **Reviews**  
 - ✅ Submit Review button creates a new review (only for logged-in users)  

@@ -10,6 +10,13 @@ def _boom_500(request):
     raise RuntimeError("boom")
 
 
+# Soft-disable Allauth's Email management page
+def email_management_disabled(request, *args, **kwargs):
+    messages.info(request, "Email management is disabled.")
+    # Redirect to home 
+    return redirect("/")
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Core pages
@@ -20,6 +27,10 @@ urlpatterns = [
     path("account/", include("accounts.urls")),
     path("checkout/", include("checkout.urls")),
     path("contact/", include("contact.urls")),
+
+    # Override Allauth email page BEFORE including allauth.urls
+    path("accounts/email/", email_management_disabled, name="account_email"),
+
     # Allauth
     path("accounts/", include("allauth.urls")),
     # Error test route
