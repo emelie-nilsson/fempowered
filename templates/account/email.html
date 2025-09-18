@@ -14,11 +14,6 @@
               {% for emailaddress in user.emailaddress_set.all %}
                 <li class="mb-2">
                   {{ emailaddress.email }}
-                  {% if emailaddress.verified %}
-                    <span class="text-success">• {% trans "Verified" %}</span>
-                  {% else %}
-                    <span class="text-muted">• {% trans "Unverified" %}</span>
-                  {% endif %}
                   {% if emailaddress.primary %}
                     <span class="text-muted">• {% trans "Primary" %}</span>
                   {% endif %}
@@ -42,9 +37,6 @@
             <div class="form-row">
               <div class="col-12 col-sm-auto mb-2">
                 <button class="btn-fem w-100" name="action_add" type="submit">{% trans "Add email" %}</button>
-              </div>
-              <div class="col-12 col-sm-auto mb-2">
-                <button class="btn-fem-outline w-100" name="action_send" type="submit">{% trans "Re-send verification" %}</button>
               </div>
               <div class="col-12 col-sm-auto mb-2">
                 <button class="btn-fem-outline w-100" name="action_primary" type="submit">{% trans "Make primary" %}</button>

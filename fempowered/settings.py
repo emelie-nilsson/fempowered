@@ -138,6 +138,7 @@ ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = True
 ACCOUNT_USERNAME_MIN_LENGTH = 4
+ACCOUNT_EMAIL_VERIFICATION = "none"  
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 
@@ -212,7 +213,6 @@ CONTACT_RECIPIENTS = env_list("CONTACT_RECIPIENTS", "info@fempowered.com")
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "Fempowered <no-reply@example.local>"
-    ACCOUNT_EMAIL_VERIFICATION = "optional"
 else:
     EMAIL_BACKEND = os.getenv(
         "EMAIL_BACKEND",
@@ -225,7 +225,7 @@ else:
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
     DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Fempowered <no-reply@fempowered.shop>")
     SERVER_EMAIL = os.getenv("SERVER_EMAIL", "no-reply@fempowered.shop")
-    ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
+    
 
 
 # Security dev vs prod

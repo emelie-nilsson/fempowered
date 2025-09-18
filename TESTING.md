@@ -442,7 +442,7 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 - ✅ Login/Logout buttons show the correct state depending on authentication  
 - ✅ Logout confirmation includes *Yes, log me out* and *Cancel*  
 - ✅ Addresses form: *Save*, *Cancel*, *Delete* all work correctly  
-- ✅ Email management: *Add email*, *Re-send verification*, *Make primary*, *Remove* all work correctly  
+- ✅ Email management: *Add email*, *Make primary*, *Remove* all work correctly  
 - ✅ Change password: *Change password* saves successfully  
 
 **Orders & Error pages**  
@@ -469,7 +469,7 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 ---
 
 ### Authentication
-- ✅ Signup works with email verification  
+- ✅ Signup works without email verification (accounts activate immediately)    
 - ✅ Login works with valid credentials  
 - ✅ Logout logs the user out and displays a confirmation message  
 - ✅ Password reset flow sends an email and accepts new password  
