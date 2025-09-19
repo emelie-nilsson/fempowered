@@ -474,7 +474,8 @@ Extended statuses (e.g., Preparing, Shipped, Delivered) are documented under *Fu
 - ✅ Signup works without email verification (accounts activate immediately)    
 - ✅ Login works with valid credentials  
 - ✅ Logout logs the user out and displays a confirmation message  
-- ✅ Password reset flow sends an email and accepts new password  
+- ✅ Password reset flow allows the user to change their password
+ 
 
 ---
 
@@ -557,12 +558,12 @@ Screenshot (taken before adding the missing image in the template):
 
 ---
 
-#### 4) Horizontal overflow on small screens (≤425px)
-- **What I saw:** Small horizontal scroll / right-side gap; footer såg “avklippt” ut på index och produktlistan.
-- **Why:** Bootstrap 4 layout blandades med en BS5-klass (`g-0`), och ett fullbreddselement (inkl. H1) orsakade overflow.
-- **Fix:** La till `.full-bleed` helper, bytte till `row no-gutters` (BS4), och justerade H1 + produktgrid så de inte forcerar overflow.
-- **How I checked:** Chrome DevTools med cache disabled + hard reload på flera breakpoints. Ingen horisontell scroll; footern fyller hela bredden.
- 
+#### 4) Horizontal overflow on small screens (≤425px)  
+- **What I saw:** A small horizontal scroll and right-side gap. The footer looked cut off on the index page and product listing.  
+- **Why:** Bootstrap 4 layout was mixed with a Bootstrap 5 class (`g-0`) and a full-width element (including the H1) caused overflow.  
+- **Fix:** Added a `.full-bleed` utility, switched to `row no-gutters` (BS4) and adjusted the H1 and product grid so they no longer force overflow.  
+- **How I checked:** Used Chrome DevTools with cache disabled and hard reload across several breakpoints. No horizontal scroll and the footer now spans the full width.  
+
 
 ---
 
@@ -602,7 +603,7 @@ Screenshot (taken before adding the missing image in the template):
 - **What I saw:** On the first open with DevTools, the layout sometimes looked wrong. After a hard reload it was fine.  
 - **Why:** The browser served an old cached CSS and the device emulation changed the viewport.  
 - **Fix:** In production, static files are versioned (hashed) via WhiteNoise, so fresh CSS is loaded automatically after deploy. Locally, I test with cache disabled and hard reload.  
-- **How I checked:** Opened DevTools and tested different screen sizes with cache disabled. Layout remained correct with no horizontal scroll.  
+- **How I checked:** Opened DevTools and tested different screen sizes with cache disabled. Layout remained correct.  
 
 ---
 
@@ -649,7 +650,7 @@ Screenshot (taken before adding the missing image in the template):
 #### 15) Reviews could not be deleted
 - **What I saw:** Clicking “Delete” on a review did not work.  
 - **Why:** The view/template setup was incomplete, so the delete action was not connected.  
-- **Fix:** Added the delete view, URL, and template confirmation page.  
+- **Fix:** Added the delete view, URL, and confirmation.  
 - **How I checked:** Created a review, deleted it, and confirmed it was removed from both the database and the product page.  
 
 ---
